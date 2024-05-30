@@ -14,13 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 """
-
-import pyfirmata
+import util
+from __init__ import *
 from time import sleep
-from feagi_connector import router
+import pyfirmata_neuraville
 from feagi_connector import sensors
 from feagi_connector import actuators
-from pyfirmata import Arduino, SERVO, util
 from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from feagi_connector import feagi_interface as feagi
@@ -83,8 +82,9 @@ def action(obtained_data):
                 print("pin: ", i, " is not configured. Select another pin please.")
     else:
         if output_track:
-            pin_board[output_track[0]].write(0)
-            output_track.pop()
+            for pin in output_track:
+                pin_board[pin].write(0)
+            output_track.clear()
 
     if recieve_servo_data:
         # Do some custom work with servo data as well
@@ -92,7 +92,7 @@ def action(obtained_data):
             if id in pin_mode:
                 if pin_mode[int(id)] != 4:
                     print("reset your board to use the servo again after you updated pin: ", id)
-                    set_pin_mode(pin_board[int(id)], pyfirmata.OUTPUT, id)
+                    set_pin_mode(pin_board[int(id)], pyfirmata_neuraville.OUTPUT, id)
                 servo_power = actuators.servo_generate_power(180, recieve_servo_data[id], id)
                 if id in motor_status:
                     del motor_status[id]
@@ -129,9 +129,10 @@ if __name__ == "__main__":
     board = Arduino(port)
     it = util.Iterator(board)  # for Analog or Input
     it.start()
-    # list_all_analog_pins(board) # Temporarily pause analog section
+    list_all_analog_pins(board) # Temporarily pause analog section
     sleep(2)
     list_all_pins(board)
+    print("HERE: ", analog_pin_board)
 
     while True:
         message_from_feagi = pns.message_from_feagi
@@ -144,13 +145,22 @@ if __name__ == "__main__":
             action(obtained_signals)
         if input_track:
             create_generic_input_dict = dict()
-            create_generic_input_dict['i_gpio'] = dict()
+            create_generic_input_dict['idgpio'] = dict()
             for pin in input_track:
                 obtain_data = pin_board[pin].read()
                 if obtain_data:
                     location_string = str(pin) + "-0-0"
-                    create_generic_input_dict['i_gpio'][location_string] = 100
+                    create_generic_input_dict['idgpio'][location_string] = 100
             message_to_feagi = sensors.add_generic_input_to_feagi_data(create_generic_input_dict,
+                                                                       message_to_feagi)
+        if analog_pin_board:
+            create_analog_data_list = dict()
+            create_analog_data_list['iagpio'] = dict()
+            for i in analog_pin_board:
+                position_of_analog = sensors.convert_sensor_to_ipu_data(0, 1, analog_pin_board[
+                    i].read(), i)
+                create_analog_data_list['iagpio'][position_of_analog] = 100
+            message_to_feagi = sensors.add_generic_input_to_feagi_data(create_analog_data_list,
                                                                        message_to_feagi)
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         sleep(feagi_settings['feagi_burst_speed'])

@@ -1,0 +1,33 @@
+{
+    "description": "ufactory",
+    "version": "v0.0.0",
+    "feagi_settings": {
+        "feagi_url": null,
+        "feagi_dns": null,
+        "feagi_host": "127.0.0.1",
+        "feagi_api_port": 8000
+    },
+    "agent_settings": {
+        "agent_data_port": 10001,
+        "agent_id": "Ufactory_arm_lite_6",
+        "agent_type": "embodiment",
+        "compression": true
+    },
+"capabilities": {
+    "servo": {
+        "type": "opu",
+        "disabled": "False",
+        "count": 6,
+        "rolling_window_len": 3,
+        "max_speed": 25,
+        "servo_range": {
+            "0": [-340, 340],
+            "1": [-100,100],
+            "2": [-280,280],
+            "3": [-340, 340],
+            "4": [-100,100],
+            "5": [-340, 340]
+        }
+    }
+}
+}

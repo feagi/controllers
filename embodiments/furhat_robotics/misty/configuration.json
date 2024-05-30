@@ -1,0 +1,35 @@
+{
+    "description": "misty",
+    "version": "v0.0.0",
+    "feagi_settings": {
+        "feagi_url": null,
+        "feagi_dns": null,
+        "feagi_host": "127.0.0.1",
+        "feagi_api_port": 8000
+    },
+    "agent_settings": {
+        "agent_data_port": 10007,
+        "agent_id": "misty",
+        "agent_type": "embodiment",
+        "compression": true
+    },
+    "capabilities": {
+        "misty": {
+            "ip": "192.168.50.237"
+        },
+        "servo": {
+            "servo_range": {
+                "0": [-9, 34.9],
+                "1": [-43, 43],
+                "2": [-89, 90],
+                "3": [-89, 90],
+                "4": [-89, 90]
+            }
+        },
+        "motor": {
+            "rolling_window_len": 2,
+            "count": 4,
+            "power_amount": 100
+        }
+    }
+}
