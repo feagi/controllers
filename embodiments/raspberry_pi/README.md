@@ -19,7 +19,7 @@ it will correspond to the pin number.
 
 The cortical area responsible for GPIO output is named "GPIO_out." If you select, for example, 2 
 from the picture above, it will activate GPIO 2 as an output. There is also a cortical area's ID 
-called "i_gpio," which displays red voxels based on the data it reads.
+called "idgpio," which displays red voxels based on the data it reads.
 
 ## Example with LED
 You can utilize various examples available in Raspberry PI tutorials. For instance, I obtained the sample image from [here](https://projects.drogon.net/raspberry-pi/gpio-examples/tux-crossing/gpio-examples-1-a-single-led/). You can see it here:
@@ -44,4 +44,4 @@ So, we will need a GPIO 18 and 18 in `GPIO_in` cortical area. Since this switch 
 cutting off the electricity, that's how it is set up in the diagram. You can adjust it to meet your needs. 
 FEAGI is extremely flexible for that. 
 So, using the diagram above, you should see a red voxel displaying in the `GPIO_in` or the ID 
-called `i_gpio` until you press the button, at which point the red voxel will disappear.
+called `idgpio` until you press the button, at which point the red voxel will disappear.

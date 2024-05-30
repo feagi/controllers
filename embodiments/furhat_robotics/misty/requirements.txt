@@ -1,0 +1,3 @@
+feagi_connector
+opencv-python>=4.0.0,<5.0.0
+websocket-client==1.8.0

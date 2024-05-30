@@ -15,9 +15,12 @@ limitations under the License.
 ==============================================================================
 """
 import RPi.GPIO as GPIO
+from gpiozero import MCP3008
+from feagi_connector import sensors
 
 # Dictionary to keep track of GPIO modes
 gpio_modes = {}
+analog_pins = {}
 
 
 # Function to setup GPIO
@@ -60,6 +63,17 @@ def gather_all_input_data():
     return input_list
 
 
+def gather_all_analog_output_data():
+    global analog_pins
+    create_analog_data_list = dict()
+    create_analog_data_list['iagpio'] = dict()
+    for channel in analog_pins:
+        position_of_analog = sensors.convert_sensor_to_ipu_data(0, 1, analog_pins[
+            channel].value, channel)
+        print("channel: ", channel, " and value: ", analog_pins[channel].value)
+        create_analog_data_list['iagpio'][position_of_analog] = 100
+
+
 def get_available_gpios():
     available_gpios = []
     for pin in range(2, 28):  # The latest Raspberry Pi, the Raspberry Pi 5, features 28 GPIO pins.
@@ -86,13 +100,24 @@ def configured_board_by_config(capabilities):
     if 'GPIO' in capabilities:
         if 'port' in capabilities['GPIO']:
             for pin in capabilities['GPIO']['port']:
-                GPIO.setup(int(pin), capabilities['GPIO']['port'][pin])
+                if capabilities['GPIO']['port'][pin] == 1:
+                    GPIO.setup(int(pin), capabilities['GPIO']['port'][pin],
+                               pull_up_down=GPIO.PUD_DOWN)
+                else:
+                    GPIO.setup(int(pin), capabilities['GPIO']['port'][pin])
                 gpio_modes[int(pin)] = capabilities['GPIO']['port'][pin]
     print(gpio_modes)
 
 
 def clear_gpio():
     GPIO.cleanup()
+
+
+def analog_pins_generate(channels=8, device=1):
+    global analog_pins
+    for channel in range(channels):
+        analog_pins[channel] = MCP3008(channel=channel, device=device)
+    print("Analog: ", analog_pins)
 
 
 GPIO.setmode(GPIO.BCM)  # Using Broadcom pin numbering

@@ -244,7 +244,7 @@ def action(obtained_data, arms_angle, head_angle):
         if id in [0, 1]:
             test_head_angle = head_angle
             if id == 1:
-                test_head_angle -= servo_power / capabilities["servo"]["power_amount"]
+                test_head_angle += servo_power / capabilities["servo"]["power_amount"]
             else:
                 test_head_angle += servo_power / capabilities["servo"]["power_amount"]
             if move_head(cli, test_head_angle, max, min):

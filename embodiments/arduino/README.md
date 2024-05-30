@@ -11,7 +11,7 @@ it will correspond to the pin number.
 
 The cortical area responsible for GPIO output is named "GPIO_out." If you select, for example, 2 
 from the picture above, it will activate GPIO 2 as an output. There is also a cortical area's ID 
-called "i_gpio," which displays red voxels based on the data it reads.
+called "idgpio," which displays red voxels based on the data it reads.
 
 
 ## Mapping in Arduino Pins
