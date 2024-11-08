@@ -183,6 +183,17 @@
 					"max_power": 10,
 					"max_value": 90,
 					"min_value": -90
+				},
+			"misc": {
+				"0": {
+					"custom_name": "toggle balancing",
+					"disabled": false,
+					"feagi_index": 0
+				},
+				"1": {
+					"custom_name": "toggle servo reading",
+					"disabled": false,
+					"feagi_index": 1
 				}
 			},
 			"misc": {
@@ -196,6 +207,7 @@
 					"disabled": false,
 					"feagi_index": 1
 				}
+			}
 			}
 		}
 	}

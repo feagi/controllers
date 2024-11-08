@@ -21,7 +21,7 @@
 						"X offset percentage": 99,
 						"Y offset percentage": 99
 					},
-					"threshold_default": 1
+					"threshold_default": 50
 				}
 			}
 		}

@@ -33,7 +33,7 @@ agent_settings = {
     'TTL': 2,
     'last_message': 0,
     'godot_websocket_ip': "0.0.0.0",
-    'godot_websocket_port': os.environ.get('WS_PETOI_PORT', "9052"), # Needs to set to 9054
+    'godot_websocket_port': os.environ.get('WS_WEBCAM_PORT', "9051"),
     'compression': True
 }
 

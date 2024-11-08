@@ -1,5 +1,5 @@
 """
-Copyright 2016-2022 The FEAGI Authors. All Rights Reserved.
+Copyright 2016-present Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     feagi_settings['feagi_burst_speed'] = float(runtime_data["feagi_state"]['burst_duration'])
 
     rpi.configured_board_by_config(capabilities)  # pass your config setting to this
-    if capabilities['analog']:
+    if capabilities['analog']['enable_analog']:
         analog_list = rpi.analog_pins_generate(channels=3)
 
     while True:
@@ -74,12 +74,16 @@ if __name__ == "__main__":
                 action(obtained_signals)
             generic_input_dict = dict()
             generic_input_dict['idgpio'] = rpi.gather_all_input_data()
-            if capabilities['analog']:
-                generic_input_dict['iagpio'] = rpi.gather_all_analog_output_data(analog_list)
+            if capabilities['analog']['enable_analog']:
+                analog_input_list_data = rpi.gather_all_analog_output_data(analog_list)
+                message_to_feagi = sensors.create_data_for_feagi('analog_input', capabilities, message_to_feagi,
+                                                                 current_data=analog_input_list_data,
+                                                                 symmetric=True)
             message_to_feagi = sensors.add_generic_input_to_feagi_data(generic_input_dict,
                                                                        message_to_feagi)
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings,
                                  feagi_settings)
+            message_to_feagi.clear()
             sleep(feagi_settings['feagi_burst_speed'])
         except KeyboardInterrupt:
             rpi.clear_gpio()

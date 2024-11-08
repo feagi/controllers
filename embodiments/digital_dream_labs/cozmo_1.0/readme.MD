@@ -1,17 +1,38 @@
 # How to connect FEAGI with Cozmo
-Assuming you already have playground up running.
-1) `git clone https://github.com/feagi/controllers.git`
-2) `cd controllers/embodiments/digital_dream_labs/cozmo_1.0`
-3) `python3 -m venv venv`
-4) `source venv/bin/activate`
-5) Connect your wifi with Cozmo.
-6) Run python using below:
-   1. mac/linux users:
-      1. `pip3 install -r requirements`
-      2. `python3 controller.py`
-   2. windows users:
-      1. `pip install -r requirements`
-      2. `python controller.py`
+## Load Docker:
+1. `git clone git@github.com:feagi/feagi.git`
+2. `cd ~/feagi/docker`
+3. `docker compose -f playground.yml pull`
+4. Wait until it's done.
+5. `docker compose -f playground.yml up`
+
+## Open Playground Website:
+5. Go to [http://127.0.0.1:4000/](http://127.0.0.1:4000/)
+6. Click the "GENOME" button on the top right, next to "API."
+7. Click "Essential."
+
+## Start Cozmo:
+8. Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
+9. `cd controllers/embodiments/digital_dream_labs/cozmo_1.0`
+10. `python3 -m venv venv` (Windows: `python -m venv venv`)
+11. `source venv/bin/activate` (Windows: `venv/Scripts/activate`)
+12. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
+13. `export FEAGI_OPU_PORT=30000` (Windows: `set FEAGI_OPU_PORT=30000`)
+14. Connect your Wi-Fi to Cozmo.
+15. `python3 controller.py` (Windows: `python controller.py`)
+16. Go back to the Playground website and watch it in action!
+
+# Installer of Cozmo for window users (BETA)
+1. Download the Cozmo cognitive connector: [here](https://storage.googleapis.com/nrs_embodiments/em-iqgkoadn/controller.zip). 
+2. Unzip and click the executable file, `controller.exe`
+3. You should see a white dialog screen pop up. 
+4. Since you are using Docker, simply click "submit" button under the `IP:port` since it has "https://127.0.0.1:8000" in it.
+
+
+![image](_static/IP_port_submit.png)
+
+Note: If you don't want to download anything but prefer to run it from Python source, go to the above section.
+
 
 # How do I turn Cozmo on and connect it?
 

@@ -1,0 +1,149 @@
+{
+    "capabilities": {
+        "analog": {
+            "enable_analog": false
+        },
+        "input": {
+            "digital_input": {
+                "15": {
+                    "custom_name": "digital 15",
+                    "disabled": false,
+                    "feagi_index": 15
+                },
+                "16": {
+                    "custom_name": "digital 16",
+                    "disabled": false,
+                    "feagi_index": 16
+                },
+                "18": {
+                    "custom_name": "digital 18",
+                    "disabled": false,
+                    "feagi_index": 18
+                },
+                "20": {
+                    "custom_name": "digital 20",
+                    "disabled": false,
+                    "feagi_index": 20
+                },
+                "21": {
+                    "custom_name": "digital 21",
+                    "disabled": false,
+                    "feagi_index": 21
+                },
+                "23": {
+                    "custom_name": "digital 23",
+                    "disabled": false,
+                    "feagi_index": 23
+                },
+                "24": {
+                    "custom_name": "digital 24",
+                    "disabled": false,
+                    "feagi_index": 24
+                },
+                "25": {
+                    "custom_name": "digital 25",
+                    "disabled": false,
+                    "feagi_index": 25
+                }
+            },
+            "analog_input": {
+                "0": {
+                    "custom_name": "analog input 0",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "1": {
+                    "custom_name": "analog input 1",
+                    "disabled": false,
+                    "feagi_index": 1,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "2": {
+                    "custom_name": "analog input 2",
+                    "disabled": false,
+                    "feagi_index": 2,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "3": {
+                    "custom_name": "analog input 3",
+                    "disabled": false,
+                    "feagi_index": 3,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "4": {
+                    "custom_name": "analog input 4",
+                    "disabled": false,
+                    "feagi_index": 4,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "5": {
+                    "custom_name": "analog input 5",
+                    "disabled": false,
+                    "feagi_index": 5,
+                    "max_value": 1,
+                    "min_value": 0
+                }
+            }
+        },
+        "output": {
+            "digital_output": {
+                "2": {
+                    "custom_name": "digital output 2",
+                    "disabled": false,
+                    "feagi_index": 2
+                },
+                "3": {
+                    "custom_name": "digital output 3",
+                    "disabled": false,
+                    "feagi_index": 3
+                },
+                "4": {
+                    "custom_name": "digital output 4",
+                    "disabled": false,
+                    "feagi_index": 4
+                },
+                "5": {
+                    "custom_name": "digital output 5",
+                    "disabled": false,
+                    "feagi_index": 5
+                },
+                "6": {
+                    "custom_name": "digital output 6",
+                    "disabled": false,
+                    "feagi_index": 6
+                },
+                "17": {
+                    "custom_name": "digital output 17",
+                    "disabled": false,
+                    "feagi_index": 17
+                },
+                "19": {
+                    "custom_name": "digital output 19",
+                    "disabled": false,
+                    "feagi_index": 19
+                },
+                "22": {
+                    "custom_name": "digital output 22",
+                    "disabled": false,
+                    "feagi_index": 22
+                },
+                "26": {
+                    "custom_name": "digital output 26",
+                    "disabled": false,
+                    "feagi_index": 26
+                },
+                "27": {
+                    "custom_name": "digital output 27",
+                    "disabled": false,
+                    "feagi_index": 27
+                }
+            }
+        }
+    }
+}

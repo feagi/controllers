@@ -1,5 +1,5 @@
 """
-Copyright 2016-2022 The FEAGI Authors. All Rights Reserved.
+Copyright 2016-present Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ def list_all_analog_pins(board):
         all_pins[pin.pin_number] = ""
     for pin in all_pins:
         analog_pin_board[pin] = board.get_pin('a:{0}:i'.format(int(pin)))
-    print(analog_pin_board)
 
 
 def set_pin_mode(pin, mode, id):
@@ -61,7 +60,7 @@ def set_pin_mode(pin, mode, id):
 
 
 def action(obtained_data):
-    recieve_servo_data = actuators.get_servo_data(obtained_data, True)
+    recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_gpio_data = actuators.get_gpio_data(obtained_data)
     check_input_request = actuators.check_convert_gpio_to_input(obtained_data)
     if check_input_request:
@@ -133,7 +132,6 @@ if __name__ == "__main__":
     list_all_analog_pins(board) # Temporarily pause analog section
     sleep(2)
     list_all_pins(board)
-    print("HERE: ", analog_pin_board)
 
     while True:
         message_from_feagi = pns.message_from_feagi
@@ -153,54 +151,15 @@ if __name__ == "__main__":
                     location_string = str(pin) + "-0-0"
                     create_generic_input_dict['idgpio'][location_string] = 100
             message_to_feagi = sensors.add_generic_input_to_feagi_data(create_generic_input_dict, message_to_feagi)
+
         if analog_pin_board:
-            for device_id in capabilities['input']['analog']:
-                if not capabilities['input']['analog'][device_id]['disable']:
-                    analog_data = analog_pin_board[int(device_id)].read()
-                    cortical_id = capabilities['input']['analog'][device_id]["cortical_id"]
-                    create_data_list = dict()
-                    create_data_list[cortical_id] = dict()
-                    start_point = capabilities['input']['analog'][device_id]["feagi_index"] * len(
-                        capabilities['input']['analog'])
-                    feagi_data_position = start_point
-                    capabilities['input']['analog'][device_id]['maximum_value'], \
-                    capabilities['input']['analog'][device_id][
-                        'minimum_value'] = sensors.measuring_max_and_min_range(analog_data,
-                                                                               capabilities[
-                                                                                   'input'][
-                                                                                   'analog'][device_id][
-                                                                                   'maximum_value'],
-                                                                               capabilities[
-                                                                                   'input'][
-                                                                                   'analog'][device_id][
-                                                                                   'minimum_value'])
+            analog_input_list_data = dict()
+            for analog_pin in analog_pin_board:
+                analog_input_list_data[analog_pin] = analog_pin_board[int(analog_pin)].read()
+            message_to_feagi = sensors.create_data_for_feagi('analog_input', capabilities, message_to_feagi,
+                                                             current_data=analog_input_list_data,
+                                                             symmetric=True)
 
-                    position_in_feagi_location = sensors.convert_sensor_to_ipu_data(
-                        capabilities['input']['analog'][device_id]['minimum_value'],
-                        capabilities['input']['analog'][device_id]['maximum_value'],
-                        analog_data,
-                        capabilities['input']['analog'][device_id]['feagi_index'],
-                        cortical_id=cortical_id)
-                    create_data_list[cortical_id][position_in_feagi_location] = 100
-                    if create_data_list[cortical_id]:
-                        message_to_feagi = sensors.add_generic_input_to_feagi_data(create_data_list,
-                                                                                   message_to_feagi)
-
-            # analog_encoded = dict()
-            # for pin in range(len(analog_pin_board)):
-            #     analog_encoded[pin] = analog_pin_board[pin].read()
-            # message_to_feagi, capabilities['analog']['max_value_list'], capabilities['analog'][
-            #     'min_value_list'] = (
-            #     sensors.create_data_for_feagi(
-            #         cortical_id='iagpio',
-            #         robot_data=analog_encoded,
-            #         maximum_range=capabilities['analog']['max_value_list'],
-            #         minimum_range=capabilities['analog']['min_value_list'],
-            #         enable_symmetric=False,
-            #         index=capabilities['analog']['dev_index'],
-            #         count=capabilities['analog']['sub_channel_count'],
-            #         message_to_feagi=message_to_feagi,
-            #         has_range=True))
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         message_to_feagi.clear()
         sleep(feagi_settings['feagi_burst_speed'])

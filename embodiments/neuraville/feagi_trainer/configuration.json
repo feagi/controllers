@@ -1,7 +1,7 @@
 {
       "image_reader": {
         "0": {
-          "feagi_controlled": true,
+          "feagi_controlled": false ,
           "image_display_duration": 0.5,
           "image_gap_duration": 0,
           "loop": true,

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import argparse
 import requests
 from time import sleep
@@ -48,11 +49,20 @@ if __name__ == '__main__':
         feagi_settings["feagi_api_port"] = args['port']
     if args['image']:
         capabilities['input']['camera']['0']["image"] = args['image']
-    if args['magic_link']:
-        network_output = requests.get(args['magic_link']).json()
-        capabilities['feagi_url'] = network_output['feagi_url']
-        capabilities['feagi_api_port'] = network_output['feagi_api_port']
-        # capabilities['feagi_opu_port'] = network_output['feagi_opu_port']
+    if feagi_settings['feagi_url'] or args['magic_link']:
+        if args['magic_link']:
+            for arg in args:
+                if args[arg] is not None:
+                    feagi_settings['magic_link'] = args[arg]
+                    break
+            configuration['feagi_settings']['feagi_url'] = feagi_settings['magic_link']
+            with open('configuration.json', 'w') as f:
+                json.dump(configuration, f)
+        else:
+            feagi_settings['magic_link'] = feagi_settings['feagi_url']
+        url_response = json.loads(requests.get(feagi_settings['magic_link']).text)
+        feagi_settings['feagi_dns'] = url_response['feagi_url']
+        feagi_settings['feagi_api_port'] = url_response['feagi_api_port']
 
     inital_feagi_setting = feagi_settings.copy()
     inital_agent_settings = agent_settings.copy()

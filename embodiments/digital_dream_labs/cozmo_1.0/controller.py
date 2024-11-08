@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Copyright 2016-2022 The FEAGI Authors. All Rights Reserved.
+Copyright 2016-present Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ def action(obtained_data):
                 facial_expression.face_selected.append(i)
         obtained_data['misc'].clear()
 
-def data_OPU(action):
+def data_opu(action):
     old_message = {}
     while True:
         message_from_feagi = pns.message_from_feagi
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     threading.Thread(target=retina.vision_progress,
                      args=(default_capabilities,feagi_settings,
                            cozmo_functions.camera_data,), daemon=True).start()
-    threading.Thread(target=data_OPU, args=(action, ), daemon=True).start()
+    threading.Thread(target=data_opu, args=(action, ), daemon=True).start()
     time.sleep(2)
     # vision ends
 

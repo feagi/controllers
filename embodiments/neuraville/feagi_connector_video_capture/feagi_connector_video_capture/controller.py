@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Copyright 2016-2022 The FEAGI Authors. All Rights Reserved.
+Copyright 2016-present Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ camera_data = {"vision": []}
 def process_video(video_path, capabilities):
     webcam_list = list()
     webcam_data_each = dict()
-    print("bwuk: ", video_path)
     if capabilities['input']['camera']['0']["image"] == "":
         for device in video_path:
             new_cam = cv2.VideoCapture(device)
@@ -118,24 +117,26 @@ def main(feagi_auth_url, feagi_settings, agent_settings, capabilities, message_t
     runtime_data = {"vision": {}, "current_burst_id": None, "stimulation_period": None,
                     "feagi_state": None,
                     "feagi_network": None}
-    FEAGI_FLAG = False
-    print("Waiting on FEAGI...")
-    while not FEAGI_FLAG:
-        FEAGI_FLAG = feagi.is_FEAGI_reachable(
-            os.environ.get('FEAGI_HOST_INTERNAL', feagi_settings["feagi_host"]),
-            int(os.environ.get('FEAGI_OPU_PORT', "3000")))
-        print((
-            os.environ.get('FEAGI_HOST_INTERNAL', feagi_settings["feagi_host"]),
-            int(os.environ.get('FEAGI_OPU_PORT', "3000"))))
-        print("retrying...")
-        sleep(2)
-    print("FEAGI is reachable!")
+    # FEAGI_FLAG = False
+    # print("Waiting on FEAGI...")
+    # while not FEAGI_FLAG:
+    #     FEAGI_FLAG = feagi.is_FEAGI_reachable(
+    #         os.environ.get('FEAGI_HOST_INTERNAL', feagi_settings["feagi_host"]),
+    #         int(os.environ.get('FEAGI_OPU_PORT', "3000")))
+    #     print((
+    #         os.environ.get('FEAGI_HOST_INTERNAL', feagi_settings["feagi_host"]),
+    #         int(os.environ.get('FEAGI_OPU_PORT', "3000"))))
+    #     print("retrying...")
+    #     sleep(2)
+    # print("FEAGI is reachable!")
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # - - - - - - - - - - - - - - - - - - #
-    feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
-        feagi.connect_to_feagi(feagi_settings, runtime_data, agent_settings, capabilities,
-                               __version__)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # FEAGI registration - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = (
+        feagi.connect_to_feagi(
+            feagi_settings, runtime_data, agent_settings, capabilities, __version__
+        )
+    )
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     msg_counter = runtime_data["feagi_state"]['burst_counter']
     rgb = dict()
     rgb['camera'] = dict()
@@ -145,7 +146,6 @@ def main(feagi_auth_url, feagi_settings, agent_settings, capabilities, message_t
     # overwrite manual
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
     # default_capabilities = retina.convert_new_json_to_old_json(default_capabilities)  # temporary
-    threading.Thread(target=pns.feagi_listener, args=(feagi_opu_channel,), daemon=True).start()
     threading.Thread(target=retina.vision_progress, args=(default_capabilities, feagi_settings, camera_data['vision'],), daemon=True).start()
     while True:
         try:

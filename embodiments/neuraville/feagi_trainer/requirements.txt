@@ -1,3 +1,3 @@
 flask==3.0.3
 pydantic
-feagi-connector>=0.0.17
+feagi-connector>=0.0.29
