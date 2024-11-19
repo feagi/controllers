@@ -9,6 +9,10 @@ from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from feagi_connector import actuators
 
+servo_status = dict()
+gyro = {"0":[]}
+acc = {"0":[]}
+
 feagi.validate_requirements(
     'requirements.txt')  # you should get it from the boilerplate generator
 runtime_data = {}
@@ -26,6 +30,23 @@ def read_from_port(ser):
                 for servo_id in range(len(split_data)):
                     received_data[str(servo_id)] = int(float(split_data[servo_id]))
                 petoi_data['servo_status'] = received_data
+            if len(split_data) == 6:
+                gyro['0'] = [float(split_data[0]), float(split_data[1]), float(split_data[2])]
+                acc['0'] = [int(split_data[3]), int(split_data[4]), int(split_data[5])]
+            if '#' in received_data:
+                cleaned_data = received_data.replace('#', '')
+                new_data = full_data + cleaned_data
+                new_data = new_data.split(",")
+                processed_data = []
+                for i in new_data:
+                    full_number = str()
+                    for x in i:
+                        if x in [".", "-"] or x.isdigit():
+                            full_number += x
+                    if full_number:
+                        processed_data.append(float(full_number))
+                # Add gyro data into feagi data
+                gyro['gyro'] = {'0': [processed_data[0], processed_data[1], processed_data[2]]}
             else:
                 gyro_sliced = split_data[:3]
                 acceleration_sliced = split_data[3:6]
@@ -69,13 +90,14 @@ def action(obtained_data):
     if recieved_misc_data:
         for data_point in recieved_misc_data:
             if data_point == 0:
-                ser.write('gP'.encode())
+                ser.write('gPb'.encode())
             if data_point == 1:
                 ser.write('f'.encode())
             # if data_point == 2:
             #     ser.write('gP'.encode())
 
     if recieve_servo_position_data:
+        servo_for_feagi = 'i '
         petoi_data['servo_status'].clear() # petoi doesnt work at the same time.
         for device_id in recieve_servo_position_data:
             new_power = recieve_servo_position_data[device_id]
@@ -83,6 +105,7 @@ def action(obtained_data):
 
     if servo_data:
         petoi_data['servo_status'].clear()
+        servo_for_feagi = 'i '
         for device_id in servo_data:
             power = servo_data[device_id]
             servo_for_feagi += str(feagi_to_petoi_id(device_id)) + " " + str(power) + " "
@@ -93,7 +116,7 @@ def action(obtained_data):
 
 
 if __name__ == "__main__":
-    ser = serial.Serial('/dev/ttyACM0', 115200)
+    ser = serial.Serial('COM4', 115200)
     thread_read = threading.Thread(target=read_from_port, args=(ser,))
     # thread_write = threading.Thread(target=write_to_port, args=(ser,))
 
@@ -122,14 +145,15 @@ if __name__ == "__main__":
     actuators.start_servos(capabilities)
     ser.write('gPb'.encode()) # initalize
     time.sleep(5)
-
-    # # special handling code:
     feagi_servo_data_to_send = 'i '
     for position in capabilities['output']['servo']:
-        feagi_servo_data_to_send += str(feagi_to_petoi_id(int(position))) + " " + str(capabilities['output']['servo'][position]['default_value']) + " "
+        feagi_servo_data_to_send += str(feagi_to_petoi_id(int(position))) + " " + str(
+            capabilities['output']['servo'][position]['default_value']) + " "
+    actuators.start_servos(capabilities)
+    # ser.write('gPb'.encode())
+    print("here: ", feagi_servo_data_to_send)
     ser.write(feagi_servo_data_to_send.encode())
-    # # ends of special handling code
-
+    print("done")
     while True:
         message_from_feagi = pns.message_from_feagi
 
@@ -148,25 +172,18 @@ if __name__ == "__main__":
                                                              message_to_feagi,
                                                              current_data=petoi_data['servo_status'],
                                                              symmetric=True)
-        if petoi_data['gyro']:
-            # print("gyro: ", petoi_data['gyro'])
-            message_to_feagi = sensors.create_data_for_feagi(
-                sensor='gyro',
-                capabilities=capabilities,
-                message_to_feagi=message_to_feagi,
-                current_data=petoi_data['gyro'],
-                symmetric=True,
-                measure_enable=True)
-
-        if petoi_data['acceleration']:
-            # print("acc: ", petoi_data['acceleration'])
-            message_to_feagi = sensors.create_data_for_feagi(
-                sensor='accelerometer',
-                capabilities=capabilities,
-                message_to_feagi=message_to_feagi,
-                current_data=petoi_data['acceleration'],
-                symmetric=True,
-                measure_enable=True)
+        if gyro['0']:
+            message_to_feagi = sensors.create_data_for_feagi('gyro',
+                                                             capabilities,
+                                                             message_to_feagi,
+                                                             current_data=gyro,
+                                                             symmetric=True)
+        if acc['0']:
+            message_to_feagi = sensors.create_data_for_feagi('accelerometer',
+                                                             capabilities,
+                                                             message_to_feagi,
+                                                             current_data=acc,
+                                                             symmetric=True)
 
         sleep(feagi_settings['feagi_burst_speed'])  # bottleneck
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel,
