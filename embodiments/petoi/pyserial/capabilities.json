@@ -7,9 +7,9 @@
 					"disabled": false,
 					"feagi_index": 0,
 					"max_value": [
-						0,
-						0,
-						0
+						1,
+						1,
+						1
 					],
 					"min_value": [
 						0,
@@ -24,9 +24,9 @@
 					"disabled": false,
 					"feagi_index": 0,
 					"max_value": [
-						0,
-						0,
-						0
+						1,
+						1,
+						1
 					],
 					"min_value": [
 						0,
@@ -102,6 +102,18 @@
 			}
 		},
 		"output": {
+			"misc": {
+				"0": {
+					"custom_name": "toggle balancing",
+					"disabled": false,
+					"feagi_index": 0
+				},
+				"1": {
+					"custom_name": "toggle servo reading",
+					"disabled": false,
+					"feagi_index": 1
+				}
+			},
 			"servo": {
 				"0": {
 					"custom_name": "head",
@@ -183,31 +195,7 @@
 					"max_power": 10,
 					"max_value": 90,
 					"min_value": -90
-				},
-			"misc": {
-				"0": {
-					"custom_name": "toggle balancing",
-					"disabled": false,
-					"feagi_index": 0
-				},
-				"1": {
-					"custom_name": "toggle servo reading",
-					"disabled": false,
-					"feagi_index": 1
 				}
-			},
-			"misc": {
-				"0": {
-					"custom_name": "toggle balancing",
-					"disabled": false,
-					"feagi_index": 0
-				},
-				"1": {
-					"custom_name": "toggle servo reading",
-					"disabled": false,
-					"feagi_index": 1
-				}
-			}
 			}
 		}
 	}
