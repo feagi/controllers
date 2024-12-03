@@ -40,12 +40,8 @@ def get_gyro(full_data):
         This function will return gyro data only.
         This gyro is 3 axis gyro.
     """
-    new_data = dict()
     try:
-        new_data[0] = full_data['pitch']
-        new_data[1] = full_data['roll']
-        new_data[2] = full_data['yaw']
-        return new_data
+        return {'0': [full_data['pitch'], full_data['roll'], full_data['yaw']]}
     except Exception as e:
         print("ERROR STARTS WITH: ", e)
 
@@ -55,12 +51,8 @@ def get_accelerator(full_data):
     full data should be a raw data of get_current_state().
     This function will return acc data only.
     """
-    new_data = dict()
     try:
-        new_data[0] = full_data['agx']
-        new_data[1] = full_data['agy']
-        new_data[2] = full_data['agz']
-        return new_data
+        return {'0': [full_data['agx'], full_data['agy'], full_data['agz']]}
     except Exception as e:
         print("ERROR STARTS WITH: ", e)
 
@@ -163,21 +155,24 @@ def action(obtained_signals):
         for i in recieve_speed_data:
             speed['0'] = recieve_speed_data[i]
     if recieve_motion_control_data:
-        for i in recieve_motion_control_data:
-            if 'yaw_left' == i:
-                tello.send_command_without_return("cw {}".format(recieve_motion_control_data[i] *
-                                                                 100))
-            if 'yaw_right' == i:
-                tello.send_command_without_return("ccw {}".format(recieve_motion_control_data[i]
-                                                                  * 100))
-            if "move_left" == i:
-                navigate_to_xyz(tello, 0, 100 * int(recieve_motion_control_data[i]), 0, speed['0'])
-            if "move_right" == i:
-                navigate_to_xyz(tello, 0, -100 * int(recieve_motion_control_data[i]), 0, speed['0'])
-            if "move_up" == i:
-                navigate_to_xyz(tello, 0, 0, 100 * int(recieve_motion_control_data[i]), speed['0'])
-            if "move_down" == i:
-                navigate_to_xyz(tello, 0, 0, -100 * int(recieve_motion_control_data[i]), speed['0'])
+        if 'motion_control' in recieve_motion_control_data:
+            if recieve_motion_control_data['motion_control']:
+                for index in capabilities['output']['motion_control']:
+                    for i in recieve_motion_control_data['motion_control'][int(index)]:
+                        if 'yaw_left' == i:
+                            tello.send_command_without_return("cw {}".format(recieve_motion_control_data['motion_control'][int(index)][i] *
+                                                                             100))
+                        if 'yaw_right' == i:
+                            tello.send_command_without_return("ccw {}".format(recieve_motion_control_data['motion_control'][int(index)][i]
+                                                                              * 100))
+                        if "move_left" == i:
+                            navigate_to_xyz(tello, 0, 100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), 0, speed['0'])
+                        if "move_right" == i:
+                            navigate_to_xyz(tello, 0, -100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), 0, speed['0'])
+                        if "move_up" == i:
+                            navigate_to_xyz(tello, 0, 0, 100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), speed['0'])
+                        if "move_down" == i:
+                            navigate_to_xyz(tello, 0, 0, -100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), speed['0'])
     if 'misc' in obtained_signals:
         for i in obtained_signals['misc']:
             misc_control(tello, i, battery)
@@ -210,9 +205,8 @@ if __name__ == '__main__':
     default_capabilities = config['default_capabilities'].copy()
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
-    default_capabilities = retina.convert_new_json_to_old_json(default_capabilities)  # temporary
-    print("cap: ", capabilities)
-    print("default: ", default_capabilities)
+
+    actuators.start_generic_opu(capabilities)
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - #
