@@ -143,6 +143,43 @@ def navigate_to_xyz(self, x=0, y=0, z=0, s=0):
     self.send_command_without_return(cmd)
 
 
+def get_motion_vector(direction, magnitude):
+    if direction == "move_left":
+        return (0, 100 * magnitude, 0)
+    elif direction == "move_right":
+        return (0, -100 * magnitude, 0)
+    elif direction == "move_up":
+        return (0, 0, 100 * magnitude)
+    elif direction == "move_down":
+        return (0, 0, -100 * magnitude)
+    elif direction == "move_forward":
+        return (100 * magnitude, 0, 0)
+    elif direction == "move_backward":
+        return (-100 * magnitude, 0, 0)
+    return (0, 0, 0)
+
+
+def process_motion_control(data, index, tello, speed):
+    if not data.get('motion_control', {}).get(int(index)):
+        return
+
+    total_x = total_y = total_z = 0
+    motions = data['motion_control'][int(index)]
+
+    for direction, value in motions.items():
+        if 'yaw' in direction:
+            cmd = "cw" if direction == "yaw_left" else "ccw"
+            tello.send_command_without_return(f"{cmd} {int(value) * 100}")
+            continue
+
+        x, y, z = get_motion_vector(direction, int(value))
+        total_x += x
+        total_y += y
+        total_z += z
+
+    if any((total_x, total_y, total_z)):
+        navigate_to_xyz(tello, total_x, total_y, total_z, speed['0'])
+
 
 def action(obtained_signals):
     global speed
@@ -154,25 +191,11 @@ def action(obtained_signals):
     if recieve_speed_data:
         for i in recieve_speed_data:
             speed['0'] = recieve_speed_data[i]
+
     if recieve_motion_control_data:
-        if 'motion_control' in recieve_motion_control_data:
-            if recieve_motion_control_data['motion_control']:
-                for index in capabilities['output']['motion_control']:
-                    for i in recieve_motion_control_data['motion_control'][int(index)]:
-                        if 'yaw_left' == i:
-                            tello.send_command_without_return("cw {}".format(recieve_motion_control_data['motion_control'][int(index)][i] *
-                                                                             100))
-                        if 'yaw_right' == i:
-                            tello.send_command_without_return("ccw {}".format(recieve_motion_control_data['motion_control'][int(index)][i]
-                                                                              * 100))
-                        if "move_left" == i:
-                            navigate_to_xyz(tello, 0, 100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), 0, speed['0'])
-                        if "move_right" == i:
-                            navigate_to_xyz(tello, 0, -100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), 0, speed['0'])
-                        if "move_up" == i:
-                            navigate_to_xyz(tello, 0, 0, 100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), speed['0'])
-                        if "move_down" == i:
-                            navigate_to_xyz(tello, 0, 0, -100 * int(recieve_motion_control_data['motion_control'][int(index)][i]), speed['0'])
+        for index in capabilities['output']['motion_control']:
+            process_motion_control(recieve_motion_control_data, index, tello, speed)
+
     if 'misc' in obtained_signals:
         for i in obtained_signals['misc']:
             misc_control(tello, i, battery)
