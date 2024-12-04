@@ -114,8 +114,14 @@
       <body name="head" pos="0 0 .19">
         <geom name="head" type="sphere" size=".09"/>
         <site name="head_gyro_mount" pos="0 0 0" size="0.01"/>
-
         <camera name="egocentric" pos=".09 0 0" xyaxes="0 -1 0 .1 0 1" fovy="80"/>
+
+        <replicate count="4" euler="0 4 0">   
+          <replicate count="4" euler="0 0 -4">
+            <site name="rf" pos=".16 0 0" zaxis="1 0 0"/>
+          </replicate>
+        </replicate>
+
       </body>
       <body name="waist_lower" pos="-.01 0 -.26">
         <geom name="waist_lower" fromto="0 -.06 0 0 .06 0" size=".06"/>
@@ -186,11 +192,6 @@
     </body>
   </worldbody>
 
-  <sensor>
-      <!-- Define gyro sensor attached to the mounting site -->
-      <framequat objtype="site" objname="head_gyro_mount" name="head_gyro"/>
-  </sensor>
-
   <contact>
     <exclude body1="waist_lower" body2="thigh_right"/>
     <exclude body1="waist_lower" body2="thigh_left"/>
@@ -206,30 +207,6 @@
       <joint joint="knee_left" coef="-.5"/>
     </fixed>
   </tendon>
-
- <!--  <actuator>
-    <motor name="abdomen_z"       gear="40"  joint="abdomen_z"/>
-    <motor name="abdomen_y"       gear="40"  joint="abdomen_y"/>
-    <motor name="abdomen_x"       gear="40"  joint="abdomen_x"/>
-    <motor name="hip_x_right"     gear="40"  joint="hip_x_right"/>
-    <motor name="hip_z_right"     gear="40"  joint="hip_z_right"/>
-    <motor name="hip_y_right"     gear="120" joint="hip_y_right"/>
-    <motor name="knee_right"      gear="80"  joint="knee_right"/>
-    <motor name="ankle_y_right"   gear="20"  joint="ankle_y_right"/>
-    <motor name="ankle_x_right"   gear="20"  joint="ankle_x_right"/>
-    <motor name="hip_x_left"      gear="40"  joint="hip_x_left"/>
-    <motor name="hip_z_left"      gear="40"  joint="hip_z_left"/>
-    <motor name="hip_y_left"      gear="120" joint="hip_y_left"/>
-    <motor name="knee_left"       gear="80"  joint="knee_left"/>
-    <motor name="ankle_y_left"    gear="20"  joint="ankle_y_left"/>
-    <motor name="ankle_x_left"    gear="20"  joint="ankle_x_left"/>
-    <motor name="shoulder1_right" gear="20"  joint="shoulder1_right"/>
-    <motor name="shoulder2_right" gear="20"  joint="shoulder2_right"/>
-    <motor name="elbow_right"     gear="40"  joint="elbow_right"/>
-    <motor name="shoulder1_left"  gear="20"  joint="shoulder1_left"/>
-    <motor name="shoulder2_left"  gear="20"  joint="shoulder2_left"/>
-    <motor name="elbow_left"      gear="40"  joint="elbow_left"/>
-  </actuator> -->
 
   <actuator>
     <position joint="abdomen_z" name="abdomen_z" ctrlrange="-0.578 0.794" kp="50"/>
@@ -254,35 +231,19 @@
     <position joint="shoulder2_left" name="shoulder2_left" ctrlrange="-1.49 1.06" kp="50"/>
     <position joint="elbow_left" name="elbow_left" ctrlrange="-1.75 0.882" kp="50"/>
   </actuator>
-  <!-- without kp it doesnt move? -->
-  <!-- <actuator>
-    <position joint="abdomen_z" name="abdomen_z" ctrlrange="-0.578 0.794" />
-    <position joint="abdomen_y" name="abdomen_y" ctrlrange="-0.509 0.531"/>
-    <position joint="abdomen_x" name="abdomen_x" ctrlrange="-0.619 0.619"/>
-    <position joint="hip_x_right" name="hip_x_right" ctrlrange="-0.533 0.162"/>
-    <position joint="hip_z_right" name="hip_z_right" ctrlrange="-0.567 0.621"/>
-    <position joint="hip_y_right" name="hip_y_right" ctrlrange="-2.63 0.358"/>
-    <position joint="knee_right" name="knee_right" ctrlrange="-2.8 0.0443"/>
-    <position joint="ankle_y_right" name="ankle_y_right" ctrlrange="-0.882 0.882"/>
-    <position joint="ankle_x_right" name="ankle_x_right" ctrlrange="-0.883 0.882"/>
-    <position joint="hip_x_left" name="hip_x_left" ctrlrange="-0.5 0.132"/>
-    <position joint="hip_z_left" name="hip_z_left" ctrlrange="-1.06 0.621"/>
-    <position joint="hip_y_left" name="hip_y_left" ctrlrange="-2.63 0.358"/>
-    <position joint="knee_left" name="knee_left" ctrlrange="-2.8 0.0443"/>
-    <position joint="ankle_y_left" name="ankle_y_left" ctrlrange="-0.882 0.882"/>
-    <position joint="ankle_x_left" name="ankle_x_left" ctrlrange="-0.882 0.882"/>
-    <position joint="shoulder1_right" name="shoulder1_right" ctrlrange="-1.49 1.05"/>
-    <position joint="shoulder2_right" name="shoulder2_right" ctrlrange="-1.49 0.835"/>
-    <position joint="elbow_right" name="elbow_right" ctrlrange="-1.75 0.882"/>
-    <position joint="shoulder1_left" name="shoulder1_left" ctrlrange="-1.49 1.05"/>
-    <position joint="shoulder2_left" name="shoulder2_left" ctrlrange="-1.49 1.06"/>
-    <position joint="elbow_left" name="elbow_left" ctrlrange="-1.75 0.882"/>
-</actuator> -->
+  
    
   <sensor>
+    <!-- Define gyro sensor attached to the mounting site (First 4 values in data.sensor) -->
+    <framequat objtype="site" objname="head_gyro_mount" name="head_gyro"/>
+
+    <!-- Next 3 values in data.sensor -->
     <distance cutoff="10" name="waist_elevation" geom1="waist_lower" geom2="floor"/>
     <distance cutoff="10" name="upper_arm_left_elevation" geom1="upper_arm_left" geom2="floor"/>
     <distance cutoff="10" name="upper_arm_right_elevation" geom1="upper_arm_right" geom2="floor"/>
+
+    <!-- Final 16 values in data.sensor (4x4 loop with replicate for 16 lasers) -->
+    <rangefinder site="rf"/>
   </sensor>
 
 

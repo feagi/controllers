@@ -158,6 +158,8 @@ if __name__ == "__main__":
                           pns.full_template_information_corticals}
             sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
                            pns.full_template_information_corticals}
+            lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
+                           pns.full_template_information_corticals}
 
             # Get gyro data
             gyro = get_head_orientation()
