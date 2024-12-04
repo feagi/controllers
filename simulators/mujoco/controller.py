@@ -18,8 +18,10 @@ limitations under the License.
 """
 
 import time
+import threading
 import numpy as np
 import mujoco.viewer
+from feagi_connector import retina
 from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
@@ -88,6 +90,12 @@ if __name__ == "__main__":
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
 
+
+    previous_frame_data = {}
+    rgb = {}
+    rgb['camera'] = {}
+    camera_data = {"vision": {}}
+
     config = feagi.build_up_from_configuration()
     feagi_settings = config['feagi_settings'].copy()
     agent_settings = config['agent_settings'].copy()
@@ -100,7 +108,9 @@ if __name__ == "__main__":
         feagi.connect_to_feagi(feagi_settings, runtime_data, agent_settings, capabilities,
                                __version__)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+    threading.Thread(target=retina.vision_progress,
+                     args=(default_capabilities, feagi_settings, camera_data['vision'],),
+                     daemon=True).start()
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
     model = mujoco.MjModel.from_xml_path('./humanoid.xml')
     data = mujoco.MjData(model)
@@ -109,6 +119,8 @@ if __name__ == "__main__":
     force_list = {}
     for x in range(20):
         force_list[str(x)] = [0, 0, 0]
+
+
 
     actuators.start_servos(capabilities)
     with mujoco.viewer.launch_passive(model, data) as viewer:
@@ -126,7 +138,7 @@ if __name__ == "__main__":
             if message_from_feagi:
                 # Translate from feagi data to human readable data
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
-                pns.check_genome_status_no_vision(message_from_feagi)
+                # pns.check_genome_status_no_vision(message_from_feagi)
                 action(obtained_signals)
 
             # region READ POSITIONAL DATA HERE ###
@@ -158,8 +170,29 @@ if __name__ == "__main__":
                           pns.full_template_information_corticals}
             sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
                            pns.full_template_information_corticals}
-            lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
-                           pns.full_template_information_corticals}
+            # lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
+            #                pns.full_template_information_corticals}
+            lidar_data = data.sensordata[7:] * 100
+            lidar_2d = lidar_data.reshape(16, 16)
+
+            # Create 16x16x3 array and flatten it
+            result = np.zeros((16, 16, 3))  # 3 for x,y,z
+            result[:, :, 0] = lidar_2d  # Set first channel to LIDAR data
+            flat_result = result.flatten()  # Makes it 1D array of length 768 (16*16*3)
+            raw_frame = retina.RGB_list_to_ndarray(flat_result,
+                                                   [16, 16])
+            camera_data['vision'] = {"0": retina.update_astype(raw_frame)}
+            # lidar_2d = lidar_data.reshape(16, 16)
+            # lidar_3d = np.zeros((16, 16, 16))  # Creating 16x16x16 array filled with zeros
+            # lidar_3d[:, :, 0] = lidar_2d  # Setting first z-layer to LIDAR data
+
+            previous_frame_data, rgb, default_capabilities = \
+                retina.process_visual_stimuli(
+                    camera_data['vision'],
+                    default_capabilities,
+                    previous_frame_data,
+                    rgb, capabilities)
+            message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
 
             # Get gyro data
             gyro = get_head_orientation()
