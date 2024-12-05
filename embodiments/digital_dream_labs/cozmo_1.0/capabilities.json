@@ -7,14 +7,14 @@
 					"disabled": false,
 					"feagi_index": 0,
 					"max_value": [
-						0,
-						0,
-						0
+						7000,
+						7000,
+						7000
 					],
 					"min_value": [
-						0,
-						0,
-						0
+						-7000,
+						-7000,
+						-7000
 					]
 				}
 			},
@@ -107,16 +107,16 @@
 			},
 			"servo": {
 				"0": {
-					"custom_name": "servo_0",
+					"custom_name": "head",
 					"disabled": false,
 					"feagi_index": 0,
 					"max_power": 0.2,
-					"max_value": 0.676671517137477,
+					"max_value": 0.6766715171374768,
 					"min_value": -0.33633231299858,
 					"default_value": 0
 				},
 				"1": {
-					"custom_name": "servo_1",
+					"custom_name": "arms",
 					"disabled": false,
 					"feagi_index": 1,
 					"max_power": 3,

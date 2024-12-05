@@ -18,7 +18,7 @@ NUM_DOTS = 3
 DOT_SIZE = 1
 LINE_WIDTH = 1
 
-robot = {'accelerator': {}, "proximity": [], "gyro": [], 'servo_head': [], "battery": [],
+robot = {'accelerator': {'0': []}, "proximity": [], "gyro": {'0': []}, 'servo_head': [], "battery": [],
          'lift_height': []}
 camera_data = {"vision": []}
 
@@ -110,9 +110,9 @@ def on_robot_state(cli, pkt: pycozmo.protocol_encoder.RobotState):
     backpack_touch_sensor_raw: Raw data from the robot's backpack touch sensor.
     curr_path_segment: The ID of the current path segment.
     """
-    robot['accelerator'] = {0: pkt.accel_x, 1: pkt.accel_y, 2: pkt.accel_z}
+    robot['accelerator']['0'] = [pkt.accel_x, pkt.accel_y, pkt.accel_z]
     robot['proximity'] = pkt.cliff_data_raw
-    robot["gyro"] = [pkt.gyro_x, pkt.gyro_y, pkt.gyro_z]
+    robot["gyro"]['0'] = [pkt.gyro_x, pkt.gyro_y, pkt.gyro_z]
     robot['servo_head'] = pkt.head_angle_rad
     robot['battery'] = pkt.battery_voltage
     robot['lift_height'] = pkt.lift_height_mm
