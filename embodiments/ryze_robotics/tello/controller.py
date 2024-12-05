@@ -172,7 +172,7 @@ def process_motion_control(data, index, tello, speed):
             tello.send_command_without_return(f"{cmd} {int(value) * 100}")
             continue
 
-        x, y, z = get_motion_vector(direction, int(value))
+        x, y, z = get_motion_vector(direction, value)
         total_x += x
         total_y += y
         total_z += z
