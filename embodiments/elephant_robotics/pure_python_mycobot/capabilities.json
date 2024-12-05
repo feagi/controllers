@@ -99,7 +99,7 @@
 					"disabled": false,
 					"feagi_index": 5,
 					"max_power": 50,
-					"max_value": 4096,
+					"max_value": 4095,
 					"min_value": 150
 				}
 			}
