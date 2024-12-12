@@ -58,7 +58,7 @@ def gather_all_input_data():
         if gpio_modes[pin] == 1:
             data = read_pin(pin)
             if data:
-                location_string = str(pin) + "-0-0"
+                location_string = (pin,0,0)
                 input_list[location_string] = 100
     return input_list
 
