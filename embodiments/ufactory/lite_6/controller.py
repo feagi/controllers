@@ -148,7 +148,7 @@ if __name__ == "__main__":
     arm.motion_enable(enable=True)
     arm.set_mode(0)
     arm.set_state(state=0)
-    speed = 150
+    speed = 100
     arm.set_pause_time(0)
     # UFACTORY ENDS
     pose_to_default(arm, capabilities)
