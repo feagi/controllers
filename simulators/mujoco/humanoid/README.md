@@ -4,7 +4,7 @@
 1.	Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
 2. `cd controllers/simulators/mujoco`
 3. `python3 -m venv venv` (Windows: `python -m venv venv`)
-4. `source venv/bin/activate` (Windows: `venv/Scripts/activate`)
+4. `source venv/bin/activate` (Windows: `venv\Scripts\activate`)
 5. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
 6. `python3 controller.py` (Windows: `python controller.py`) (If you are using FEAGI in the docker, run this command: `python3 controller.py --port 30000`
 
