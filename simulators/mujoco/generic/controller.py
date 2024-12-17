@@ -17,7 +17,9 @@ limitations under the License.
 ==============================================================================
 """
 
+import sys
 import time
+import argparse
 import threading
 import numpy as np
 import mujoco.viewer
@@ -84,12 +86,42 @@ def get_head_orientation():
 
     return [euler_angles[0], euler_angles[1], euler_angles[2]]
 
+def check_the_flag():
+    parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
+    parser.add_argument(
+        "--file",
+        type=str,
+        default="./humanoid.xml",
+        help="Path to the XML file (default: './humanoid.xml')"
+    )
+
+    args, remaining_args = parser.parse_known_args()
+
+    path = args.file
+    model = mujoco.MjModel.from_xml_path(path)
+    print(f"Model loaded successfully from: {path}")
+
+    cleaned_args = []
+    skip_next = False
+    for arg in sys.argv[1:]:
+        if skip_next:
+            skip_next = False
+            continue
+        if arg == "--file":
+            skip_next = True
+        else:
+            cleaned_args.append(arg)
+
+    sys.argv = [sys.argv[0]] + cleaned_args
+    return model
 
 if __name__ == "__main__":
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
 
+    # Step 3: Load the MuJoCo model
+    model = check_the_flag()
 
     previous_frame_data = {}
     rgb = {}
@@ -112,7 +144,6 @@ if __name__ == "__main__":
                      args=(default_capabilities, feagi_settings, camera_data['vision'],),
                      daemon=True).start()
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
-    model = mujoco.MjModel.from_xml_path('./humanoid.xml')
     data = mujoco.MjData(model)
 
     # Create a dict to store data
