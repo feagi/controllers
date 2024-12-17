@@ -11,7 +11,7 @@
 ## Load Docker:
 
 	1.	git clone git@github.com:feagi/feagi.git
-	2.	cd ~/feagi/docker
+	2.	cd feagi/docker
 	3.	docker compose -f playground.yml pull
 	4.	Wait until it’s done.
 	5.	docker compose -f playground.yml up
