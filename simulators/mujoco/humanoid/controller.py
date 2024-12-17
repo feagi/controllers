@@ -88,7 +88,7 @@ def get_head_orientation():
 def check_the_flag():
     parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
     parser.add_argument(
-        "--file",
+        "--model_xml_path",
         type=str,
         default="./humanoid.xml",
         help="Path to the XML file (default: './humanoid.xml')"
@@ -96,7 +96,7 @@ def check_the_flag():
 
     args, remaining_args = parser.parse_known_args()
 
-    path = args.file
+    path = args.model_xml_path
     model = mujoco.MjModel.from_xml_path(path)
     print(f"Model loaded successfully from: {path}")
 
@@ -106,7 +106,7 @@ def check_the_flag():
         if skip_next:
             skip_next = False
             continue
-        if arg == "--file":
+        if arg == "--model_xml_path":
             skip_next = True
         else:
             cleaned_args.append(arg)

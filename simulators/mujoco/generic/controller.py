@@ -51,7 +51,8 @@ def action(obtained_data):
         for real_id in recieve_servo_data:
             servo_number = real_id
             new_power = recieve_servo_data[real_id]
-            data.ctrl[servo_number] = new_power
+            if (len(data.ctrl) - 1) >= servo_number:
+                data.ctrl[servo_number] = new_power
 
 
 def quaternion_to_euler(w, x, y, z):
@@ -89,7 +90,7 @@ def get_head_orientation():
 def check_the_flag():
     parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
     parser.add_argument(
-        "--file",
+        "--model_xml_path",
         type=str,
         default="./humanoid.xml",
         help="Path to the XML file (default: './humanoid.xml')"
@@ -97,7 +98,7 @@ def check_the_flag():
 
     args, remaining_args = parser.parse_known_args()
 
-    path = args.file
+    path = args.model_xml_path
     model = mujoco.MjModel.from_xml_path(path)
     print(f"Model loaded successfully from: {path}")
 
@@ -107,7 +108,7 @@ def check_the_flag():
         if skip_next:
             skip_next = False
             continue
-        if arg == "--file":
+        if arg == "--model_xml_path":
             skip_next = True
         else:
             cleaned_args.append(arg)
@@ -197,10 +198,10 @@ if __name__ == "__main__":
 
             # Example to send data to FEAGI. This is basically reading the joint.
 
-            servo_data = {i: pos for i, pos in enumerate(positions[:20]) if
-                          pns.full_template_information_corticals}
-            sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
-                           pns.full_template_information_corticals}
+            # servo_data = {i: pos for i, pos in enumerate(positions[:20]) if
+            #               pns.full_template_information_corticals}
+            # sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
+            #                pns.full_template_information_corticals}
             # lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
             #                pns.full_template_information_corticals}
             # lidar_data = data.sensordata[7:] * 100
@@ -233,23 +234,23 @@ if __name__ == "__main__":
             #                                                  message_to_feagi,
             #                                                  current_data=gyro_data,
             #                                                  symmetric=True)
-            message_to_feagi = sensors.create_data_for_feagi('servo_position',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=servo_data,
-                                                             symmetric=True)
-
-            message_to_feagi = sensors.create_data_for_feagi('proximity',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=sensor_data,
-                                                             symmetric=True, measure_enable=True)
-            message_to_feagi = sensors.create_data_for_feagi('pressure',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=force_list,
-                                                             symmetric=True,
-                                                             measure_enable=False)  # measure enable set to false so
+            # message_to_feagi = sensors.create_data_for_feagi('servo_position',
+            #                                                  capabilities,
+            #                                                  message_to_feagi,
+            #                                                  current_data=servo_data,
+            #                                                  symmetric=True)
+            #
+            # message_to_feagi = sensors.create_data_for_feagi('proximity',
+            #                                                  capabilities,
+            #                                                  message_to_feagi,
+            #                                                  current_data=sensor_data,
+            #                                                  symmetric=True, measure_enable=True)
+            # message_to_feagi = sensors.create_data_for_feagi('pressure',
+            #                                                  capabilities,
+            #                                                  message_to_feagi,
+            #                                                  current_data=force_list,
+            #                                                  symmetric=True,
+            #                                                  measure_enable=False)  # measure enable set to false so
             # that way, it doesn't change 50/-50 in capabilities automatically
 
             # Sends to feagi data
