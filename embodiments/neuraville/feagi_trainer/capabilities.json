@@ -18,10 +18,23 @@
 					},
 					"threshold_default": 50
 				}
+			},
+			"id_trainer": {
+				"0": {
+					"custom_name": "id ipu",
+					"disabled": false,
+					"feagi_index": 0
+				}
 			}
 		},
 		"output": {
-
+			"recognition": {
+				"0": {
+					"custom_name": "id opu",
+					"disabled": false,
+					"feagi_index": 0
+				}
+			}
 		}
 	}
 }
