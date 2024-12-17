@@ -2,7 +2,7 @@
 
 ## Start Mujoco project:
 1.	Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
-2. `cd controllers/simulators/mujoco`
+2. `cd controllers/simulators/mujoco\humanoid`
 3. `python3 -m venv venv` (Windows: `python -m venv venv`)
 4. `source venv/bin/activate` (Windows: `venv\Scripts\activate`)
 5. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
