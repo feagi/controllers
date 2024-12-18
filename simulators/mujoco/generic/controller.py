@@ -18,15 +18,14 @@ limitations under the License.
 """
 
 import json
+import mujoco_library as mj_lib
 import sys
 import time
-import copy
 import argparse
 import threading
 import numpy as np
 import mujoco.viewer
 from feagi_connector import retina
-import xml.etree.ElementTree as ET
 from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
@@ -36,17 +35,6 @@ from feagi_connector import feagi_interface as feagi
 RUNTIME = float('inf')  # (seconds) timeout time
 SPEED = 120  # simulation step speed
 xml_actuators_type = dict()
-
-TRANSMISSION_TYPES = {
-    'position': 'servo',
-    'motor': 'motor'
-}
-
-SENSING_TYPES = {
-    'framequat': 'gyro',
-    'distance': 'proximity',
-    'rangefinder': 'camera'
-}
 
 
 def action(obtained_data):
@@ -116,8 +104,9 @@ def check_the_flag():
 
     path = args.model_xml_path
     model = mujoco.MjModel.from_xml_path(path)
-    xml_info = get_actuators(path)
-    xml_info = get_sensors(path, xml_info)
+    files = mj_lib.check_nest_file_from_xml(path)
+    xml_info = mj_lib.get_actuators(files)
+    xml_info = mj_lib.get_sensors(files, xml_info)
     print(f"Model loaded successfully from: {path}")
 
     cleaned_args = []
@@ -135,43 +124,6 @@ def check_the_flag():
     return model, xml_info
 
 
-def get_actuators(xml_path):
-    # Parse the XML file
-    tree = ET.parse(xml_path)
-    root = tree.getroot()
-
-    # Find the actuator section
-    actuator_section = root.find('actuator')
-
-    # Store actuator information in a dictionary
-    actuators = {'output': {}}
-
-    if actuator_section is not None:
-        # Get all children of actuator section (all types of actuators)
-        for actuator in actuator_section:
-            name = actuator.get('name')
-            actuators['output'][name] = {
-                'type': actuator.tag}
-
-    return actuators
-
-
-def get_sensors(xml_path, sensors):
-    # Parse the XML file
-    tree = ET.parse(xml_path)
-    root = tree.getroot()
-
-    # Find the sensor section
-    sensor_section = root.find('sensor')
-    sensors['input'] = {}
-
-    if sensor_section is not None:
-        # Get all children of sensor section (all types of sensors)
-        for sensor in sensor_section:
-            name = sensor.get('name')
-            sensors['input'][name] = {'type': sensor.tag}
-    return sensors
-
 
 if __name__ == "__main__":
     # Generate runtime dictionary
@@ -180,7 +132,6 @@ if __name__ == "__main__":
 
     # Step 3: Load the MuJoCo model
     model, xml_actuators_type = check_the_flag()
-    print(xml_actuators_type)
     previous_frame_data = {}
     rgb = {}
     rgb['camera'] = {}
@@ -193,89 +144,19 @@ if __name__ == "__main__":
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
 
-    # Generate capabilities based off mujoco data
+    # MUJOCO CUSTOM CODE USING MUJOCO_LIBRARY FILE
     data = mujoco.MjData(model)
-    actuator_control_range = []  # this is to define the max power (motor), max value ( servo)
-    actuator_information = {}
-    sensor_information = {}
 
-    for i in range(model.nu):
-        actuator_name = model.actuator(i).name
-        actuator_type = xml_actuators_type['output'][actuator_name]['type']
-        actuator_information[actuator_name] = {"type": actuator_type, "range": model.actuator_ctrlrange[i]}
-    print("\n\nactuator_information: ", actuator_information)
+    actuator_information = mj_lib.generate_actuator_list(model, xml_actuators_type)
 
-    for i in range(model.nsensor):
-        sensor = model.sensor(i)
-        # sensor_id = sensor.id # for device
-        sensor_name = sensor.name
-        test_sensor_type = sensor.type
-        # sensor_data = data.sensordata[i]
-        # print("sensor: ", " sensor name: ", sensor_name, " test type: ", test_sensor_type, " data: ", sensor_data)
-        if test_sensor_type == 7:
-            sensor_name = sensor_name[:-4]
-        sensor_type = xml_actuators_type['input'][sensor_name]['type']
-        sensor_information[sensor_name] = {"type": sensor_type}
+    sensor_information = mj_lib.generate_sensor_list(model, xml_actuators_type)
 
-    list_to_not_delete_device = []
-    temp_copy_property_input = {}
-    increment = 0
-    # Reading sensors
-    for mujoco_device_name in sensor_information:
-        device_name = SENSING_TYPES.get(sensor_information[mujoco_device_name]['type'], None)
-        if device_name in capabilities['input']:
-            if device_name not in list_to_not_delete_device:
-                increment = 0
-                list_to_not_delete_device.append(device_name)
-            elif device_name in list_to_not_delete_device:
-                increment += 1
-            device_id = str(increment)
-            if increment == 0:
-                temp_copy_property_input = copy.deepcopy(capabilities['input'][device_name][device_id])
-            temp_copy_property_input['custom_name'] = mujoco_device_name
-            temp_copy_property_input['feagi_index'] = increment
-            capabilities['input'][device_name][device_id] = copy.deepcopy(temp_copy_property_input)
-
-    temp_copy_property_output = {}
-    increment = 0
-    # Reading sensors
-    for mujoco_device_name in actuator_information:
-        device_name = TRANSMISSION_TYPES.get(actuator_information[mujoco_device_name]['type'], None)
-        range_control = actuator_information[mujoco_device_name]['range']
-        if device_name in capabilities['output']:
-            if device_name not in list_to_not_delete_device:
-                increment = 0
-                list_to_not_delete_device.append(device_name)
-            elif device_name in list_to_not_delete_device:
-                increment += 1
-            device_id = str(increment)
-            if increment == 0:
-                temp_copy_property_output = copy.deepcopy(capabilities['output'][device_name][device_id])
-            if device_name == 'servo':
-                temp_copy_property_output['max_value'] = range_control[1]
-                temp_copy_property_output['min_value'] = range_control[0]
-            elif device_name == 'motor':
-                temp_copy_property_output['max_power'] = range_control[1]
-                temp_copy_property_output['rolling_window_len'] = 2
-            temp_copy_property_output['custom_name'] = mujoco_device_name
-            temp_copy_property_output['feagi_index'] = increment
-            capabilities['output'][device_name][device_id] = copy.deepcopy(temp_copy_property_output)
-
-    temp_capabilities = copy.deepcopy(capabilities)
-    for I_O in temp_capabilities:
-        for device_name in temp_capabilities[I_O]:
-            if device_name not in list_to_not_delete_device:
-                del capabilities[I_O][device_name]
-
-
-    # Write the modified capabilities to test.json
-    with open("test.json", "w") as json_file:
-        json.dump(capabilities, json_file, indent=4)
+    capabilities = mj_lib.generate_capabilities_based_of_xml(sensor_information,
+                                                             actuator_information,
+                                                             capabilities)
 
 
 
-
-    print("END OF ACTUATOR")
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
@@ -291,11 +172,6 @@ if __name__ == "__main__":
     force_list = {}
     for x in range(20):
         force_list[str(x)] = [0, 0, 0]
-
-    if 'servo' in capabilities['output']:
-        actuators.start_servos(capabilities)
-    if 'motor' in capabilities['output']:
-        actuators.start_motors(capabilities)
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_resetDataKeyframe(model, data, 4)
