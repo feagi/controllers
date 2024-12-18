@@ -243,7 +243,7 @@
     <distance cutoff="10" name="upper_arm_right_elevation" geom1="upper_arm_right" geom2="floor"/>
 
     <!-- Final 16 values in data.sensor (4x4 loop with replicate for 16 lasers) -->
-    <rangefinder site="rf"/>
+    <rangefinder name="head_camera" site="rf"/>
   </sensor>
 
 
