@@ -35,23 +35,22 @@ def action(obtained_data):
     if recieve_servo_position_data:
         for device_id in recieve_servo_position_data:
             servo_for_feagi[int(device_id)] = int(recieve_servo_position_data[device_id])
-        print("Sending:", servo_for_feagi)  # Debug print
 
     if servo_data:
         for device_id in servo_data:
             servo_for_feagi[int(device_id)] = int(recieve_servo_position_data[device_id])
 
     if servo_for_feagi != previous_feagi_servo_list:
-        data = struct.pack('BBBBB', *servo_for_feagi)  # Unpack the list directly
-        ser.write(data)
-        previous_feagi_servo_list = servo_for_feagi
+        formatted_data = ','.join(map(str, servo_for_feagi)) + '\n'
+        ser.write(formatted_data.encode('utf-8'))
+        previous_feagi_servo_list = servo_for_feagi.copy()
 
 if __name__ == "__main__":
-    ser = serial.Serial('/dev/cu.usbserial-8320', 115200)
-    thread_read = threading.Thread(target=read_from_port, args=(ser,))
+    ser = serial.Serial('COM7', 115200)
+    # thread_read = threading.Thread(target=read_from_port, args=(ser,)) # We need this for sensor soon
     # thread_write = threading.Thread(target=write_to_port, args=(ser,))
 
-    thread_read.start()
+    # thread_read.start() # Needs to uncomment this for sensor
     # thread_write.start()
 
     # thread_read.join()
@@ -74,9 +73,8 @@ if __name__ == "__main__":
 
     # To give ardiuno some time to open port. It's required
     actuators.start_servos(capabilities)
-    time.sleep(3)
+    time.sleep(5)
     print("serial is ready")
-    # ser.write([90, 90, 90, 90, 90])
 
     while True:
         message_from_feagi = pns.message_from_feagi
