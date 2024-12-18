@@ -162,3 +162,12 @@ def get_sensors(files, sensors):
                 name = sensor.get('name')
                 sensors['input'][name] = {'type': sensor.tag}
     return sensors
+
+def read_position_from_all_joint(model, data):
+    position_list = {}
+    for i in range(model.njnt):
+        joint = model.joint(i)
+        name = joint.name
+        if name != '' and name != 'root':
+            position_list[name] = data.joint(i).qpos
+    print(position_list)
