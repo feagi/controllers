@@ -40,22 +40,29 @@ xml_actuators_type = dict()
 def action(obtained_data):
     recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+    recieve_motor_data = actuators.get_motor_data(obtained_data)
 
     if recieve_servo_position_data:
         # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
         for real_id in recieve_servo_position_data:
             servo_number = real_id
             power = recieve_servo_position_data[real_id]
-            if (len(data.ctrl) - 1) >= servo_number:
-                data.ctrl[servo_number] = power
+            data.ctrl[servo_number] = power
 
     if recieve_servo_data:
         # example output: {0: 0.245, 2: 1.0}
         for real_id in recieve_servo_data:
             servo_number = real_id
             new_power = recieve_servo_data[real_id]
-            if (len(data.ctrl) - 1) >= servo_number:
-                data.ctrl[servo_number] = new_power
+            data.ctrl[servo_number] = new_power
+
+    if recieve_motor_data:
+        for motor_id in recieve_motor_data:
+            data_power = recieve_motor_data[motor_id]
+            data.ctrl[motor_id] = data_power
+
+
+
 
 
 def quaternion_to_euler(w, x, y, z):
@@ -267,7 +274,7 @@ if __name__ == "__main__":
             # print("JOINT SECTION HERE: ")
             # # Number of joints
             # print("Number of joints:", model.njnt)
-            #
+            mj_lib.read_position_from_all_joint(model, data)
             # # Print joint positions (qpos) - but note the first 7 are the free joint as you mentioned
             # print("Joint positions:", data.qpos)
             #
