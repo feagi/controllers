@@ -17,13 +17,16 @@ limitations under the License.
 ==============================================================================
 """
 
+import json
 import sys
 import time
+import copy
 import argparse
 import threading
 import numpy as np
 import mujoco.viewer
 from feagi_connector import retina
+import xml.etree.ElementTree as ET
 from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
@@ -32,6 +35,18 @@ from feagi_connector import feagi_interface as feagi
 
 RUNTIME = float('inf')  # (seconds) timeout time
 SPEED = 120  # simulation step speed
+xml_actuators_type = dict()
+
+TRANSMISSION_TYPES = {
+    'position': 'servo',
+    'motor': 'motor'
+}
+
+SENSING_TYPES = {
+    'framequat': 'gyro',
+    'distance': 'proximity',
+    'rangefinder': 'camera'
+}
 
 
 def action(obtained_data):
@@ -87,6 +102,7 @@ def get_head_orientation():
 
     return [euler_angles[0], euler_angles[1], euler_angles[2]]
 
+
 def check_the_flag():
     parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
     parser.add_argument(
@@ -100,6 +116,8 @@ def check_the_flag():
 
     path = args.model_xml_path
     model = mujoco.MjModel.from_xml_path(path)
+    xml_info = get_actuators(path)
+    xml_info = get_sensors(path, xml_info)
     print(f"Model loaded successfully from: {path}")
 
     cleaned_args = []
@@ -114,7 +132,46 @@ def check_the_flag():
             cleaned_args.append(arg)
 
     sys.argv = [sys.argv[0]] + cleaned_args
-    return model
+    return model, xml_info
+
+
+def get_actuators(xml_path):
+    # Parse the XML file
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # Find the actuator section
+    actuator_section = root.find('actuator')
+
+    # Store actuator information in a dictionary
+    actuators = {'output': {}}
+
+    if actuator_section is not None:
+        # Get all children of actuator section (all types of actuators)
+        for actuator in actuator_section:
+            name = actuator.get('name')
+            actuators['output'][name] = {
+                'type': actuator.tag}
+
+    return actuators
+
+
+def get_sensors(xml_path, sensors):
+    # Parse the XML file
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    # Find the sensor section
+    sensor_section = root.find('sensor')
+    sensors['input'] = {}
+
+    if sensor_section is not None:
+        # Get all children of sensor section (all types of sensors)
+        for sensor in sensor_section:
+            name = sensor.get('name')
+            sensors['input'][name] = {'type': sensor.tag}
+    return sensors
+
 
 if __name__ == "__main__":
     # Generate runtime dictionary
@@ -122,8 +179,8 @@ if __name__ == "__main__":
                     "feagi_network": None}
 
     # Step 3: Load the MuJoCo model
-    model = check_the_flag()
-
+    model, xml_actuators_type = check_the_flag()
+    print(xml_actuators_type)
     previous_frame_data = {}
     rgb = {}
     rgb['camera'] = {}
@@ -136,6 +193,90 @@ if __name__ == "__main__":
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
 
+    # Generate capabilities based off mujoco data
+    data = mujoco.MjData(model)
+    actuator_control_range = []  # this is to define the max power (motor), max value ( servo)
+    actuator_information = {}
+    sensor_information = {}
+
+    for i in range(model.nu):
+        actuator_name = model.actuator(i).name
+        actuator_type = xml_actuators_type['output'][actuator_name]['type']
+        actuator_information[actuator_name] = {"type": actuator_type, "range": model.actuator_ctrlrange[i]}
+    print("\n\nactuator_information: ", actuator_information)
+
+    for i in range(model.nsensor):
+        sensor = model.sensor(i)
+        # sensor_id = sensor.id # for device
+        sensor_name = sensor.name
+        test_sensor_type = sensor.type
+        # sensor_data = data.sensordata[i]
+        # print("sensor: ", " sensor name: ", sensor_name, " test type: ", test_sensor_type, " data: ", sensor_data)
+        if test_sensor_type == 7:
+            sensor_name = sensor_name[:-4]
+        sensor_type = xml_actuators_type['input'][sensor_name]['type']
+        sensor_information[sensor_name] = {"type": sensor_type}
+
+    list_to_not_delete_device = []
+    temp_copy_property_input = {}
+    increment = 0
+    # Reading sensors
+    for mujoco_device_name in sensor_information:
+        device_name = SENSING_TYPES.get(sensor_information[mujoco_device_name]['type'], None)
+        if device_name in capabilities['input']:
+            if device_name not in list_to_not_delete_device:
+                increment = 0
+                list_to_not_delete_device.append(device_name)
+            elif device_name in list_to_not_delete_device:
+                increment += 1
+            device_id = str(increment)
+            if increment == 0:
+                temp_copy_property_input = copy.deepcopy(capabilities['input'][device_name][device_id])
+            temp_copy_property_input['custom_name'] = mujoco_device_name
+            temp_copy_property_input['feagi_index'] = increment
+            capabilities['input'][device_name][device_id] = copy.deepcopy(temp_copy_property_input)
+
+    temp_copy_property_output = {}
+    increment = 0
+    # Reading sensors
+    for mujoco_device_name in actuator_information:
+        device_name = TRANSMISSION_TYPES.get(actuator_information[mujoco_device_name]['type'], None)
+        range_control = actuator_information[mujoco_device_name]['range']
+        if device_name in capabilities['output']:
+            if device_name not in list_to_not_delete_device:
+                increment = 0
+                list_to_not_delete_device.append(device_name)
+            elif device_name in list_to_not_delete_device:
+                increment += 1
+            device_id = str(increment)
+            if increment == 0:
+                temp_copy_property_output = copy.deepcopy(capabilities['output'][device_name][device_id])
+            if device_name == 'servo':
+                temp_copy_property_output['max_value'] = range_control[1]
+                temp_copy_property_output['min_value'] = range_control[0]
+            elif device_name == 'motor':
+                temp_copy_property_output['max_power'] = range_control[1]
+                temp_copy_property_output['rolling_window_len'] = 2
+            temp_copy_property_output['custom_name'] = mujoco_device_name
+            temp_copy_property_output['feagi_index'] = increment
+            capabilities['output'][device_name][device_id] = copy.deepcopy(temp_copy_property_output)
+
+    temp_capabilities = copy.deepcopy(capabilities)
+    for I_O in temp_capabilities:
+        for device_name in temp_capabilities[I_O]:
+            if device_name not in list_to_not_delete_device:
+                del capabilities[I_O][device_name]
+
+
+    # Write the modified capabilities to test.json
+    with open("test.json", "w") as json_file:
+        json.dump(capabilities, json_file, indent=4)
+
+
+
+
+    print("END OF ACTUATOR")
+
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
         feagi.connect_to_feagi(feagi_settings, runtime_data, agent_settings, capabilities,
@@ -145,16 +286,17 @@ if __name__ == "__main__":
                      args=(default_capabilities, feagi_settings, camera_data['vision'],),
                      daemon=True).start()
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
-    data = mujoco.MjData(model)
 
     # Create a dict to store data
     force_list = {}
     for x in range(20):
         force_list[str(x)] = [0, 0, 0]
 
+    if 'servo' in capabilities['output']:
+        actuators.start_servos(capabilities)
+    if 'motor' in capabilities['output']:
+        actuators.start_motors(capabilities)
 
-
-    actuators.start_servos(capabilities)
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_resetDataKeyframe(model, data, 4)
         start_time = time.time()
@@ -173,7 +315,156 @@ if __name__ == "__main__":
                 # pns.check_genome_status_no_vision(message_from_feagi)
                 action(obtained_signals)
 
-            # region READ POSITIONAL DATA HERE ###
+            # ### actuator section
+            # # Number of actuators
+            # print("Number of actuators:", model.nu)
+            # # Basic actuator states
+            # print("Actuator controls (input signals):", data.ctrl)
+            # print("Actuator forces:", data.actuator_force)
+            # print("Actuator lengths:", data.actuator_length)
+            # print("Actuator velocities:", data.actuator_velocity)
+            # print("Actuator moments:", data.actuator_moment)
+            # # Activation states (if using activation dynamics)
+            # print("Activation states:", data.act)
+            # print("Activation derivatives:", data.act_dot)
+            # # Get actuator names from model
+            # print("Actuator names:")
+            # for i in range(model.nu):
+            #     print(f"Actuator {i}: {model.actuator(i).name}")
+            # # Get actuator types from model
+            # print("Actuator types:")
+            # for i in range(model.nu):
+            #     print(f"Actuator {i} type:", model.actuator_trntype[i])
+            # # Print actuator types
+            # for i in range(model.nu):
+            #     gain_type = model.actuator_gaintype[i]
+            #     print(f"Bwuk Actuator {i} ({model.actuator(i).name}): {gain_type}")
+
+            # print("Control ranges:")
+            # for i in range(model.nu):
+            #     actuator_name = model.actuator(i).name
+            #     ctrl_range_min = model.actuator_ctrlrange[i][0]
+            #     ctrl_range_max = model.actuator_ctrlrange[i][1]
+            #     print(f"Actuator {i} ({actuator_name}):")
+            #     print(f"  Control range: [{ctrl_range_min}, {ctrl_range_max}]")
+            # print("END OF ACTUATOR")
+            #
+            # # Plugion section
+            # print("PLUGIN SECTION")
+            # # Number of plugins
+            # print("Number of plugins:", data.nplugin)
+            # # Print plugin data
+            # print("Plugin data:", data.plugin_data)
+            # # Print plugin state
+            # print("Plugin state:", data.plugin_state)
+            # # To see plugin instances directly
+            # print("Plugin instances:")
+            # for i in range(data.nplugin):
+            #     print(f"Plugin {i}:", data.plugin(i))
+            # print("Plugin details from model:")
+            # for i in range(model.nplugin):
+            #     plugin = model.plugin(i)
+            #     print(f"Plugin {i}:")
+            #     print(f"  Name: {plugin.name}")
+            #     print(f"  Type: {plugin.type}")
+            # #
+            # # # Number of sensors
+            # print("SENSOR LIST: ")
+            # print("Number of sensors:", model.nsensor)
+            # # Print sensor data
+            # print("Sensor data:", data.sensordata)
+            # # Print sensor names and types
+            # print("Sensor details:")
+            # for i in range(model.nsensor):
+            #     sensor = model.sensor(i)
+            #     print(f"Sensor {i}:")
+            #     print(f"  Name: {sensor.name}")
+            #     print(f"  Type: {sensor.type}")
+            #     print(f"  Data value: {data.sensordata[i]}")
+            #
+            # # # region READ POSITIONAL DATA HERE ###
+            # print([attr for attr in dir(data) if not attr.startswith('_')])
+            # print(data.cam)
+            #
+            #
+            # # # JOINT SECTION
+            # print("JOINT SECTION HERE: ")
+            # # Number of joints
+            # print("Number of joints:", model.njnt)
+            #
+            # # Print joint positions (qpos) - but note the first 7 are the free joint as you mentioned
+            # print("Joint positions:", data.qpos)
+            #
+            # # Print joint velocities
+            # print("Joint velocities:", data.qvel)
+            #
+            # # Print detailed joint information
+            # print("Joint details:")
+            # for i in range(model.njnt):
+            #     joint = model.joint(i)
+            #     print(f"Joint {i}:")
+            #     print(f"  Name: {joint.name}")
+            #     print(f"  Type: {joint.type}")
+            #     print(f"  Position: {data.joint(i)}")
+            #     print(f"  qpos index: {joint.qposadr}")  # index into qpos array
+            #     print(f"  qvel index: {joint.dofadr}")  # index into qvel array
+
+            # # GEOM SECTION:
+            # print("GEOMS SECTION:")
+            # # Number of geoms
+            # print("Number of geoms:", model.ngeom)
+            #
+            # # Print geom positions
+            # print("\nGeom positions:", data.geom_xpos)
+            #
+            # # Print geom orientations (rotation matrices)
+            # print("\nGeom orientations:", data.geom_xmat)
+            #
+            # # Print detailed geom information
+            # print("\nGeom details:")
+            # for i in range(model.ngeom):
+            #     geom = model.geom(i)
+            #     print(f"\nGeom {i}:")
+            #     print(f"  Name: {geom.name}")
+            #     print(
+            #         f"  Type: {geom.type}")  # 0=plane, 1=hfield, 2=sphere, 3=capsule, 4=ellipsoid, 5=cylinder, 6=box, 7=mesh
+            #     print(f"  Position: {data.geom_xpos[i]}")
+            #     print(f"  Orientation: {data.geom_xmat[i]}")
+            #     print(f"  Size: {geom.size}")  # dimensions depend on geom type
+            #     print(f"  Mass: {geom.mass}")
+
+            # # SITE INFORMATION
+            # print("SITE SECTION: ")
+            # # Number of sites
+            # print("Number of sites:", model.nsite)
+            #
+            # # Print site positions
+            # print("Site positions (xpos):", data.site_xpos)
+            #
+            # # Print site orientations (rotation matrices)
+            # print("Site orientations (xmat):", data.site_xmat)
+            #
+            # # Print detailed site information
+            # print("Site details:")
+            # for i in range(model.nsite):
+            #     site = model.site(i)
+            #     print(f"Site {i}:")
+            #     print(f"  Name: {site.name}")
+            #     print(f"  Position: {data.site_xpos[i]}")
+            #     print(f"  Orientation matrix: {data.site_xmat[i]}")
+
+            ## CAMERA SECTION
+            # # Print number of cameras
+            # print("Number of cameras:", model.ncam)
+            #
+            # # Print camera names
+            # for i in range(model.ncam):
+            #     print(f"Camera {i} name:", model.camera(i).name)
+            #
+            # # Get camera positions
+            # camera_positions = data.cam()
+            # print("Camera positions:", camera_positions)
+
             positions = data.qpos  # all positions
             positions = positions[7:]  # don't know what the first 7 positions are, but they're not joints so ignore
             # them
@@ -214,7 +505,6 @@ if __name__ == "__main__":
             # raw_frame = retina.RGB_list_to_ndarray(flat_result,
             #                                        [16, 16])
             # camera_data['vision'] = {"0": retina.update_astype(raw_frame)}
-
 
             # previous_frame_data, rgb, default_capabilities = \
             #     retina.process_visual_stimuli(
