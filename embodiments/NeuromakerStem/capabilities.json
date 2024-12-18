@@ -1,0 +1,56 @@
+{
+	"capabilities": {
+		"input": {
+
+		},
+		"output": {
+			"servo": {
+				"0": {
+					"custom_name": "thumb",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				},
+				"1": {
+					"custom_name": "index",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 1,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				},
+				"2": {
+					"custom_name": "middle",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 2,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				},
+				"3": {
+					"custom_name": "ring",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 3,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				},
+				"4": {
+					"custom_name": "little",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 4,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				}
+			}
+		}
+	}
+}
