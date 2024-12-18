@@ -85,8 +85,8 @@
 					"custom_name": "motor 0",
 					"disabled": false,
 					"feagi_index": 0,
-					"max_power": 0,
-					"rolling_window_len": 0
+					"max_power": 1,
+					"rolling_window_len": 2
 				}
 			},
 			"servo": {
