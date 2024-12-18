@@ -1,0 +1,105 @@
+{
+	"capabilities": {
+		"input": {
+			"accelerometer": {
+				"0": {
+					"custom_name": "accelerometer_0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": [
+						0,
+						0,
+						0
+					],
+					"min_value": [
+						0,
+						0,
+						0
+					]
+				}
+			},
+			"camera": {
+				"0": {
+					"custom_name": "camera_0",
+					"disabled": false,
+					"eccentricity_control": {
+						"X offset percentage": 1,
+						"Y offset percentage": 1
+					},
+					"feagi_index": 0,
+					"index": "00",
+					"mirror": false,
+					"modulation_control": {
+						"X offset percentage": 99,
+						"Y offset percentage": 99
+					},
+					"threshold_default": 50
+				}
+			},
+			"gyro": {
+				"0": {
+					"custom_name": "gyro_0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": [
+						0,
+						0,
+						0
+					],
+					"min_value": [
+						0,
+						0,
+						0
+					]
+				}
+			},
+			"proximity": {
+				"0": {
+					"custom_name": "proximity_0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": 0,
+					"min_value": 0
+				}
+			},
+			"servo_position": {
+				"0": {
+					"custom_name": "servo_0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": 0,
+					"min_value": 0
+				}
+			}
+		},
+		"output": {
+			"misc": {
+				"0": {
+					"custom_name": "misc_0",
+					"disabled": false,
+					"feagi_index": 0
+				}
+			},
+			"motor": {
+				"0": {
+					"custom_name": "motor 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 0,
+					"rolling_window_len": 0
+				}
+			},
+			"servo": {
+				"0": {
+					"custom_name": "servo 0",
+					"default_value": 0,
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 0.1,
+					"max_value": 1,
+					"min_value": 0
+				}
+			}
+		}
+	}
+}
