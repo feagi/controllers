@@ -70,8 +70,24 @@
 					"max_value": 0,
 					"min_value": 0
 				}
-			}
-		},
+			},
+			"pressure": {
+                "0": {
+                    "custom_name": "floor",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": [
+                        30,
+                        30,
+                        30
+                    ],
+                    "min_value": [
+                        -30,
+                        -30,
+                        -30
+                    ]
+                }
+			}},
 		"output": {
 			"misc": {
 				"0": {
