@@ -17,7 +17,7 @@ limitations under the License.
 ==============================================================================
 """
 
-import json
+import numpy as np
 import copy
 import xml.etree.ElementTree as ET
 
@@ -55,7 +55,7 @@ def generate_sensor_list(model, xml_actuators_type):
 
 
 def generate_capabilities_based_of_xml(sensor_information, actuator_information, capabilities):
-    list_to_not_delete_device = ['pressure', 'servo_position'] # Those are automatically exist in mujoco
+    list_to_not_delete_device = ['pressure', 'servo_position']  # Those are automatically exist in mujoco
     temp_copy_property_input = {}
     increment = 0
     # Reading sensors
@@ -178,7 +178,6 @@ def generate_pressure_list(model, mujoco, capabilities):
     index = 0
     if 'pressure' in capabilities['input']:
         temp_property = copy.deepcopy(capabilities['input']['pressure'])
-        print("TEST: ", temp_property)
         for pair, info in force_list.items():
             if str(index) not in temp_property:
                 temp_property[str(index)] = {}
@@ -194,6 +193,36 @@ def generate_pressure_list(model, mujoco, capabilities):
         return capabilities
     else:
         return {}
+
+
+def generate_servo_position_list(model, capabilities):
+    position_list = get_all_position_data(model)
+    temp_property = copy.deepcopy(capabilities['input']['servo_position'])
+    for device_index in position_list:
+        index = str(device_index)
+        for name in position_list[device_index]:
+            if index not in temp_property:
+                temp_property[index] = {}
+                temp_property[index] = copy.deepcopy(capabilities['input']['servo_position']['0'])
+            temp_property[index].update({
+                'custom_name': name,
+                'feagi_index': device_index,
+                'max_value': position_list[device_index][name][1],
+                'min_value': position_list[device_index][name][0]
+            })
+    del capabilities['input']['servo_position']['0']
+    capabilities['input']['servo_position'] = copy.deepcopy(temp_property)
+    return capabilities
+
+
+def get_all_position_data(model):
+    position_list = {}
+    for i in range(model.nu):
+        actuator_name = model.actuator(i).name
+        position_list[i] = {
+            actuator_name: model.actuator_ctrlrange[i]
+        }
+    return position_list
 
 
 def get_all_geom_pairs(model, mujoco):
@@ -220,3 +249,87 @@ def get_all_geom_pairs(model, mujoco):
                 'active': False
             }
     return geom_pairs
+
+
+def read_force(data, force_list, mujoco, model):
+    for i in range(data.ncon):
+        index = str(i)
+        force = np.zeros(6)
+        mujoco.mj_contactForce(model, data, i, force)
+        obtained_data_from_force = force[:3]
+        force_list[index] = list((float(obtained_data_from_force[0]),
+                                  float(obtained_data_from_force[1]),
+                                  float(obtained_data_from_force[2])))
+    return force_list
+
+
+def read_all_sensors_to_identify_type(model):
+    SENSOR_SLICE_SIZES = {
+    }
+    number_to_sensor_name = {26: 'gyro', 37: 'proximity', 7: 'camera'}
+    # number = from mujoco with a specific sensor type, i use above to convert to humana readable for capabilities
+
+    ranges = []
+    current_type = None
+    start_index = 0
+
+    for i in range(model.nsensor):
+        sensor = model.sensor(i)
+        if current_type is None or current_type != sensor.type[0]:
+            if current_type is not None:
+                ranges.append([start_index, i])
+                # Update the dictionary for the previous type
+                SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i]
+            current_type = sensor.type[0]
+            start_index = i
+        if i == model.nsensor - 1:
+            ranges.append([start_index, i + 1])
+            # Update the dictionary for the last type
+            SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i + 1]
+    return SENSOR_SLICE_SIZES
+
+
+def check_capabilities_with_this_sensor(capabilities, sensor_name):
+    return (sensor_name in capabilities['input'])
+
+
+def quaternion_to_euler(w, x, y, z):
+    """Convert quaternion to euler angles (in degrees)"""
+    # roll (x-axis rotation)
+    sinr_cosp = 2 * (w * x + y * z)
+    cosr_cosp = 1 - 2 * (x * x + y * y)
+    roll = np.arctan2(sinr_cosp, cosr_cosp)
+
+    # pitch (y-axis rotation)
+    sinp = 2 * (w * y - z * x)
+    if abs(sinp) >= 1:
+        pitch = np.copysign(np.pi / 2, sinp)
+    else:
+        pitch = np.arcsin(sinp)
+
+    # yaw (z-axis rotation)
+    siny_cosp = 2 * (w * z + x * y)
+    cosy_cosp = 1 - 2 * (y * y + z * z)
+    yaw = np.arctan2(siny_cosp, cosy_cosp)
+
+    return np.degrees([roll, pitch, yaw])
+
+
+def read_gyro(model, data, capabilities):
+    gyro_data = {}
+    for index in capabilities['input']['gyro']:
+        name = capabilities['input']['gyro'][index]['custom_name']
+        quat_id = model.sensor(name).id
+        quat = data.sensordata[quat_id:quat_id + 4]
+        euler_angles = quaternion_to_euler(quat[0], quat[1], quat[2], quat[3])
+        gyro_data[index] = np.array([euler_angles[0], euler_angles[1], euler_angles[2]])
+    return gyro_data
+
+
+def read_proximity(model, data, capabilities):
+    proximity_data = {}
+    for index in capabilities['input']['proximity']:
+        name = capabilities['input']['proximity'][index]['custom_name']
+        sensor_id = model.sensor(name).id  # Get the sensor's ID
+        proximity_data[int(index)] = data.sensordata[sensor_id]
+    return proximity_data

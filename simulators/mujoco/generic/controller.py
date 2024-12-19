@@ -62,42 +62,6 @@ def action(obtained_data):
             data.ctrl[motor_id] = data_power
 
 
-
-
-
-def quaternion_to_euler(w, x, y, z):
-    """Convert quaternion to euler angles (in degrees)"""
-    # roll (x-axis rotation)
-    sinr_cosp = 2 * (w * x + y * z)
-    cosr_cosp = 1 - 2 * (x * x + y * y)
-    roll = np.arctan2(sinr_cosp, cosr_cosp)
-
-    # pitch (y-axis rotation)
-    sinp = 2 * (w * y - z * x)
-    if abs(sinp) >= 1:
-        pitch = np.copysign(np.pi / 2, sinp)
-    else:
-        pitch = np.arcsin(sinp)
-
-    # yaw (z-axis rotation)
-    siny_cosp = 2 * (w * z + x * y)
-    cosy_cosp = 1 - 2 * (y * y + z * z)
-    yaw = np.arctan2(siny_cosp, cosy_cosp)
-
-    return np.degrees([roll, pitch, yaw])
-
-
-def get_head_orientation():
-    # Get quaternion data from head sensor
-    quat_id = model.sensor('head_gyro').id
-    quat = data.sensordata[quat_id:quat_id + 4]  # w, x, y, z
-
-    # Convert to euler angles
-    euler_angles = quaternion_to_euler(quat[0], quat[1], quat[2], quat[3])
-
-    return [euler_angles[0], euler_angles[1], euler_angles[2]]
-
-
 def check_the_flag():
     parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
     parser.add_argument(
@@ -131,7 +95,6 @@ def check_the_flag():
     return model, xml_info
 
 
-
 if __name__ == "__main__":
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
@@ -160,12 +123,11 @@ if __name__ == "__main__":
 
     capabilities = mj_lib.generate_pressure_list(model, mujoco, capabilities)
 
+    capabilities = mj_lib.generate_servo_position_list(model, capabilities)
+
     capabilities = mj_lib.generate_capabilities_based_of_xml(sensor_information,
                                                              actuator_information,
                                                              capabilities)
-
-
-
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
@@ -179,9 +141,10 @@ if __name__ == "__main__":
 
     # Create a dict to store data
     force_list = {}
-    for x in range(20):
+    for x in range(len(capabilities['input']['pressure'])):
         force_list[str(x)] = [0, 0, 0]
 
+    sensor_slice_size = mj_lib.read_all_sensors_to_identify_type(model)
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_resetDataKeyframe(model, data, 4)
@@ -198,8 +161,9 @@ if __name__ == "__main__":
             if message_from_feagi:
                 # Translate from feagi data to human readable data
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
-                # pns.check_genome_status_no_vision(message_from_feagi)
                 action(obtained_signals)
+
+            gyro_data = mj_lib.read_gyro(model, data, capabilities)
 
             # ### actuator section
             # # Number of actuators
@@ -256,17 +220,7 @@ if __name__ == "__main__":
             # #
             # # # Number of sensors
             # print("SENSOR LIST: ")
-            # print("Number of sensors:", model.nsensor)
-            # # Print sensor data
-            # print("Sensor data:", data.sensordata)
-            # # Print sensor names and types
-            # print("Sensor details:")
-            # for i in range(model.nsensor):
-            #     sensor = model.sensor(i)
-            #     print(f"Sensor {i}:")
-            #     print(f"  Name: {sensor.name}")
-            #     print(f"  Type: {sensor.type}")
-            #     print(f"  Data value: {data.sensordata[i]}")
+
             #
             # # # region READ POSITIONAL DATA HERE ###
             # print([attr for attr in dir(data) if not attr.startswith('_')])
@@ -277,7 +231,6 @@ if __name__ == "__main__":
             # print("JOINT SECTION HERE: ")
             # # Number of joints
             # print("Number of joints:", model.njnt)
-            mj_lib.read_position_from_all_joint(model, data)
             # # Print joint positions (qpos) - but note the first 7 are the free joint as you mentioned
             # print("Joint positions:", data.qpos)
             #
@@ -364,7 +317,6 @@ if __name__ == "__main__":
             #                                float(obtained_data_from_force[2])))
             # endregion
 
-
             # FORCE LIST
             # for i in range(data.ncon):
             #     force = np.zeros(6)
@@ -397,12 +349,17 @@ if __name__ == "__main__":
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
 
+            # Grab data section
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'pressure'):
+                force_list = mj_lib.read_force(data, force_list, mujoco, model)
+
             # Example to send data to FEAGI. This is basically reading the joint.
 
-            # servo_data = {i: pos for i, pos in enumerate(positions[:20]) if
-            #               pns.full_template_information_corticals}
-            # sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
-            #                pns.full_template_information_corticals}
+            servo_data = {i: pos for i, pos in enumerate(positions[:len(capabilities['input']['servo_position'])]) if
+                          pns.full_template_information_corticals}
+            # print(servo_data)
+            sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
+                           pns.full_template_information_corticals}
             # lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
             #                pns.full_template_information_corticals}
             # lidar_data = data.sensordata[7:] * 100
@@ -429,29 +386,36 @@ if __name__ == "__main__":
             # gyro_data = {"0": np.array(gyro)}
 
             # Creating message to send to FEAGI
-            # message_to_feagi = sensors.create_data_for_feagi('gyro',
-            #                                                  capabilities,
-            #                                                  message_to_feagi,
-            #                                                  current_data=gyro_data,
-            #                                                  symmetric=True)
-            # message_to_feagi = sensors.create_data_for_feagi('servo_position',
-            #                                                  capabilities,
-            #                                                  message_to_feagi,
-            #                                                  current_data=servo_data,
-            #                                                  symmetric=True)
-            #
-            # message_to_feagi = sensors.create_data_for_feagi('proximity',
-            #                                                  capabilities,
-            #                                                  message_to_feagi,
-            #                                                  current_data=sensor_data,
-            #                                                  symmetric=True, measure_enable=True)
-            # message_to_feagi = sensors.create_data_for_feagi('pressure',
-            #                                                  capabilities,
-            #                                                  message_to_feagi,
-            #                                                  current_data=force_list,
-            #                                                  symmetric=True,
-            #                                                  measure_enable=False)  # measure enable set to false so
-            # that way, it doesn't change 50/-50 in capabilities automatically
+            # print(data.sensordata[3:6])
+            # print("SLICE LIST: ", sensor_slice_size) # I implemented but then end up doesnt even need it
+            # print("new data: ", mj_lib.read_proximity(model, data, capabilities))
+            print("SENSOR DATA: ", sensor_data)
+            # print("GYRO DATA: ", gyro_data)
+            test = mj_lib.read_proximity(model, data, capabilities)
+            message_to_feagi = sensors.create_data_for_feagi('gyro',
+                                                             capabilities,
+                                                             message_to_feagi,
+                                                             current_data=gyro_data,
+                                                             symmetric=True)
+            message_to_feagi = sensors.create_data_for_feagi('servo_position',
+                                                             capabilities,
+                                                             message_to_feagi,
+                                                             current_data=servo_data,
+                                                             symmetric=True)
+
+            message_to_feagi = sensors.create_data_for_feagi('proximity',
+                                                             capabilities,
+                                                             message_to_feagi,
+                                                             current_data=sensor_data,
+                                                             symmetric=True, measure_enable=True)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'pressure'):
+                message_to_feagi = sensors.create_data_for_feagi('pressure',
+                                                                 capabilities,
+                                                                 message_to_feagi,
+                                                                 current_data=force_list,
+                                                                 symmetric=True,
+                                                                 measure_enable=False)  # measure enable set to false so
+                # that way, it doesn't change 50/-50 in capabilities automatically
 
             # Sends to feagi data
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
