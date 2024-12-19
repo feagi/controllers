@@ -163,7 +163,8 @@ if __name__ == "__main__":
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
                 action(obtained_signals)
 
-            gyro_data = mj_lib.read_gyro(model, data, capabilities)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'gyro'):
+                gyro_data = mj_lib.read_gyro(model, data, capabilities)
 
             # ### actuator section
             # # Number of actuators
@@ -391,23 +392,26 @@ if __name__ == "__main__":
             # print("new data: ", mj_lib.read_proximity(model, data, capabilities))
             # print("SENSOR DATA: ", sensor_data)
             # print("GYRO DATA: ", gyro_data)
-            test = mj_lib.read_proximity(model, data, capabilities)
-            message_to_feagi = sensors.create_data_for_feagi('gyro',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=gyro_data,
-                                                             symmetric=True)
-            message_to_feagi = sensors.create_data_for_feagi('servo_position',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=servo_data,
-                                                             symmetric=True)
+            # test = mj_lib.read_proximity(model, data, capabilities)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'gyro'):
+                message_to_feagi = sensors.create_data_for_feagi('gyro',
+                                                                 capabilities,
+                                                                 message_to_feagi,
+                                                                 current_data=gyro_data,
+                                                                 symmetric=True)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'servo_position'):
+                message_to_feagi = sensors.create_data_for_feagi('servo_position',
+                                                                 capabilities,
+                                                                 message_to_feagi,
+                                                                 current_data=servo_data,
+                                                                 symmetric=True)
 
-            message_to_feagi = sensors.create_data_for_feagi('proximity',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=sensor_data,
-                                                             symmetric=True, measure_enable=True)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'proximity'):
+                message_to_feagi = sensors.create_data_for_feagi('proximity',
+                                                                 capabilities,
+                                                                 message_to_feagi,
+                                                                 current_data=sensor_data,
+                                                                 symmetric=True, measure_enable=True)
             if mj_lib.check_capabilities_with_this_sensor(capabilities, 'pressure'):
                 message_to_feagi = sensors.create_data_for_feagi('pressure',
                                                                  capabilities,
