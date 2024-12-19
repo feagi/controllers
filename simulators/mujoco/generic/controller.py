@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     sensor_information = mj_lib.generate_sensor_list(model, xml_actuators_type)
 
-    mj_lib.generate_pressure_list(model, mujoco, capabilities)
+    capabilities = mj_lib.generate_pressure_list(model, mujoco, capabilities)
 
     capabilities = mj_lib.generate_capabilities_based_of_xml(sensor_information,
                                                              actuator_information,
