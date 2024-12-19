@@ -389,7 +389,7 @@ if __name__ == "__main__":
             # print(data.sensordata[3:6])
             # print("SLICE LIST: ", sensor_slice_size) # I implemented but then end up doesnt even need it
             # print("new data: ", mj_lib.read_proximity(model, data, capabilities))
-            print("SENSOR DATA: ", sensor_data)
+            # print("SENSOR DATA: ", sensor_data)
             # print("GYRO DATA: ", gyro_data)
             test = mj_lib.read_proximity(model, data, capabilities)
             message_to_feagi = sensors.create_data_for_feagi('gyro',
