@@ -158,6 +158,8 @@ if __name__ == "__main__":
 
     sensor_information = mj_lib.generate_sensor_list(model, xml_actuators_type)
 
+    mj_lib.generate_pressure_list(model, mujoco, capabilities)
+
     capabilities = mj_lib.generate_capabilities_based_of_xml(sensor_information,
                                                              actuator_information,
                                                              capabilities)
@@ -179,6 +181,7 @@ if __name__ == "__main__":
     force_list = {}
     for x in range(20):
         force_list[str(x)] = [0, 0, 0]
+
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_resetDataKeyframe(model, data, 4)
@@ -352,15 +355,39 @@ if __name__ == "__main__":
             positions = positions[7:]  # don't know what the first 7 positions are, but they're not joints so ignore
             # them
 
-            for i in range(data.ncon):
-                force = np.zeros(6)  # Use numpy to allocate blank array
-
-                # Retrieve the contact force data
-                mujoco.mj_contactForce(model, data, i, force)
-                obtained_data_from_force = force[:3]
-                force_list[str(i)] = list((float(obtained_data_from_force[0]), float(obtained_data_from_force[1]),
-                                           float(obtained_data_from_force[2])))
+            # for i in range(data.ncon):
+            #     force = np.zeros(6)  # Use numpy to allocate blank array
+            #     # Retrieve the contact force data
+            #     mujoco.mj_contactForce(model, data, i, force)
+            #     obtained_data_from_force = force[:3]
+            #     force_list[str(i)] = list((float(obtained_data_from_force[0]), float(obtained_data_from_force[1]),
+            #                                float(obtained_data_from_force[2])))
             # endregion
+
+
+            # FORCE LIST
+            # for i in range(data.ncon):
+            #     force = np.zeros(6)
+            #     mujoco.mj_contactForce(model, data, i, force)
+            #     obtained_data_from_force = force[:3]
+            #
+            #     # Get the contact information
+            #     contact = data.contact[i]
+            #
+            #     # Get the names of the geoms involved
+            #     geom1_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, contact.geom1)
+            #     geom2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, contact.geom2)
+            #
+            #     # Store both force and contact information
+            #     force_list[f"{geom1_name}_{geom2_name}"] = {
+            #         'force': list((float(obtained_data_from_force[0]),
+            #                        float(obtained_data_from_force[1]),
+            #                        float(obtained_data_from_force[2]))),
+            #         'pos': list(contact.pos),
+            #         'geom1': geom1_name,
+            #         'geom2': geom2_name
+            #     }
+            #     print(force_list)
 
             # Pick up changes to the physics state, apply perturbations, update options from GUI.
             viewer.sync()
