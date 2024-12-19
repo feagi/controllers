@@ -17,6 +17,7 @@ limitations under the License.
 ==============================================================================
 """
 
+import json
 import copy
 import xml.etree.ElementTree as ET
 
@@ -179,12 +180,18 @@ def generate_pressure_list(model, mujoco, capabilities):
         temp_property = copy.deepcopy(capabilities['input']['pressure'])
         print("TEST: ", temp_property)
         for pair, info in force_list.items():
-            temp_property[str(index)] = {}
-            temp_property[str(index)]['custom_name'] = pair
-            temp_property[str(index)]['feagi_index'] = index
+            if str(index) not in temp_property:
+                temp_property[str(index)] = {}
+                temp_property[str(index)] = copy.deepcopy(capabilities['input']['pressure']['0'])
+
+            temp_property[str(index)].update({
+                'custom_name': pair,
+                'feagi_index': index
+            })
             index += 1
         del capabilities['input']['pressure']['0']
         capabilities['input']['pressure'] = copy.deepcopy(temp_property)
+        return capabilities
     else:
         return {}
 
