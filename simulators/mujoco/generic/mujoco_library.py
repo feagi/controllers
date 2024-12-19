@@ -54,7 +54,7 @@ def generate_sensor_list(model, xml_actuators_type):
 
 
 def generate_capabilities_based_of_xml(sensor_information, actuator_information, capabilities):
-    list_to_not_delete_device = []
+    list_to_not_delete_device = ['pressure', 'servo_position'] # Those are automatically exist in mujoco
     temp_copy_property_input = {}
     increment = 0
     # Reading sensors
@@ -89,7 +89,6 @@ def generate_capabilities_based_of_xml(sensor_information, actuator_information,
             if increment == 0:
                 temp_copy_property_output = copy.deepcopy(capabilities['output'][device_name][device_id])
             if device_name == 'servo':
-                print("worked")
                 temp_copy_property_output['max_value'] = range_control[1]
                 temp_copy_property_output['min_value'] = range_control[0]
             elif device_name == 'motor':
@@ -163,6 +162,7 @@ def get_sensors(files, sensors):
                 sensors['input'][name] = {'type': sensor.tag}
     return sensors
 
+
 def read_position_from_all_joint(model, data):
     position_list = {}
     for i in range(model.njnt):
@@ -170,4 +170,46 @@ def read_position_from_all_joint(model, data):
         name = joint.name
         if name != '' and name != 'root':
             position_list[name] = data.joint(i).qpos
-    print(position_list)
+
+
+def generate_pressure_list(model, mujoco, capabilities):
+    force_list = get_all_geom_pairs(model, mujoco)
+    index = 0
+    if 'pressure' in capabilities['input']:
+        temp_property = copy.deepcopy(capabilities['input']['pressure'])
+        print("TEST: ", temp_property)
+        for pair, info in force_list.items():
+            temp_property[str(index)] = {}
+            temp_property[str(index)]['custom_name'] = pair
+            temp_property[str(index)]['feagi_index'] = index
+            index += 1
+        del capabilities['input']['pressure']['0']
+        capabilities['input']['pressure'] = copy.deepcopy(temp_property)
+    else:
+        return {}
+
+
+def get_all_geom_pairs(model, mujoco):
+    geom_pairs = {}
+
+    # Get total number of geoms
+    ngeom = model.ngeom
+
+    # Get all geom names
+    for i in range(ngeom):
+        for j in range(i + 1, ngeom):  # Only need one direction of pairs
+            geom1_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i)
+            geom2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, j)
+
+            # Create key for the pair
+            pair_key = f"{geom1_name}_{geom2_name}"
+
+            # Initialize with zero force and None position
+            geom_pairs[pair_key] = {
+                'force': [0.0, 0.0, 0.0],
+                'pos': [0.0, 0.0, 0.0],
+                'geom1': geom1_name,
+                'geom2': geom2_name,
+                'active': False
+            }
+    return geom_pairs
