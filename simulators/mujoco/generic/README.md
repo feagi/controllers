@@ -1,5 +1,11 @@
 # How to connect FEAGI with Mujoco
 
+## See the requirement below:
+1) Git: [https://gitforwindows.org/]  
+2) Python 3.9 or higher: [https://www.python.org/downloads/]  
+3) Docker (if you want to use FEAGI on Docker): [https://docs.docker.com/get-started/introduction/get-docker-desktop/]  
+
+   
 ## Start Mujoco project:
 1.	Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
 2. `cd controllers/simulators/mujoco`
