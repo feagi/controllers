@@ -8,6 +8,8 @@
 5. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
 6. `python3 controller.py` (Windows: `python controller.py`) (If you are using FEAGI in the docker, run this command: `python3 controller.py --port 30000`
 
+Need to load it onto your own mujoco file? Visit the "Extra Flags" section bottom.
+
 ## Load Docker:
 
 	1.	git clone git@github.com:feagi/feagi.git
@@ -43,4 +45,6 @@ optional arguments:
   -port PORT, --port PORT
                         Change the ZMQ port. Use 30000 for Docker and 3000 for localhost.
 
+  --model_xml_path, --MODEL_XML_PATH
+                        Path to the XML file (default: './humanoid.xml')
 ```
