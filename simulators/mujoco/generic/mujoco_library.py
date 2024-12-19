@@ -267,7 +267,6 @@ def read_all_sensors_to_identify_type(model):
     SENSOR_SLICE_SIZES = {
     }
     number_to_sensor_name = {26: 'gyro', 37: 'proximity', 7: 'camera'}
-    # number = from mujoco with a specific sensor type, i use above to convert to humana readable for capabilities
 
     ranges = []
     current_type = None
@@ -285,7 +284,9 @@ def read_all_sensors_to_identify_type(model):
         if i == model.nsensor - 1:
             ranges.append([start_index, i + 1])
             # Update the dictionary for the last type
-            SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i + 1]
+            if current_type in number_to_sensor_name:
+                SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i + 1]
+
     return SENSOR_SLICE_SIZES
 
 
@@ -330,6 +331,7 @@ def read_proximity(model, data, capabilities):
     proximity_data = {}
     for index in capabilities['input']['proximity']:
         name = capabilities['input']['proximity'][index]['custom_name']
-        sensor_id = model.sensor(name).id  # Get the sensor's ID
-        proximity_data[int(index)] = data.sensordata[sensor_id]
+        # quat_id = model.sensor(name).id
+        # quat = data.sensor(name).data[0]
+        proximity_data[int(index)] = data.sensor(name).data[0]
     return proximity_data
