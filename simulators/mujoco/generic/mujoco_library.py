@@ -185,7 +185,7 @@ def generate_pressure_list(model, mujoco, capabilities):
 
             temp_property[str(index)].update({
                 'custom_name': pair,
-                'feagi_index': index
+                'feagi_index': index * 3
             })
             index += 1
         del capabilities['input']['pressure']['0']
@@ -291,7 +291,7 @@ def read_all_sensors_to_identify_type(model):
 
 
 def check_capabilities_with_this_sensor(capabilities, sensor_name):
-    return (sensor_name in capabilities['input'])
+    return sensor_name in capabilities['input']
 
 
 def quaternion_to_euler(w, x, y, z):
