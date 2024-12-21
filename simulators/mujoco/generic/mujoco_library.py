@@ -190,6 +190,7 @@ def generate_pressure_list(model, mujoco, capabilities):
             index += 1
         del capabilities['input']['pressure']['0']
         capabilities['input']['pressure'] = copy.deepcopy(temp_property)
+
         return capabilities
     else:
         return {}
@@ -266,27 +267,29 @@ def read_force(data, force_list, mujoco, model):
 def read_all_sensors_to_identify_type(model):
     SENSOR_SLICE_SIZES = {
     }
-    number_to_sensor_name = {26: 'gyro', 37: 'proximity', 7: 'camera'}
-
-    ranges = []
-    current_type = None
+    number_to_sensor_name = {26: {'name': 'gyro', "channels": 3}, 37: {'name': 'proximity', 'channels': 1}, 7: {'name': 'camera', 'channels': 1}}
     start_index = 0
+    current_plugin = 0
 
     for i in range(model.nsensor):
-        sensor = model.sensor(i)
-        if current_type is None or current_type != sensor.type[0]:
-            if current_type is not None:
-                ranges.append([start_index, i])
-                # Update the dictionary for the previous type
-                SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i]
-            current_type = sensor.type[0]
-            start_index = i
-        if i == model.nsensor - 1:
-            ranges.append([start_index, i + 1])
-            # Update the dictionary for the last type
-            if current_type in number_to_sensor_name:
-                SENSOR_SLICE_SIZES[number_to_sensor_name[current_type]] = [start_index, i + 1]
+        sensor = model.sensor(i) # obtain data
+        id_type_plugin = sensor.type[0] # obtain raw id of sensor
+        if id_type_plugin in [26, 37, 7]:
+            if id_type_plugin != 7:
+                name_sensor = number_to_sensor_name[id_type_plugin]['name'] # convert to sensor name from id
+                device_name = sensor.name
+                current_plugin = id_type_plugin
 
+                if i not in SENSOR_SLICE_SIZES: # initalize the key
+                    SENSOR_SLICE_SIZES[i] = {'name': device_name, 'frame': [start_index, (start_index + number_to_sensor_name[id_type_plugin]['channels'])], 'type_plugin': name_sensor}
+                start_index = start_index + number_to_sensor_name[id_type_plugin]['channels']
+            elif id_type_plugin == 7:
+                name_sensor = number_to_sensor_name[id_type_plugin]['name'] # convert to sensor name from id
+                device_name = sensor.name[:-4]
+                if device_name not in SENSOR_SLICE_SIZES: # initalize the key
+                    SENSOR_SLICE_SIZES[device_name] = {'name': device_name, 'device_id': i, 'frame': [start_index, (start_index + number_to_sensor_name[id_type_plugin]['channels'])], 'type_plugin': name_sensor}
+                SENSOR_SLICE_SIZES[device_name]['frame'][1] = start_index + number_to_sensor_name[id_type_plugin]['channels']
+                start_index = start_index + number_to_sensor_name[id_type_plugin]['channels']
     return SENSOR_SLICE_SIZES
 
 
