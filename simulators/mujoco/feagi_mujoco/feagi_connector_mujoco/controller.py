@@ -96,7 +96,7 @@ def check_the_flag():
     return model, xml_info
 
 
-if __name__ == "__main__":
+def main():
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
@@ -232,3 +232,7 @@ if __name__ == "__main__":
             # Sends to feagi data
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
             message_to_feagi.clear()
+
+
+
+# if __name__ == "__main__":
