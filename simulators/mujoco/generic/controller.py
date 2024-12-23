@@ -24,6 +24,7 @@ import time
 import argparse
 import threading
 import numpy as np
+import copy
 import mujoco.viewer
 from feagi_connector import retina
 from feagi_connector import sensors
@@ -164,20 +165,7 @@ if __name__ == "__main__":
                 action(obtained_signals)
 
             if mj_lib.check_capabilities_with_this_sensor(capabilities, 'gyro'):
-                gyro_data = mj_lib.read_gyro(model, data, capabilities)
-
-
-            ## CAMERA SECTION
-            # # Print number of cameras
-            # print("Number of cameras:", model.ncam)
-            #
-            # # Print camera names
-            # for i in range(model.ncam):
-            #     print(f"Camera {i} name:", model.camera(i).name)
-            #
-            # # Get camera positions
-            # camera_positions = data.cam()
-            # print("Camera positions:", camera_positions)
+                gyro_data = mj_lib.read_gyro(data, capabilities,  sensor_slice_size)
 
             positions = data.qpos  # all positions
             positions = positions[7:]  # don't know what the first 7 positions are, but they're not joints so ignore
@@ -198,41 +186,21 @@ if __name__ == "__main__":
 
             servo_data = {i: pos for i, pos in enumerate(positions[:len(capabilities['input']['servo_position'])]) if
                           pns.full_template_information_corticals}
-            # print(servo_data)
-            sensor_data = {i: pos for i, pos in enumerate(data.sensordata[3:6]) if
-                           pns.full_template_information_corticals}
-            # lidar_data = {i: pos for i, pos in enumerate(data.sensordata[7:]) if
-            #                pns.full_template_information_corticals}
-            # lidar_data = data.sensordata[7:] * 100
-            # lidar_2d = lidar_data.reshape(16, 16)
-            #
-            # # Create 16x16x3 array and flatten it
-            # result = np.zeros((16, 16, 3))  # 3 for x,y,z
-            # result[:, :, 0] = lidar_2d  # Set first channel to LIDAR data
-            # flat_result = result.flatten()  # Makes it 1D array of length 768 (16*16*3)
-            # raw_frame = retina.RGB_list_to_ndarray(flat_result,
-            #                                        [16, 16])
-            # camera_data['vision'] = {"0": retina.update_astype(raw_frame)}
 
-            # previous_frame_data, rgb, default_capabilities = \
-            #     retina.process_visual_stimuli(
-            #         camera_data['vision'],
-            #         default_capabilities,
-            #         previous_frame_data,
-            #         rgb, capabilities)
-            # message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
-            #
-            # # Get gyro data
-            # gyro = get_head_orientation()
-            # gyro_data = {"0": np.array(gyro)}
 
-            # Creating message to send to FEAGI
-            # print(data.sensordata[3:6])
-            # print("SLICE LIST: ", sensor_slice_size) # I implemented but then end up doesnt even need it
-            # print("new data: ", mj_lib.read_proximity(model, data, capabilities))
-            # print("SENSOR DATA: ", sensor_data)
-            # print("GYRO DATA: ", gyro_data)
-            # test = mj_lib.read_proximity(model, data, capabilities)
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'camera'):
+                camera_data['vision'] = copy.deepcopy(mj_lib.read_lidar(data, sensor_slice_size))
+
+                previous_frame_data, rgb, default_capabilities = \
+                    retina.process_visual_stimuli(
+                        camera_data['vision'],
+                        default_capabilities,
+                        previous_frame_data,
+                        rgb, capabilities)
+                message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
+
+            if mj_lib.check_capabilities_with_this_sensor(capabilities, 'proximity'):
+                sensor_data = mj_lib.read_proximity(data, sensor_slice_size)
             if mj_lib.check_capabilities_with_this_sensor(capabilities, 'gyro'):
                 message_to_feagi = sensors.create_data_for_feagi('gyro',
                                                                  capabilities,
