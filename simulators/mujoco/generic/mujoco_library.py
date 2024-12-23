@@ -19,6 +19,7 @@ limitations under the License.
 
 import numpy as np
 import copy
+from feagi_connector import retina
 import xml.etree.ElementTree as ET
 
 TRANSMISSION_TYPES = {
@@ -265,32 +266,46 @@ def read_force(data, force_list, mujoco, model):
 
 
 def read_all_sensors_to_identify_type(model):
-    SENSOR_SLICE_SIZES = {
-    }
-    number_to_sensor_name = {26: {'name': 'gyro', "channels": 3}, 37: {'name': 'proximity', 'channels': 1}, 7: {'name': 'camera', 'channels': 1}}
+    sensor_slice_sizes = {}
+    number_to_sensor_name = {26: {'name': 'gyro', "channels": 3}, 37: {'name': 'proximity', 'channels': 1},
+                             7: {'name': 'camera', 'channels': 1}}
     start_index = 0
-    current_plugin = 0
+    device_ids = {}  # Dictionary to keep track of device IDs per sensor type
 
     for i in range(model.nsensor):
-        sensor = model.sensor(i) # obtain data
-        id_type_plugin = sensor.type[0] # obtain raw id of sensor
-        if id_type_plugin in [26, 37, 7]:
-            if id_type_plugin != 7:
-                name_sensor = number_to_sensor_name[id_type_plugin]['name'] # convert to sensor name from id
-                device_name = sensor.name
-                current_plugin = id_type_plugin
+        sensor = model.sensor(i)
+        id_type_plugin = sensor.type[0]
 
-                if i not in SENSOR_SLICE_SIZES: # initalize the key
-                    SENSOR_SLICE_SIZES[i] = {'name': device_name, 'frame': [start_index, (start_index + number_to_sensor_name[id_type_plugin]['channels'])], 'type_plugin': name_sensor}
-                start_index = start_index + number_to_sensor_name[id_type_plugin]['channels']
-            elif id_type_plugin == 7:
-                name_sensor = number_to_sensor_name[id_type_plugin]['name'] # convert to sensor name from id
+        if id_type_plugin in [26, 37, 7]:
+            name_sensor = number_to_sensor_name[id_type_plugin]['name']
+
+            # Handle camera name differently
+            if id_type_plugin == 7:
                 device_name = sensor.name[:-4]
-                if device_name not in SENSOR_SLICE_SIZES: # initalize the key
-                    SENSOR_SLICE_SIZES[device_name] = {'name': device_name, 'device_id': i, 'frame': [start_index, (start_index + number_to_sensor_name[id_type_plugin]['channels'])], 'type_plugin': name_sensor}
-                SENSOR_SLICE_SIZES[device_name]['frame'][1] = start_index + number_to_sensor_name[id_type_plugin]['channels']
-                start_index = start_index + number_to_sensor_name[id_type_plugin]['channels']
-    return SENSOR_SLICE_SIZES
+            else:
+                device_name = sensor.name
+
+            # Initialize device_ids for this sensor type if not exists
+            if name_sensor not in device_ids:
+                device_ids[name_sensor] = 0
+
+            # If this device hasn't been processed yet
+            if device_name not in sensor_slice_sizes:
+                sensor_slice_sizes[device_name] = {
+                    'name': device_name,
+                    'device_id': device_ids[name_sensor],
+                    'frame': [start_index, (start_index + number_to_sensor_name[id_type_plugin]['channels'])],
+                    'type_plugin': name_sensor
+                }
+                device_ids[name_sensor] += 1  # Increment the device ID for this sensor type
+
+            # Update frame end index for cameras (and potentially other cumulative sensors)
+            if id_type_plugin == 7:
+                sensor_slice_sizes[device_name]['frame'][1] = start_index + number_to_sensor_name[id_type_plugin][
+                    'channels']
+
+            start_index = start_index + number_to_sensor_name[id_type_plugin]['channels']
+    return sensor_slice_sizes
 
 
 def check_capabilities_with_this_sensor(capabilities, sensor_name):
@@ -319,22 +334,38 @@ def quaternion_to_euler(w, x, y, z):
     return np.degrees([roll, pitch, yaw])
 
 
-def read_gyro(model, data, capabilities):
+def read_gyro(data, capabilities, sensor_information):
     gyro_data = {}
-    for index in capabilities['input']['gyro']:
-        name = capabilities['input']['gyro'][index]['custom_name']
-        quat_id = model.sensor(name).id
-        quat = data.sensordata[quat_id:quat_id + 4]
-        euler_angles = quaternion_to_euler(quat[0], quat[1], quat[2], quat[3])
-        gyro_data[index] = np.array([euler_angles[0], euler_angles[1], euler_angles[2]])
+    for device_id in sensor_information:
+        if sensor_information[device_id]['type_plugin'] == 'gyro':
+            for index in capabilities['input']['gyro']:
+                quat_id = sensor_information[device_id]['frame'][0]
+                quat = data.sensordata[quat_id:quat_id + 4]
+                euler_angles = quaternion_to_euler(quat[0], quat[1], quat[2], quat[3])
+                gyro_data[index] = np.array([euler_angles[0], euler_angles[1], euler_angles[2]])
     return gyro_data
 
 
-def read_proximity(model, data, capabilities):
+def read_proximity(data, sensor_information):
     proximity_data = {}
-    for index in capabilities['input']['proximity']:
-        name = capabilities['input']['proximity'][index]['custom_name']
-        # quat_id = model.sensor(name).id
-        # quat = data.sensor(name).data[0]
-        proximity_data[int(index)] = data.sensor(name).data[0]
+    for device_id in sensor_information:
+        if sensor_information[device_id]['type_plugin'] == 'proximity':
+            index = sensor_information[device_id]['device_id']
+            proximity_data[int(index)] = data.sensordata[sensor_information[device_id]['frame'][0]]
     return proximity_data
+
+def read_lidar(data, sensor_information):
+    camera_data = {}
+    for device_id in sensor_information:
+        if sensor_information[device_id]['type_plugin'] == 'camera':
+            index = sensor_information[device_id]['device_id']
+            lidar_data = data.sensordata[sensor_information[device_id]['frame'][0]:sensor_information[device_id]['frame'][1]] * 100
+            lidar_2d = lidar_data.reshape(16, 16)
+            result = np.zeros((16, 16, 3))
+            result[:, :, 0] = lidar_2d
+            flat_result = result.flatten()
+
+            raw_frame = retina.RGB_list_to_ndarray(flat_result, [16, 16])
+            camera_data = {str(index): retina.update_astype(raw_frame)}
+
+    return camera_data
