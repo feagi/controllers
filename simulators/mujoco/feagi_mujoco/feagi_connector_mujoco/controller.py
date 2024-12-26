@@ -17,14 +17,12 @@ limitations under the License.
 ==============================================================================
 """
 
-import json
-import mujoco_library as mj_lib
+import os
 import sys
 import time
+import copy
 import argparse
 import threading
-import numpy as np
-import copy
 import mujoco.viewer
 from feagi_connector import retina
 from feagi_connector import sensors
@@ -32,13 +30,14 @@ from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from feagi_connector import feagi_interface as feagi
+from feagi_connector_mujoco import mujoco_library as mj_lib
 
 RUNTIME = float('inf')  # (seconds) timeout time
 SPEED = 120  # simulation step speed
 xml_actuators_type = dict()
 
 
-def action(obtained_data):
+def action(obtained_data, data):
     recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
     recieve_motor_data = actuators.get_motor_data(obtained_data)
@@ -63,7 +62,15 @@ def action(obtained_data):
             data.ctrl[motor_id] = data_power
 
 
+def check_execution_method():
+    if __package__ is None:
+        return False
+    else:
+        return True
+
+
 def check_the_flag():
+
     parser = argparse.ArgumentParser(description="Load MuJoCo model from XML path")
     parser.add_argument(
         "--model_xml_path",
@@ -73,30 +80,42 @@ def check_the_flag():
     )
 
     args, remaining_args = parser.parse_known_args()
-
-    path = args.model_xml_path
+    path = args.model_xml_path  # e.g., './humanoid.xml' or 'C:/path/to/humanoid.xml'
+    full_path = os.path.abspath(path)
+    if check_execution_method():
+        if path == "./humanoid.xml":
+            import feagi_connector_mujoco
+            package_path = os.path.dirname(feagi_connector_mujoco.__file__)
+            full_path = os.path.join(package_path, path.lstrip('./'))
+    path = full_path
     model = mujoco.MjModel.from_xml_path(path)
     files = mj_lib.check_nest_file_from_xml(path)
     xml_info = mj_lib.get_actuators(files)
     xml_info = mj_lib.get_sensors(files, xml_info)
     print(f"Model loaded successfully from: {path}")
-
+    available_list_from_feagi_connector = feagi.get_flag_list()
     cleaned_args = []
     skip_next = False
-    for arg in sys.argv[1:]:
+    for i, arg in enumerate(sys.argv[1:]):
         if skip_next:
             skip_next = False
             continue
-        if arg == "--model_xml_path":
-            skip_next = True
-        else:
+        if arg in available_list_from_feagi_connector:
             cleaned_args.append(arg)
+            if i + 1 < len(sys.argv[1:]) and not sys.argv[1:][i + 1].startswith("-"):
+                cleaned_args.append(sys.argv[1:][i + 1])
+                skip_next = True
 
     sys.argv = [sys.argv[0]] + cleaned_args
+
     return model, xml_info
 
 
-def main():
+def start(path):
+    main(path)
+
+
+def main(path):
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
@@ -108,7 +127,7 @@ def main():
     rgb['camera'] = {}
     camera_data = {"vision": {}}
 
-    config = feagi.build_up_from_configuration()
+    config = feagi.build_up_from_configuration(path)
     feagi_settings = config['feagi_settings'].copy()
     agent_settings = config['agent_settings'].copy()
     default_capabilities = config['default_capabilities'].copy()
@@ -162,10 +181,10 @@ def main():
             if message_from_feagi:
                 # Translate from feagi data to human readable data
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
-                action(obtained_signals)
+                action(obtained_signals, data)
 
             if mj_lib.check_capabilities_with_this_sensor(capabilities, 'gyro'):
-                gyro_data = mj_lib.read_gyro(data, capabilities,  sensor_slice_size)
+                gyro_data = mj_lib.read_gyro(data, capabilities, sensor_slice_size)
 
             positions = data.qpos  # all positions
             positions = positions[7:]  # don't know what the first 7 positions are, but they're not joints so ignore
@@ -186,7 +205,6 @@ def main():
 
             servo_data = {i: pos for i, pos in enumerate(positions[:len(capabilities['input']['servo_position'])]) if
                           pns.full_template_information_corticals}
-
 
             if mj_lib.check_capabilities_with_this_sensor(capabilities, 'camera'):
                 camera_data['vision'] = copy.deepcopy(mj_lib.read_lidar(data, sensor_slice_size))
@@ -233,6 +251,5 @@ def main():
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
             message_to_feagi.clear()
 
-
-
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    start('./')
