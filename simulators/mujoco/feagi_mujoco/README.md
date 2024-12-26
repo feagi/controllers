@@ -1,20 +1,44 @@
-# How to connect FEAGI with Mujoco
+# FEAGI MuJoCo Connector
+
+A Python connector for interfacing FEAGI with MuJoCo physics simulation.
 
 ## See the requirement below:
 1) Git: [https://gitforwindows.org/]  
 2) Python 3.9 or higher: [https://www.python.org/downloads/]  
 3) Docker (if you want to use FEAGI on Docker): [https://docs.docker.com/get-started/introduction/get-docker-desktop/]  
 
-   
-## Start Mujoco project:
-1.	Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
-2. `cd controllers/simulators/mujoco`
-3. `python3 -m venv venv` (Windows: `python -m venv venv`)
-4. `source venv/bin/activate` (Windows: `venv/Scripts/activate`)
-5. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
-6. `python3 controller.py` (Windows: `python controller.py`) (If you are using FEAGI in the docker, run this command: `python3 controller.py --port 30000`
 
-Need to load it onto your own mujoco file? Visit the "Extra Flags" section bottom.
+## Installation
+
+```
+# For Windows
+pip install feagi_connector_mujoco
+
+# For Mac/Linux
+pip3 install feagi_connector_mujoco
+```
+
+## Usage
+To run the connector:
+
+```
+# For Windows
+python -m feagi_connector_mujoco
+
+# For Mac/Linux
+python3 -m feagi_connector_mujoco
+```
+
+## Docker Usage
+When running with Docker, append the port flag:
+
+```
+python -m feagi_connector_mujoco --port 30000
+```
+
+## Custom MuJoCo Files
+
+To use your own MuJoCo files, see the [Extra Flags](#extra-flags) section below.
 
 ## Load Docker:
 
