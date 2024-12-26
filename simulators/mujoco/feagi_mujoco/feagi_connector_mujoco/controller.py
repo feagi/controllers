@@ -30,7 +30,19 @@ from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from feagi_connector import feagi_interface as feagi
-from feagi_connector_mujoco import mujoco_helper as mj_lib
+
+
+def check_execution_method():
+    if __package__ is None:
+        return False
+    else:
+        return True
+
+
+if check_execution_method():
+    from feagi_connector_mujoco import mujoco_helper as mj_lib
+else:
+    import mujoco_helper as mj_lib
 
 RUNTIME = float('inf')  # (seconds) timeout time
 SPEED = 120  # simulation step speed
@@ -60,14 +72,6 @@ def action(obtained_data, data):
         for motor_id in recieve_motor_data:
             data_power = recieve_motor_data[motor_id]
             data.ctrl[motor_id] = data_power
-
-
-def check_execution_method():
-    if __package__ is None:
-        return False
-    else:
-        return True
-
 
 def check_the_flag():
 
