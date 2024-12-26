@@ -32,8 +32,8 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 
 2. Create a New Experiment:
    - Click "Create"
-   - Select "Embodiment Agnostic Brain"
-   - Choose "The Barebones Genome"
+   - Select "Mujoco simulation"
+   - Choose any genome. "Barebones genome" is highly recommended.
    - Name your experiment
    - Click "Create"
 
@@ -117,11 +117,11 @@ python -m feagi_connector_mujoco --model_xml_path /path/to/your/model.xml
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/feagi/feagi/blob/staging/CONTRIBUTING.md) for details.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/feagi/feagi/blob/staging/LICENSE.txt) file for details.
 
 ## 🔗 Links
 - [FEAGI Website](https://feagi.org)
