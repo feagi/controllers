@@ -8,7 +8,7 @@
   },
     "agent_settings": {
         "agent_data_port": 10002,
-        "agent_id": "tello_drone",
+        "agent_id": "tello",
         "agent_type": "embodiment",
         "compression": true
     }

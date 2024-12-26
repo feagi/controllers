@@ -1,53 +1,9 @@
 {
     "capabilities": {
         "arduino": {
-            "port": "/dev/cu.usbmodem1201"
+            "port": "/dev/ttyUSB0"
         },
         "input": {
-            "analog_input": {
-                "0": {
-                    "custom_name": "analog 0",
-                    "disabled": false,
-                    "feagi_index": 0,
-                    "max_value": 1,
-                    "min_value": 0
-                },
-                "1": {
-                    "custom_name": "analog 1",
-                    "disabled": false,
-                    "feagi_index": 1,
-                    "max_value": 1,
-                    "min_value": 0
-                },
-                "2": {
-                    "custom_name": "analog 2",
-                    "disabled": false,
-                    "feagi_index": 2,
-                    "max_value": 1,
-                    "min_value": 0
-                },
-                "3": {
-                    "custom_name": "analog 3",
-                    "disabled": false,
-                    "feagi_index": 3,
-                    "max_value": 1,
-                    "min_value": 0
-                },
-                "4": {
-                    "custom_name": "analog 4",
-                    "disabled": false,
-                    "feagi_index": 4,
-                    "max_value": 1,
-                    "min_value": 0
-                },
-                "5": {
-                    "custom_name": "analog 5",
-                    "disabled": false,
-                    "feagi_index": 5,
-                    "max_value": 1,
-                    "min_value": 0
-                }
-            },
             "digital_input": {
                 "2": {
                     "custom_name": "digital 2",
@@ -109,8 +65,115 @@
                     "disabled": false,
                     "feagi_index": 13
                 }
+            },
+            "analog_input": {
+                "0": {
+                    "custom_name": "analog input 0",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "1": {
+                    "custom_name": "analog input 1",
+                    "disabled": false,
+                    "feagi_index": 1,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "2": {
+                    "custom_name": "analog input 2",
+                    "disabled": false,
+                    "feagi_index": 2,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "3": {
+                    "custom_name": "analog input 3",
+                    "disabled": false,
+                    "feagi_index": 3,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "4": {
+                    "custom_name": "analog input 4",
+                    "disabled": false,
+                    "feagi_index": 4,
+                    "max_value": 1,
+                    "min_value": 0
+                },
+                "5": {
+                    "custom_name": "analog input 5",
+                    "disabled": false,
+                    "feagi_index": 5,
+                    "max_value": 1,
+                    "min_value": 0
+                }
             }
         },
-        "output": {}
+        "output": {
+            "digital_output": {
+                "2": {
+                    "custom_name": "digital output 2",
+                    "disabled": false,
+                    "feagi_index": 2
+                },
+                "3": {
+                    "custom_name": "digital output 3",
+                    "disabled": false,
+                    "feagi_index": 3
+                },
+                "4": {
+                    "custom_name": "digital output 4",
+                    "disabled": false,
+                    "feagi_index": 4
+                },
+                "5": {
+                    "custom_name": "digital output 5",
+                    "disabled": false,
+                    "feagi_index": 5
+                },
+                "6": {
+                    "custom_name": "digital output 6",
+                    "disabled": false,
+                    "feagi_index": 6
+                },
+                "7": {
+                    "custom_name": "digital output 7",
+                    "disabled": false,
+                    "feagi_index": 7
+                },
+                "8": {
+                    "custom_name": "digital output 8",
+                    "disabled": false,
+                    "feagi_index": 8
+                },
+                "9": {
+                    "custom_name": "digital output 9",
+                    "disabled": false,
+                    "feagi_index": 9
+                },
+                "10": {
+                    "custom_name": "digital output 10",
+                    "disabled": false,
+                    "feagi_index": 10
+                },
+                "11": {
+                    "custom_name": "digital output 11",
+                    "disabled": false,
+                    "feagi_index": 11
+                },
+                "12": {
+                    "custom_name": "digital output 12",
+                    "disabled": false,
+                    "feagi_index": 12
+                },
+                "13": {
+                    "custom_name": "digital output 13",
+                    "disabled": false,
+                    "feagi_index": 13
+                }
+            }
+        }
     }
 }
