@@ -1,5 +1,4 @@
 # FEAGI MuJoCo Connector
-
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI version](https://badge.fury.io/py/feagi-connector-mujoco.svg)](https://badge.fury.io/py/feagi-connector-mujoco)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/Neuraville/controllers/blob/14f4f8d6f010f134a48fa40d1e3b25a85a364fe1/LICENSE.txt)
@@ -7,9 +6,7 @@
 A Python-based connector that enables seamless integration between FEAGI (Fast Extensible Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
 
 ## 🚀 Quick Start
-
 ### Installation
-
 ```
 # Windows
 pip install feagi_connector_mujoco
@@ -18,20 +15,18 @@ pip install feagi_connector_mujoco
 pip3 install feagi_connector_mujoco
 ```
 
-### Prerequisites
-
-- Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
-- For Docker deployment:
-  - Git ([Windows Download](https://gitforwindows.org/))
-  - Docker Desktop ([Installation Guide](https://docs.docker.com/get-started/introduction/get-docker-desktop/))
-
 ## 💻 Usage Options
-
 ### 1. Neurorobotics Studio (Recommended)
 
 The Neurorobotics Studio provides a user-friendly web interface for quick setup and experimentation.
 
+### Prerequisites
+
+- Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
+
+
 #### Getting Started with Neurorobotics Studio
+
 
 1. Visit [Neurorobotics Studio](https://neurorobotics.studio/lab)
 
@@ -56,10 +51,17 @@ python3 -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
 ```
 
 ### 2. Docker Deployment
+### Prerequisites
+
+- Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
+- For Docker deployment:
+  - Git ([Windows only Download](https://gitforwindows.org/))
+  - Docker Desktop ([Installation Guide](https://docs.docker.com/get-started/introduction/get-docker-desktop/))
+
 
 #### Setup Instructions
 
-1. Clone the repository:
+1. Clone the repository after you launch CMD or Terminal:
 ```
 git clone git@github.com:feagi/feagi.git
 ```
@@ -122,7 +124,6 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
-
 - [FEAGI Website](https://feagi.org)
 - [Documentation](https://docs.feagi.org)
 - [GitHub Repository](https://github.com/feagi/feagi)
