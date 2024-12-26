@@ -24,7 +24,8 @@ import xml.etree.ElementTree as ET
 
 TRANSMISSION_TYPES = {
     'position': 'servo',
-    'motor': 'motor'
+    'motor': 'motor',
+    'general': 'motor'
 }
 
 SENSING_TYPES = {
@@ -34,10 +35,22 @@ SENSING_TYPES = {
 }
 
 
+def validate_name(name):
+    symbols = ['/', '\\']
+    for i in symbols:
+        if i in name:
+            name = name.replace(i, '_')
+    return name
+
 def generate_actuator_list(model, xml_actuators_type):
     actuator_information = {}
+    counter = 0
     for i in range(model.nu):
         actuator_name = model.actuator(i).name
+        if actuator_name == '':
+            actuator_name = "actuator_" + str(counter)
+            counter += 1
+        actuator_name = validate_name(actuator_name)
         actuator_type = xml_actuators_type['output'][actuator_name]['type']
         actuator_information[actuator_name] = {"type": actuator_type, "range": model.actuator_ctrlrange[i]}
     return actuator_information
@@ -130,6 +143,7 @@ def check_nest_file_from_xml(xml_path):
 def get_actuators(files):
     # Store actuator information in a dictionary
     actuators = {'output': {}}
+    counter = 0
     for xml_path in files:
         # Parse the XML file
         tree = ET.parse(xml_path)
@@ -142,6 +156,10 @@ def get_actuators(files):
             # Get all children of actuator section (all types of actuators)
             for actuator in actuator_section:
                 name = actuator.get('name')
+                if name is None:
+                    name = "actuator_" + str(counter)
+                    counter += 1
+                name = validate_name(name)
                 actuators['output'][name] = {
                     'type': actuator.tag}
     return actuators
