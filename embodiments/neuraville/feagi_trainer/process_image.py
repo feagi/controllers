@@ -9,7 +9,7 @@ def get_corners(location_data, size_of_cortical, target_size):
 
     # Calculate min and max coordinates
     for key in location_data.keys():
-        x, y, _ = map(int, key.split('-'))
+        x, y = key[0], key[1]
         if x < min_x:
             min_x = x
         if x > max_x:
