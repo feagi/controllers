@@ -17,8 +17,8 @@ limitations under the License.
 ==============================================================================
 """
 
-import numpy as np
 import copy
+import numpy as np
 from feagi_connector import retina
 import xml.etree.ElementTree as ET
 
@@ -367,5 +367,4 @@ def read_lidar(data, sensor_information):
 
             raw_frame = retina.RGB_list_to_ndarray(flat_result, [16, 16])
             camera_data = {str(index): retina.update_astype(raw_frame)}
-
     return camera_data
