@@ -30,7 +30,7 @@ from feagi_connector import actuators
 from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from feagi_connector import feagi_interface as feagi
-from feagi_connector_mujoco import mujoco_library as mj_lib
+from feagi_connector_mujoco import mujoco_helper as mj_lib
 
 RUNTIME = float('inf')  # (seconds) timeout time
 SPEED = 120  # simulation step speed
