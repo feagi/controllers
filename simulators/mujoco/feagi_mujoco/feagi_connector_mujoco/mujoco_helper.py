@@ -113,11 +113,11 @@ def generate_capabilities_based_of_xml(sensor_information, actuator_information,
             temp_copy_property_output['feagi_index'] = increment
             capabilities['output'][device_name][device_id] = copy.deepcopy(temp_copy_property_output)
 
-        temp_capabilities = copy.deepcopy(capabilities)
-        for I_O in temp_capabilities:
-            for device_name in temp_capabilities[I_O]:
-                if device_name not in list_to_not_delete_device:
-                    del capabilities[I_O][device_name]
+    temp_capabilities = copy.deepcopy(capabilities)
+    for I_O in temp_capabilities:
+        for device_name in temp_capabilities[I_O]:
+            if device_name not in list_to_not_delete_device:
+                del capabilities[I_O][device_name]
     return capabilities
 
 
