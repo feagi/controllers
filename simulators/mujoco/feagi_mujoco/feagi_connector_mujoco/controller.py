@@ -96,7 +96,6 @@ def check_the_flag():
     files = mj_lib.check_nest_file_from_xml(path)
     xml_info = mj_lib.get_actuators(files)
     xml_info = mj_lib.get_sensors(files, xml_info)
-    print(f"Model loaded successfully from: {path}")
     available_list_from_feagi_connector = feagi.get_flag_list()
     cleaned_args = []
     skip_next = False
