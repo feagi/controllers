@@ -46,7 +46,10 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 # Windows
 python -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
 
-# Mac/Linux
+# Mac
+mjpython -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+
+# Linux
 python3 -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
 ```
 
@@ -87,7 +90,10 @@ docker compose -f playground.yml up
 # Windows
 python -m feagi_connector_mujoco --port 30000
 
-# Mac/Linux
+# Mac
+mjpython -m feagi_connector_mujoco --port 30000
+
+# Linux
 python3 -m feagi_connector_mujoco --port 30000
 ```
 
@@ -112,7 +118,14 @@ python -m feagi_connector_mujoco --help
 To use custom MuJoCo files, specify the path using the `--model_xml_path` flag:
 
 ```
+# Windows
 python -m feagi_connector_mujoco --model_xml_path /path/to/your/model.xml
+
+# Mac 
+mjpython -m feagi_connector_mujoco --model_xml_path /path/to/your/model.xml
+
+# Linux
+python3 -m feagi_connector_mujoco --model_xml_path /path/to/your/model.xml
 ```
 
 ## 🤝 Contributing
@@ -121,7 +134,7 @@ We welcome contributions! Please see our [Contributing Guidelines](https://githu
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/feagi/feagi/blob/staging/LICENSE.txt) file for details.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](https://github.com/feagi/feagi/blob/staging/LICENSE.txt) file for details.
 
 ## 🔗 Links
 - [FEAGI Website](https://feagi.org)
