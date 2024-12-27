@@ -163,10 +163,11 @@ def main(path):
                      daemon=True).start()
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
 
-    # Create a dict to store data
-    force_list = {}
-    for x in range(len(capabilities['input']['pressure'])):
-        force_list[str(x)] = [0, 0, 0]
+    if mj_lib.check_capabilities_with_this_sensor(capabilities, 'pressure'):
+        # Create a dict to store data
+        force_list = {}
+        for x in range(len(capabilities['input']['pressure'])):
+            force_list[str(x)] = [0, 0, 0]
 
     sensor_slice_size = mj_lib.read_all_sensors_to_identify_type(model)
 
