@@ -1,56 +1,130 @@
-# How to connect FEAGI with Mujoco
+# FEAGI MuJoCo Connector
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://badge.fury.io/py/feagi-connector-mujoco.svg)](https://badge.fury.io/py/feagi-connector-mujoco)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/Neuraville/controllers/blob/14f4f8d6f010f134a48fa40d1e3b25a85a364fe1/LICENSE.txt)
 
-## See the requirement below:
-1) Git: [https://gitforwindows.org/]  
-2) Python 3.9 or higher: [https://www.python.org/downloads/]  
-3) Docker (if you want to use FEAGI on Docker): [https://docs.docker.com/get-started/introduction/get-docker-desktop/]  
+A Python-based connector that enables seamless integration between FEAGI (Fast Extensible Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
 
-   
-## Start Mujoco project:
-1.	Open a new terminal/cmd and run: `git clone https://github.com/feagi/controllers.git`
-2. `cd controllers/simulators/mujoco`
-3. `python3 -m venv venv` (Windows: `python -m venv venv`)
-4. `source venv/bin/activate` (Windows: `venv/Scripts/activate`)
-5. `pip3 install -r requirements.txt` (Windows: `pip install -r requirements.txt`)
-6. `python3 controller.py` (Windows: `python controller.py`) (If you are using FEAGI in the docker, run this command: `python3 controller.py --port 30000`
-
-Need to load it onto your own mujoco file? Visit the "Extra Flags" section bottom.
-
-## Load Docker:
-
-	1.	git clone git@github.com:feagi/feagi.git
-	2.	cd ~/feagi/docker
-	3.	docker compose -f playground.yml pull
-	4.	Wait until it’s done.
-	5.	docker compose -f playground.yml up
-
-## Open Playground Website:
-
-	1.	Go to http://127.0.0.1:4000/
-	2.	Click the “GENOME” button on the top right, next to “API.”
-	3.	Click “Essential.”
-
-
-# Extra flags
-Example command: `python controller.py --help`
+## 🚀 Quick Start
+### Installation
 ```
-optional arguments:
-  -h, --help            Show this help message and exit.
-  
-  -magic_link MAGIC_LINK, --magic_link MAGIC_LINK
-                        Use a magic link. You can find your magic link from NRS studio.
-                        
-  -magic-link MAGIC_LINK, --magic-link MAGIC_LINK
-                        Use a magic link. You can find your magic link from NRS studio.
-                        
-  -magic MAGIC, --magic MAGIC
-                        Use a magic link. You can find your magic link from NRS studio.
-                        
-  -ip IP, --ip IP       Specify the FEAGI IP address.
-  
-  -port PORT, --port PORT
-                        Change the ZMQ port. Use 30000 for Docker and 3000 for localhost.
+# Windows
+pip install feagi_connector_mujoco
 
-  --model_xml_path, --MODEL_XML_PATH
-                        Path to the XML file (default: './humanoid.xml')
+# Mac/Linux
+pip3 install feagi_connector_mujoco
 ```
+
+## 💻 Usage Options
+### 1. Neurorobotics Studio (Recommended)
+
+The Neurorobotics Studio provides a user-friendly web interface for quick setup and experimentation.
+
+### Prerequisites
+
+- Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
+
+
+#### Getting Started with Neurorobotics Studio
+
+
+1. Visit [Neurorobotics Studio](https://neurorobotics.studio/lab)
+
+2. Create a New Experiment:
+   - Click "Create"
+   - Select "Mujoco simulation"
+   - Choose any genome. "Barebones genome" is highly recommended.
+   - Name your experiment
+   - Click "Create"
+
+3. Connect via Magic Link:
+   - Navigate to "Embodiment" in the top menu
+   - Click "Magic Link"
+   - Run the provided command:
+
+```
+# Windows
+python -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+
+# Mac/Linux
+python3 -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+```
+
+### 2. Docker Deployment
+### Prerequisites
+
+- Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
+- For Docker deployment:
+  - Git ([Windows only Download](https://gitforwindows.org/))
+  - Docker Desktop ([Installation Guide](https://docs.docker.com/get-started/introduction/get-docker-desktop/))
+
+
+#### Setup Instructions
+
+1. Clone the repository after you launch CMD or Terminal:
+```
+git clone git@github.com:feagi/feagi.git
+```
+
+2. Navigate to the Docker directory:
+```
+cd feagi/docker
+```
+
+3. Pull and start the Docker containers:
+```
+docker compose -f playground.yml pull
+docker compose -f playground.yml up
+```
+
+4. Access the Playground:
+   - Open `http://127.0.0.1:4000/`
+   - Click "GENOME" (top right, next to "API")
+   - Select "Essential"
+
+5. Start the connector:
+```
+# Windows
+python -m feagi_connector_mujoco --port 30000
+
+# Mac/Linux
+python3 -m feagi_connector_mujoco --port 30000
+```
+
+## 🛠️ Configuration Options
+
+### Command-Line Arguments
+
+```
+python -m feagi_connector_mujoco --help
+```
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `-h, --help` | Display help message | - |
+| `-magic_link, --magic_link` | NRS Studio magic link | - |
+| `-ip, --ip` | FEAGI IP address | localhost |
+| `-port, --port` | ZMQ port (30000 for Docker, 3000 for localhost) | 3000 |
+| `--model_xml_path` | Custom MuJoCo XML file path | './humanoid.xml' |
+
+## 🔧 Custom MuJoCo Configuration
+
+To use custom MuJoCo files, specify the path using the `--model_xml_path` flag:
+
+```
+python -m feagi_connector_mujoco --model_xml_path /path/to/your/model.xml
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/feagi/feagi/blob/staging/CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/feagi/feagi/blob/staging/LICENSE.txt) file for details.
+
+## 🔗 Links
+- [FEAGI Website](https://feagi.org)
+- [Documentation](https://docs.feagi.org)
+- [GitHub Repository](https://github.com/feagi/feagi)
+- [Issue Tracker](https://github.com/feagi/feagi/issues)
