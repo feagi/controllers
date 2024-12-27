@@ -116,11 +116,17 @@
         <site name="head_gyro_mount" pos="0 0 0" size="0.01"/>
         <camera name="egocentric" pos=".09 0 0" xyaxes="0 -1 0 .1 0 1" fovy="80"/>
 
-        <replicate count="16" euler="0 4 0">
-          <replicate count="16" euler="0 0 -4">
-            <site name="rf" pos=".16 0 0" zaxis="1 0 0"/>
-          </replicate>
+
+      <replicate count="16" euler="0 4 0">
+        <replicate count="16" euler="0 0 4">
+          <site name="rf" pos=".16 0 0" zaxis="1 0 0"/>
         </replicate>
+      </replicate>
+<!--        <replicate count="16" euler="0 4 0">-->
+<!--          <replicate count="16" euler="0 0 -4">-->
+<!--            <site name="rf" pos=".16 0 0" zaxis="1 0 0"/>-->
+<!--          </replicate>-->
+<!--        </replicate>-->
 
       </body>
       <body name="waist_lower" pos="-.01 0 -.26">
