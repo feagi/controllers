@@ -10,9 +10,7 @@
        "agent_data_port": 10012,
        "agent_id": "mujoco_simulation",
        "agent_type": "embodiment",
-       "compression": true,
-       "godot_websocket_ip": "0.0.0.0",
-       "godot_websocket_port": 9052
+       "compression": true
     }
  }
- 
+
