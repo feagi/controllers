@@ -148,7 +148,7 @@ if __name__ == "__main__":
             for pin in input_track:
                 obtain_data = pin_board[pin].read()
                 if obtain_data:
-                    location_string = str(pin) + "-0-0"
+                    location_string = (pin, 0, 0)
                     create_generic_input_dict['idgpio'][location_string] = 100
             message_to_feagi = sensors.add_generic_input_to_feagi_data(create_generic_input_dict, message_to_feagi)
 
