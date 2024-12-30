@@ -51,6 +51,7 @@ def run_app():
 app_thread = threading.Thread(target=run_app)
 app_thread.start()
 
+
 if __name__ == "__main__":
     runtime_data = {
         "vision": {},
@@ -283,6 +284,7 @@ if __name__ == "__main__":
                     else:
                         success_rate, success, total = 0, 0, 0
                     # Send signals to FEAGI
+
                     pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings,
                                          feagi_settings)
 
@@ -304,7 +306,8 @@ if __name__ == "__main__":
                     raw_frame = cap.read()[1]
 
                     # Carry on with the image processing
-                    message_to_feagi = feagi_trainer.id_training_with_image(message_to_feagi, name_id)
+                    if not image_reader_config["test_mode"]:
+                        message_to_feagi = feagi_trainer.id_training_with_image(message_to_feagi, name_id)
                     if start_timer == 0.0:
                         start_timer = datetime.now()
 
@@ -401,7 +404,7 @@ if __name__ == "__main__":
 
                         # location section
                         location_data = pns.recognize_location_data(message_from_feagi)
-                        if image_reader_config["test_mode"]:
+                        if image_reader_config["test_mode"] and "opu" in message_from_feagi:
                             success_rate, success, total = testing_mode.mode_testing(name_id, message_from_feagi, total,
                                                                                      success, success_rate)
                         else:
@@ -428,7 +431,8 @@ if __name__ == "__main__":
                                                                              new_feagi_image_id=None,
                                                                              static=flask_server.latest_static)
                     # Carry on with the image processing
-                    message_to_feagi = feagi_trainer.id_training_with_image(message_to_feagi, name_id)
+                    if not image_reader_config["test_mode"]:
+                        message_to_feagi = feagi_trainer.id_training_with_image(message_to_feagi, name_id)
                     if start_timer == 0.0:
                         start_timer = datetime.now()
 
@@ -501,22 +505,18 @@ if __name__ == "__main__":
                                 message_to_feagi = pns.generate_feagi_data(
                                     rgb, message_to_feagi
                                 )
-                        message_from_feagi = (
-                            pns.message_from_feagi
-                        )  # Need to re-structure this code to be more consistent
+                        message_from_feagi = pns.message_from_feagi  # Need to re-structure this code to be more consistent
 
                         # location section
                         location_data = pns.recognize_location_data(message_from_feagi)
-                        if image_reader_config["test_mode"]:
-                            success_rate, success, total = testing_mode.mode_testing(name_id, message_from_feagi,
-                                                                                     total, success, success_rate)
+                        if image_reader_config["test_mode"] and "opu" in message_from_feagi:
+                            success_rate, success, total = testing_mode.mode_testing(name_id, message_from_feagi, total, success, success_rate)
+
                         else:
                             success_rate, success, total = 0, 0, 0
 
                         # Send signals to FEAGI
-                        pns.signals_to_feagi(
-                            message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings
-                        )
+                        pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
 
                         # Sleep for the burst duration specified in the settings
                         sleep(feagi_settings["burst_duration"])
