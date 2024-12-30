@@ -90,3 +90,9 @@ To fix this, follow these steps:
 4. Double-click on `Install Certificates....ommand` file.
 5. Wait for it to be done then close the terminal it popped.
 6. Re-run your Python script.
+
+
+
+# How to Use
+TODO: Add text describing the folowing image in detail
+<img width="1100" alt="image" src="https://github.com/user-attachments/assets/51ba52cd-ee9c-4560-84da-b979c96206a3">
