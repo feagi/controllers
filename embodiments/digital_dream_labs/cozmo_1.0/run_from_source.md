@@ -4,9 +4,10 @@
 
 A Python-based connector that enables seamless integration between FEAGI (The Framework for Evolutionary Artificial General Intelligence) and the Cozmo. This connector facilitates neural network-driven control of Cozmo.
 
-
 ## 💻 Usage Options
-### 1. Neurorobotics Studio (Recommended)
+
+<details>
+<summary><h3>1. Neurorobotics Studio (Recommended) 🎯</h3></summary>
 
 The Neurorobotics Studio provides a user-friendly web interface for quick setup and experimentation.
 
@@ -15,9 +16,7 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 - Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
 - Dongle Wi-Fi
 
-
-#### Getting Started with Neurorobotics Studio
-
+### Getting Started with Neurorobotics Studio
 
 1. Visit [Neurorobotics Studio](https://neurorobotics.studio/lab)
 
@@ -42,9 +41,12 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 
 ![image](https://storage.googleapis.com/nrs-artifacts/em-iqgkoadn/pasteyourmagictohere.png)
 
-Note: If you don't want to download anything but prefer to run it from Python or if you are on Mac/Linux, go to the next section "Run without installer (For NRS or Docker)".
+Note: If you don't want to download anything but prefer to run it from Python or if you are on Mac/Linux, go to the "Run without installer" section.
+</details>
 
-### 2. Docker Deployment
+<details>
+<summary><h3>2. Docker Deployment 🐳</h3></summary>
+
 ### Prerequisites
 
 - Python 3.9 or higher ([Download Python](https://www.python.org/downloads/))
@@ -52,8 +54,7 @@ Note: If you don't want to download anything but prefer to run it from Python or
   - Git ([Windows only Download](https://gitforwindows.org/))
   - Docker Desktop ([Installation Guide](https://docs.docker.com/get-started/introduction/get-docker-desktop/))
 
-
-#### Setup Instructions
+### Setup Instructions
 
 1. Clone the repository after you launch CMD or Terminal:
 ```
@@ -71,35 +72,69 @@ docker compose -f playground.yml pull
 docker compose -f playground.yml up
 ```
 
-1. Access the Playground:
+4. Access the Playground:
    - Open `http://127.0.0.1:4000/`
    - Click "GENOME" (top right, next to "API")
    - Select "Essential"
 
-2. Continue to the section, "Run without installer (For NRS or Docker)"
+5. Continue to the "Run without installer" section
+</details>
 
-### 3. Run without installer (For NRS or Docker)
+<details>
+<summary><h3>3. Run without installer (For NRS or Docker) 🔧</h3></summary>
+
 ### Prerequisites
-1) python 3.8+
+1) Python 3.8+
 2) CMD (WINDOWS) or Terminal (MAC OR LINUX)
 3) Wifi Dongle (To connect Cozmo while your computer stays connected to the internet)
 4) Git (https://git-scm.com/downloads for windows. Mac and Linux should have it by default)
 
 ### Run the controller
-1) `git clone https://github.com/feagi/controllers.git`
-2) `cd controllers/embodiments/digital_dream_labs/cozmo_1.0`
-3) `python3 -m venv venv` (venv/Scripts/activate for windows)
-4) `source venv/bin/activate`
-5) Connect your Wi-Fi with Cozmo.
-6) Run python using below:
-   1. linux/Mac users:
-      1. `pip3 install -r requirements.txt`
-      2. `python3 controller.py --magic_link "<insert link here>" (replace <insert link here> without removing the quotes in the command).`
-   2. Windows users:
-      1. `pip install -r requirements.txt`
-      2. `python controller.py --magic_link "<insert link here>" (replace <insert link here> without removing the quotes in the command).`
-7) You're all set. Next time you want to run the robot, you can simply execute 
-`python3 controller.py` or `python controller.py` without following the steps above again.
+1) Clone the repository:
+```
+git clone https://github.com/feagi/controllers.git
+```
+
+2) Navigate to the Cozmo directory:
+```
+cd controllers/embodiments/digital_dream_labs/cozmo_1.0
+```
+
+3) Create and activate virtual environment:
+```
+# For Unix/Linux/Mac:
+python3 -m venv venv
+source venv/bin/activate
+
+# For Windows:
+python -m venv venv
+venv\Scripts\activate
+```
+
+4) Connect your Wi-Fi with Cozmo.
+
+5) Install requirements and run:
+
+For Linux/Mac:
+```
+pip3 install -r requirements.txt
+python3 controller.py --magic_link "<insert link here>"
+```
+
+For Windows:
+```
+pip install -r requirements.txt
+python controller.py --magic_link "<insert link here>"
+```
+
+Note: Replace `<insert link here>` with your magic link, keeping the quotes.
+
+For subsequent runs, you can simply execute:
+```
+python3 controller.py  # Linux/Mac
+python controller.py   # Windows
+```
+</details>
 
 ## 🛠️ Configuration Options
 
