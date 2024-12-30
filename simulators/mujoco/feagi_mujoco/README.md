@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/feagi-connector-mujoco.svg)](https://badge.fury.io/py/feagi-connector-mujoco)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/Neuraville/controllers/blob/14f4f8d6f010f134a48fa40d1e3b25a85a364fe1/LICENSE.txt)
 
-A Python-based connector that enables seamless integration between FEAGI (Fast Extensible Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
+A Python-based connector that enables seamless integration between FEAGI (The Framework for Evolutionary Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
 
 ## 🚀 Quick Start
 ### Installation
