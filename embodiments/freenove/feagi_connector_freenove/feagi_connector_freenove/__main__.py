@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import traceback
-import argparse
 from time import sleep
 import feagi_connector_freenove
 from feagi_connector import feagi_interface as feagi

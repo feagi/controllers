@@ -1,22 +1,22 @@
 import sys
-import argparse
-import subprocess
 import cv2
 import time
 import asyncio
-import threading
+import argparse
 import traceback
-import RPi.GPIO as GPIO
+import threading
+import subprocess
 from time import sleep
+import RPi.GPIO as GPIO
 from collections import deque
-from feagi_connector_freenove.Led import *
 from feagi_connector_freenove.ADC import *
+from feagi_connector_freenove.Led import *
 from feagi_connector import retina as retina
-from feagi_connector import pns_gateway as pns
 from feagi_connector import sensors as sensors
+from feagi_connector import pns_gateway as pns
 from feagi_connector import actuators as actuators
-from feagi_connector import feagi_interface as FEAGI
 from feagi_connector_freenove.PCA9685 import PCA9685
+from feagi_connector import feagi_interface as FEAGI
 from feagi_connector_freenove.version import __version__
 
 ir_data = deque()
