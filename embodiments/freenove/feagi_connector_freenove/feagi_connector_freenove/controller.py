@@ -1,15 +1,14 @@
 import sys
+import argparse
+import subprocess
 import cv2
 import time
 import asyncio
-import requests
 import threading
 import traceback
 import RPi.GPIO as GPIO
 from time import sleep
 from collections import deque
-from datetime import datetime
-from feagi_connector import router
 from feagi_connector_freenove.Led import *
 from feagi_connector_freenove.ADC import *
 from feagi_connector import retina as retina
@@ -491,9 +490,41 @@ def start_ultrasonic(feagi_settings):
     asyncio.run(read_ultrasonic(feagi_settings))
 
 
+def check_the_flag(current_path):
+    parser = argparse.ArgumentParser(description="Load freenove")
+    parser.add_argument('-setup', '--setup', help='first time setup only', required=False)
+    args, remaining_args = parser.parse_known_args()
 
-def main(feagi_auth_url, feagi_settings, agent_settings, capabilities):
+    if args.setup:
+        if args.setup.lower() == 'true':
+            new_path = current_path[0] + "/setup.sh " + current_path[0]
+            subprocess.run([new_path, "arguments"], shell=True)
+
+    available_list_from_feagi_connector = FEAGI.get_flag_list()
+    cleaned_args = []
+    skip_next = False
+    for i, arg in enumerate(sys.argv[1:]):
+        if skip_next:
+            skip_next = False
+            continue
+        if arg in available_list_from_feagi_connector:
+            cleaned_args.append(arg)
+            if i + 1 < len(sys.argv[1:]) and not sys.argv[1:][i + 1].startswith("-"):
+                cleaned_args.append(sys.argv[1:][i + 1])
+                skip_next = True
+
+    sys.argv = [sys.argv[0]] + cleaned_args
+
+
+def main(current_path):
     GPIO.cleanup()
+    check_the_flag(current_path)
+    config = FEAGI.build_up_from_configuration(str(current_path[0]) + '/')
+    feagi_settings = config['feagi_settings'].copy()
+    agent_settings = config['agent_settings'].copy()
+    capabilities = config['capabilities'].copy()
+
+
     # # FEAGI REACHABLE CHECKER # #
     print("retrying...")
     print("Waiting on FEAGI...")
