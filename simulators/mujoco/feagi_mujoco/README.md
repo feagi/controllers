@@ -15,6 +15,17 @@ pip install feagi_connector_mujoco
 pip3 install feagi_connector_mujoco
 ```
 
+Prefer to do it in a venv? Do it here:
+```
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
 ## 💻 Usage Options
 ### 1. Neurorobotics Studio (Recommended)
 
@@ -44,13 +55,13 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 
 ```
 # Windows
-python -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+python -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 
 # Mac
-mjpython -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+mjpython -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 
 # Linux
-python3 -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+python3 -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 ```
 
 ### 2. Docker Deployment
