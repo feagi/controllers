@@ -1,0 +1,2 @@
+pyserial
+feagi_connector>=0.0.35
