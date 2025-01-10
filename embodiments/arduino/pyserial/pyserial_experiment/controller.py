@@ -35,20 +35,21 @@ def action(obtained_data):
 
 
 if __name__ == "__main__":
-    ser = serial.Serial('COM7', 115200)
+    print("Ready...")
+    config = feagi.build_up_from_configuration(serial_in_use=True)
+    feagi_settings = config['feagi_settings'].copy()
+    agent_settings = config['agent_settings'].copy()
+    default_capabilities = config['default_capabilities'].copy()
+    message_to_feagi = config['message_to_feagi'].copy()
+    capabilities = config['capabilities'].copy()
+
+    ser = serial.Serial(agent_settings['usb_port'], 115200)
     thread_read = threading.Thread(target=read_from_port, args=(ser,))
     thread_read.start()
     # thread_write.start()
 
     # thread_read.join()
     # thread_write.join()
-    print("Ready...")
-    config = feagi.build_up_from_configuration()
-    feagi_settings = config['feagi_settings'].copy()
-    agent_settings = config['agent_settings'].copy()
-    default_capabilities = config['default_capabilities'].copy()
-    message_to_feagi = config['message_to_feagi'].copy()
-    capabilities = config['capabilities'].copy()
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - #
