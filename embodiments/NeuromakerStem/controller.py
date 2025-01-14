@@ -38,7 +38,7 @@ def action(obtained_data):
 
     if servo_data:
         for device_id in servo_data:
-            servo_for_feagi[int(device_id)] = int(recieve_servo_position_data[device_id])
+            servo_for_feagi[int(device_id)] = int(servo_data[device_id])
 
     if servo_for_feagi != previous_feagi_servo_list:
         formatted_data = ','.join(map(str, servo_for_feagi)) + '\n'
