@@ -57,8 +57,7 @@ def action(obtained_data, capabilities):
 
 if __name__ == "__main__":
     # Generate runtime dictionary
-    runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
-                    "feagi_network": None}
+    runtime_data = {}
 
     # This function will build the capabilities from your configuration.json and read the
     # args input. First, it will gather all details from your configuration.json. Once it's done,
@@ -88,12 +87,17 @@ if __name__ == "__main__":
 
     # This is for processing the data and updating in real-time based on the user's activity in BV,
     # such as cortical size, blink, reload genome, and other backend tasks.
-    if "camera" in capabilities['input']:
-        threading.Thread(target=retina.vision_progress,
-                         args=(default_capabilities, feagi_settings, camera_data['vision'],),
-                         daemon=True).start()
+    if capabilities:
+        if "camera" in capabilities['input']:
+            threading.Thread(target=retina.vision_progress,
+                             args=(default_capabilities, feagi_settings, camera_data['vision'],),
+                             daemon=True).start()
+
 
     while True:
+        joint_read = []  # Replace this to read the data for example
+
+
         # The controller will grab the data from FEAGI in real-time
         message_from_feagi = pns.message_from_feagi
         if message_from_feagi: # Verify if the feagi data is not empty
