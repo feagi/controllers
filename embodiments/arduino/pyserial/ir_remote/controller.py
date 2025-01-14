@@ -18,16 +18,14 @@ runtime_data = {}
 
 # Function to handle receiving data
 def read_from_port(ser):
-    while True:
-        try:
-            obtained_data = ser.readline().decode('utf-8').rstrip()
-            parsed_data = json.loads(obtained_data)
-            acc['0'] = parsed_data[0]
-            gyro['0'] = parsed_data[1]
-        except Exception as Error_case:
-            pass
-            # print("error: ", Error_case)
-            # print("raw data: ", obtained_data)
+    data_received = ser.readline().decode('utf-8').rstrip()
+    if data_received:
+        # print(data_received) # TODO: Needs to make this somewhat useful and scalable
+        # print("type: :", type(data_received))
+        if data_received.isdigit():
+            data_as_int = int(data_received)
+            # print(data_as_int)
+            return data_as_int
 
 
 def action(obtained_data):
@@ -44,8 +42,6 @@ if __name__ == "__main__":
     capabilities = config['capabilities'].copy()
 
     ser = serial.Serial(agent_settings['usb_port'], 115200)
-    thread_read = threading.Thread(target=read_from_port, args=(ser,))
-    thread_read.start()
     # thread_write.start()
 
     # thread_read.join()
@@ -63,24 +59,23 @@ if __name__ == "__main__":
         message_from_feagi = pns.message_from_feagi
 
         # Fetch data such as motor, servo, etc and pass to a function (you make ur own action.
-        if message_from_feagi is not None:
+        if message_from_feagi:
             pns.check_genome_status_no_vision(message_from_feagi)
             feagi_settings['feagi_burst_speed'] = pns.check_refresh_rate(
                 message_from_feagi, feagi_settings['feagi_burst_speed'])
             obtained_signals = pns.obtain_opu_data(message_from_feagi)
             # action(obtained_signals)
-        if gyro['0']:
-            message_to_feagi = sensors.create_data_for_feagi('gyro',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=gyro,
-                                                             symmetric=True)
-        if acc['0']:
-            message_to_feagi = sensors.create_data_for_feagi('accelerometer',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=acc,
-                                                             symmetric=True)
+
+        position = read_from_port(ser)
+        if position is not None:
+            print("data recieved: ", position)
+            new_data = (0, int(position), 0)
+            create_id = dict()
+            create_id['i___id'] = dict()
+            create_id['i___id'][new_data] = 100
+            message_to_feagi = sensors.add_generic_input_to_feagi_data(create_id, message_to_feagi)
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            message_to_feagi.clear()
 
         sleep(feagi_settings['feagi_burst_speed'])  # bottleneck
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel,

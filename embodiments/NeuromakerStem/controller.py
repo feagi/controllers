@@ -1,16 +1,17 @@
 from time import sleep
 import time
-import ast
-import json
 import threading
 import serial
+from datetime import datetime
 from feagi_connector import feagi_interface as feagi
 from feagi_connector import sensors
 from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
+from feagi_connector import actuators
+import struct
 
-gyro = {"0": []}
-acc = {"0": []}
+servo_for_feagi = [40, 40, 40, 40, 40]
+previous_feagi_servo_list = servo_for_feagi.copy()
 
 feagi.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
 runtime_data = {}
@@ -20,21 +21,39 @@ runtime_data = {}
 def read_from_port(ser):
     while True:
         try:
-            obtained_data = ser.readline().decode('utf-8').rstrip()
-            parsed_data = json.loads(obtained_data)
-            acc['0'] = parsed_data[0]
-            gyro['0'] = parsed_data[1]
+            obtained_data = ser.readline()
+            print("recieved_data: ", obtained_data)
         except Exception as Error_case:
-            pass
-            # print("error: ", Error_case)
-            # print("raw data: ", obtained_data)
+            print("error: ", Error_case)
 
 
 def action(obtained_data):
-    pass
+    global servo_for_feagi, previous_feagi_servo_list
+    servo_data = actuators.get_servo_data(obtained_data)
+    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
+    if recieve_servo_position_data:
+        for device_id in recieve_servo_position_data:
+            servo_for_feagi[int(device_id)] = int(recieve_servo_position_data[device_id])
+
+    if servo_data:
+        for device_id in servo_data:
+            servo_for_feagi[int(device_id)] = int(servo_data[device_id])
+
+    if servo_for_feagi != previous_feagi_servo_list:
+        formatted_data = ','.join(map(str, servo_for_feagi)) + '\n'
+        ser.write(formatted_data.encode('utf-8'))
+        previous_feagi_servo_list = servo_for_feagi.copy()
 
 if __name__ == "__main__":
+    # thread_read = threading.Thread(target=read_from_port, args=(ser,)) # We need this for sensor soon
+    # thread_write = threading.Thread(target=write_to_port, args=(ser,))
+
+    # thread_read.start() # Needs to uncomment this for sensor
+    # thread_write.start()
+
+    # thread_read.join()
+    # thread_write.join()
     print("Ready...")
     config = feagi.build_up_from_configuration(serial_in_use=True)
     feagi_settings = config['feagi_settings'].copy()
@@ -42,14 +61,7 @@ if __name__ == "__main__":
     default_capabilities = config['default_capabilities'].copy()
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
-
     ser = serial.Serial(agent_settings['usb_port'], 115200)
-    thread_read = threading.Thread(target=read_from_port, args=(ser,))
-    thread_read.start()
-    # thread_write.start()
-
-    # thread_read.join()
-    # thread_write.join()
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - #
@@ -58,7 +70,12 @@ if __name__ == "__main__":
                                capabilities,
                                __version__)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    # To give ardiuno some time to open port. It's required
+    actuators.start_servos(capabilities)
     time.sleep(5)
+    print("serial is ready")
+
     while True:
         message_from_feagi = pns.message_from_feagi
 
@@ -68,19 +85,7 @@ if __name__ == "__main__":
             feagi_settings['feagi_burst_speed'] = pns.check_refresh_rate(
                 message_from_feagi, feagi_settings['feagi_burst_speed'])
             obtained_signals = pns.obtain_opu_data(message_from_feagi)
-            # action(obtained_signals)
-        if gyro['0']:
-            message_to_feagi = sensors.create_data_for_feagi('gyro',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=gyro,
-                                                             symmetric=True)
-        if acc['0']:
-            message_to_feagi = sensors.create_data_for_feagi('accelerometer',
-                                                             capabilities,
-                                                             message_to_feagi,
-                                                             current_data=acc,
-                                                             symmetric=True)
+            action(obtained_signals)
 
         sleep(feagi_settings['feagi_burst_speed'])  # bottleneck
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel,

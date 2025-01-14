@@ -6,9 +6,9 @@
 5. Connect your ufactory arm.
 6. Run Python using the commands below:
    1. Mac/Linux users:
-      1. `pip3 install -r requirements`
+      1. `pip3 install -r requirements.txt`
    2. Windows users:
-      1. `pip install -r requirements`
+      1. `pip install -r requirements.txt`
 7. `git clone git@github.com:xArm-Developer/xArm-Python-SDK.git xArm`
 8. `pip3 install -r requirements.txt`
 9. `cd xArm && python setup.py install`

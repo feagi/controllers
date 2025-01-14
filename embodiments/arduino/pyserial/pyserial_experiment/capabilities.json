@@ -1,0 +1,43 @@
+{
+	"capabilities": {
+		"input": {
+			"accelerometer": {
+				"0": {
+					"custom_name": "acc 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": [
+						10,
+						10,
+						10
+					],
+					"min_value": [
+						-10,
+						-10,
+						-10
+					]
+				}
+			},
+			"gyro": {
+				"0": {
+					"custom_name": "GYRO 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": [
+						5,
+						5,
+						5
+					],
+					"min_value": [
+						-5,
+						-5,
+						-5
+					]
+				}
+			}
+		},
+		"output": {
+
+		}
+	}
+}
