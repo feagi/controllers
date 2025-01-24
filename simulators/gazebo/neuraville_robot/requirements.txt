@@ -1,0 +1,2 @@
+djitellopy
+feagi-connector>=0.0.17
