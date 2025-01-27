@@ -46,7 +46,8 @@ from rclpy.qos import qos_profile_sensor_data
 from threading import Thread
 from datetime import datetime
 
-feagi.validate_requirements('src/requirements.txt')  # you should get it from the boilerplate generator
+feagi.validate_requirements(
+    'src/requirements.txt')  # you should get it from the boilerplate generator
 lidar_data = []
 
 
@@ -64,13 +65,6 @@ class ScalableSubscriber(Node):
     def listener_callback(self, msg):
         global lidar_data
         lidar_data = msg.ranges
-        # self.get_logger().info("Raw Message: {}".format(msg.ranges))
-        # try:
-        #     self.counter += 1
-        # except Exception as e:
-        #     print("Error in listener callback...", e)
-        #     exc_info = sys.exc_info()
-        #     traceback.print_exception(*exc_info)
 
 
 class UltrasonicSubscriber(ScalableSubscriber):
@@ -78,16 +72,24 @@ class UltrasonicSubscriber(ScalableSubscriber):
         super().__init__(subscription_name, msg_type, topic)
 
 
-def convert_lidar_to_feagi_data(new_data):
+def convert_lidar_to_feagi_data(full_lidar_data, cortical_size):
     result = {'ilidar': {}}
-    for x in range(len(new_data)):
-        name = (x, 0, 0)
-        try:
-            result['ilidar'][name] = 1/new_data[x]
-        except:
-            pass
-    print(result['ilidar'])
+    total_array = []
+    counter = 0
+    length_based_off_cortical = int(len(full_lidar_data) / cortical_size[0])
+    for x in range(len(full_lidar_data)): # grab
+        total_array.append(1 / full_lidar_data[x])
+        if len(total_array) == length_based_off_cortical:
+            name = (counter, 0, 0)
+            counter += 1
+            try:
+                result['ilidar'][name] = sum(total_array) // len(total_array)
+                total_array.clear()
+            except:
+                traceback.print_exc()
+    # print(result['ilidar'])
     return result
+
 
 if __name__ == '__main__':
     rclpy.init(args=None)
@@ -106,7 +108,6 @@ if __name__ == '__main__':
     default_capabilities = config['default_capabilities'].copy()
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
-
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - #
@@ -129,12 +130,16 @@ if __name__ == '__main__':
 
             ## output: [distance_at_minus135deg, distance_at_minus134.75deg, distance_at_minus134.5deg, ...]
             if lidar_data:
-                new_data = convert_lidar_to_feagi_data(lidar_data)
-                message_to_feagi = sensors.add_generic_input_to_feagi_data(
-                    new_data,
-                    message_to_feagi)
+                if pns.full_list_dimension:
+                    size = pns.full_list_dimension['ilidar'][
+                        'cortical_dimensions_per_device']
+                    new_data = convert_lidar_to_feagi_data(lidar_data, size)
+                    message_to_feagi = sensors.add_generic_input_to_feagi_data(
+                        new_data,
+                        message_to_feagi)
             sleep(feagi_settings['feagi_burst_speed'])  # bottleneck
-            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel,
+                                 agent_settings, feagi_settings)
             message_to_feagi.clear()
         except KeyboardInterrupt:
             print("\nStopping measurements...")
