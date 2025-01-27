@@ -3,53 +3,32 @@
 <package format="3">
   <name>hokuyo</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Hokuyo controller package for ROS2</description>
   <maintainer email="kevin.a.araujo@gmail.com">bwuk</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD</license>
 
- <buildtool_depend>ament_cmake</buildtool_depend>
- <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <!-- Edifice -->
-  <exec_depend condition="$IGNITION_VERSION == edifice">ignition-gazebo5</exec_depend>
-  <!-- Dome -->
-  <exec_depend condition="$IGNITION_VERSION == dome">ignition-gazebo4</exec_depend>
-  <!-- Citadel (default) -->
-  <exec_depend condition="$IGNITION_VERSION == citadel">ignition-gazebo3</exec_depend>
-  <exec_depend condition="$IGNITION_VERSION == ''">ignition-gazebo3</exec_depend>
+  <depend>rclpy</depend>
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+
 
   <exec_depend>image_transport_plugins</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros_ign_bridge</exec_depend>
   <exec_depend>ros_ign_gazebo</exec_depend>
   <exec_depend>ros_ign_image</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>rclcpp</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>configuration</exec_depend>
-  <exec_depend>sys</exec_depend>
-  <exec_depend>random</exec_depend>
-
-  
-  
-  
-  <!-- See https://github.com/osrf/ros_ign/issues/40 -->
-  <!--exec_depend>ros_ign_point_cloud</exec_depend-->
   <exec_depend>rqt_image_view</exec_depend>
   <exec_depend>rqt_plot</exec_depend>
   <exec_depend>rqt_topic</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>xacro</exec_depend>
-  
-  
-  <depend condition="$IGNITION_VERSION == citadel">ignition-msgs5</depend>
-  <depend condition="$IGNITION_VERSION == citadel">ignition-transport8</depend>
-  
 
   <export>
     <build_type>ament_cmake</build_type>
   </export>
 </package>
-
