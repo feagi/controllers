@@ -3,7 +3,7 @@ from glob import glob
 import subprocess, os, platform
 
 
-package_name = 'simulation'
+package_name = 'hokuyo'
 
 setup(
     name=package_name,
