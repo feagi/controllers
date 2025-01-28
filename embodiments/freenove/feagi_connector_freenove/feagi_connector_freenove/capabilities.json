@@ -1,0 +1,109 @@
+{
+	"capabilities": {
+		"input": {
+			"battery": {
+				"0": {
+					"custom_name": "battery 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": 100,
+					"min_value": 0
+				}
+			},
+			"camera": {
+				"0": {
+					"custom_name": "front camera",
+					"disabled": false,
+					"eccentricity_control": {
+						"X offset percentage": 1,
+						"Y offset percentage": 1
+					},
+					"feagi_index": 0,
+					"index": "00",
+					"mirror": false,
+					"modulation_control": {
+						"X offset percentage": 99,
+						"Y offset percentage": 99
+					},
+					"threshold_default": 30
+				}
+			},
+			"infrared": {
+				"0": {
+					"custom_name": "infrared 0",
+					"disabled": false,
+					"feagi_index": 0
+				},
+				"1": {
+					"custom_name": "infrared 1",
+					"disabled": false,
+					"feagi_index": 1
+				},
+				"2": {
+					"custom_name": "infrared 2",
+					"disabled": false,
+					"feagi_index": 2
+				}
+			},
+			"proximity": {
+				"0": {
+					"custom_name": "ultrasonic 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": 300,
+					"min_value": 0
+				}
+			}
+		},
+		"output": {
+			"led": {
+				"0": {
+					"custom_name": "led 0",
+					"disabled": false,
+					"feagi_index": 0
+				}
+			},
+			"motor": {
+				"0": {
+					"custom_name": "motor 0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 4094,
+					"rolling_window_len": -1
+				},
+				"1": {
+					"custom_name": "motor 1",
+					"disabled": false,
+					"feagi_index": 1,
+					"max_power": 4094,
+					"rolling_window_len": 2
+				},
+				"2": {
+					"custom_name": "motor 2",
+					"disabled": false,
+					"feagi_index": 2,
+					"max_power": 4094,
+					"rolling_window_len": 2
+				},
+				"3": {
+					"custom_name": "motor 3",
+					"disabled": false,
+					"feagi_index": 3,
+					"max_power": 4094,
+					"rolling_window_len": 2
+				}
+			},
+			"servo": {
+				"0": {
+					"custom_name": "servo 0",
+					"default_value": 90,
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 2,
+					"max_value": 180,
+					"min_value": 0
+				}
+			}
+		}
+	}
+}

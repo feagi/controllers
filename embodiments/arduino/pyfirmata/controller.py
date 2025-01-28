@@ -109,7 +109,7 @@ def action(obtained_data):
 
 if __name__ == "__main__":
     runtime_data = dict()
-    config = feagi.build_up_from_configuration()
+    config = feagi.build_up_from_configuration(serial_in_use=True)
     feagi_settings = config['feagi_settings'].copy()
     agent_settings = config['agent_settings'].copy()
     default_capabilities = config['default_capabilities'].copy()
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Specify the serial port where your Arduino is connected (e.g., 'COM3' on Windows or
     # '/dev/ttyUSB0' on Linux)
     feagi_settings['feagi_burst_speed'] = float(runtime_data["feagi_state"]['burst_duration'])
-    port = capabilities['arduino']['port']  # Don't change this
+    port = agent_settings['usb_port']
     board = Arduino(port)
     it = util.Iterator(board)  # for Analog or Input
     it.start()
