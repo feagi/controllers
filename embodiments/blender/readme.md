@@ -39,7 +39,7 @@ Boilerplates are provided. A controller requires capabilities, networking, requi
 Feagi-connector is the library that enables communication with the brain (FEAGI). We need to create a controller for Blender.
 
 ## Troubleshooting
-- Join our [Discord community](https://chat.expo.dev) to chat with other users and ask questions
+- Join our [Discord community](https://discord.gg/GxHXvY79) to chat with other users and ask questions
 - If you encounter issues building the controller, please create an issue in the repository
 
 # Goal for this project
