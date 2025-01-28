@@ -48,4 +48,7 @@ Feagi-connector is the library that enables communication with the brain (FEAGI)
 # Project Objective
 1) This is very similar to Mujoco and Gazebo, but the difference is that this uses Webots. It should work with FEAGI and enable FEAGI to control any models. See the example below:
 
-
+- https://www.youtube.com/watch?v=1ND9Sw5MaIk
+- https://youtu.be/0dNpxriXLQ4?t=60
+- https://youtu.be/7CH8Sc_mNoI?t=84
+- https://www.youtube.com/watch?v=h-yra2-bHZE
