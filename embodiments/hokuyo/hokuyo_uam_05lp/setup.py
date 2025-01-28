@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from glob import glob
 import os
 
-package_name = 'hokuyo'
+package_name = 'hokuyo_uam_05lp'
 
 setup(
     name=package_name,
@@ -27,7 +27,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'robot = hokuyo.robot:main',
+            'robot = hokuyo_uam_05lp.robot:main',
         ],
     },
 )
