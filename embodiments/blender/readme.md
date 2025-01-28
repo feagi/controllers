@@ -41,3 +41,28 @@ Feagi-connector is the library that enables communication with the brain (FEAGI)
 ## Troubleshooting
 - Join our [Discord community](https://chat.expo.dev) to chat with other users and ask questions
 - If you encounter issues building the controller, please create an issue in the repository
+
+# Goal for this project
+- Control the hand using FEAGI. See the example at the bottom, which is similar to the second video.
+  Official Blender animation example showing manual hand movement:
+
+  ![hand.gif](_static/hand.gif)
+
+    - Here is a video of FEAGI controlling the robotic hand (3:37 to 3:46):
+https://youtu.be/u8Lw8djFQAY?t=217
+
+    - Another example from 0:00 to 0:05:
+https://www.youtube.com/watch?v=1ND9Sw5MaIk
+
+The goal is to enable FEAGI to move any object in Blender, such as arms, eyes, eyebrows, hands, fingers, etc.
+
+- FEAGI should have the capability to rig objects automatically. See this example from Blender:
+
+![rig_example.gif](_static/rig_example.gif)
+
+- FEAGI should be able to update animation keyframes
+
+- The end goal should look similar to this. You don't need to worry about the webcam - focus only on how FEAGI controls Blender.
+See an example of the ideal result:
+
+![motion_detect.gif](_static/motion_detect.gif)
