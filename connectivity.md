@@ -1,7 +1,11 @@
+# Creation of Custom Controller
+The controller enables communication between FEAGI and your robot. It is designed to allow FEAGI to control your embodiment (such as simulations, models, or physical robots).
+
+If you want to connect FEAGI with your own robot, this is the right place for you. There are three different ways your controller can be used for: the Neurorobotics Studio website, Docker, or locally. The Neurorobotics Studio is a website that requires no setup. We also offer Docker and local options. Docker allows you to open a container without additional setup work. The local option lets you build source code directly and access FEAGI directly.
+
 # Environments
 
-There are three types of environments where you can connect Neurorobotics Studio (NRS): **NRS**, **Docker**, and **Local**. These environments are designed to suit your project's specific needs. Among them, **Neurorobotics Studio** is widely recommended for most use cases.
-
+There are three environments where you can connect to Neurorobotics Studio (NRS): **NRS**, **Docker**, and **Local**. These environments are designed to suit your project's specific needs. Among them, **Neurorobotics Studio** is widely recommended for most use cases.
 ---
 
 ## Neurorobotics Studio (NRS)
@@ -57,7 +61,7 @@ There are three types of environments where you can connect Neurorobotics Studio
 
 1. Clone the repository:  
    ```
-   git clone git@github.com:feagi/feagi.git
+   git clone https://github.com/feagi/feagi.git
    ```
 
 2. Navigate to the Docker directory:  
@@ -106,5 +110,11 @@ optional arguments:
   
   -port PORT, --port PORT
                         Change the ZMQ port. Use 30000 for Docker and 3000 for localhost.
-
+                        
+  -usb_address USB_ADDRESS, --usb_address USB_ADDRESS
+                        Specify the USB port for connecting to your embodiment via a USB cable. This flag is optional
+                        and only needs to be set once.
 ```
+
+## Learn More About Controllers
+For detailed information, visit: [create_controller.md](docs/create_controller.md)

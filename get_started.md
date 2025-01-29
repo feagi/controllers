@@ -1,3 +1,4 @@
+# Get started
 1) Please see three examples. Each controller may handle and read data from the source differently, but the way you pass data to FEAGI should be exactly the same as the others.
 
 Tello (Drone) example: https://github.com/feagi/controllers/blob/staging/embodiments/ryze_robotics/tello/controller.py#L245-L293
@@ -31,3 +32,8 @@ If you want to see red voxels, you will need to run the Godot bridge from here: 
 Make sure FEAGI is started before the Godot bridge, then you can use your own controller to test.
 
 Again, it's entirely up to you how you choose to run it. Personally, I prefer running everything locally.
+
+# Additional Information
+For information about connectivity and creating your own controller, visit:
+- [connectivity.md](connectivity.md)
+- [create_controller.md](docs/create_controller.md)

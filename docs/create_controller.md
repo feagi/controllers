@@ -1,5 +1,17 @@
-# How to Create Your Own Controller
+# The Role of the Controller
+![controller_role.001.jpeg](_static/controller_role.001.jpeg)
 
+On the left is any type of embodiment, which can be WebSocket-based, serial-based, protobuf-based, socket-based, or any other protocol. It can also be a Bluetooth device, robotic arm, drone, or RC vehicle, depending on your embodiment's design. The controller's role in this image is to create a bridge that allows FEAGI to communicate with and control your embodiment while receiving data from both FEAGI and the robot.
+
+When the robot sends data, such as sensor readings or camera feed, it passes through the controller. The controller then processes and sends the updated data to FEAGI. Similarly, when FEAGI wants to control the robot—for example, moving a wheel—it sends data to the controller, which converts the commands based on your robot's capabilities and transmits them in the robot's native protocol. The wheel then moves according to these translated commands. In this way, the controller facilitates bidirectional communication between FEAGI and your robot.
+
+
+# Creation of Custom Controller
+The controller enables communication between FEAGI and your robot. It is designed to allow FEAGI to control your embodiment (such as simulations, models, or physical robots).
+
+If you want to connect FEAGI with your own robot, this is the right place for you. There are three different ways your controller can be used for: the Neurorobotics Studio website, Docker, or locally. The Neurorobotics Studio is a website that requires no setup. We also offer Docker and local options. Docker allows you to open a container without additional setup work. The local option lets you build source code directly and access FEAGI directly.
+
+# How to Create Your Own Controller
 Creating your own controller is a highly customizable process, and there is no single "right way" to approach it. This repository contains multiple controllers because there is no universal standard for generic devices or robots. However, many components share commonalities. For instance, accelerometers typically return x, y, and z coordinates, while batteries provide percentage values.
 
 This guide will walk you through implementing and integrating controllers for new or unfamiliar devices.
@@ -10,7 +22,7 @@ This guide will walk you through implementing and integrating controllers for ne
 
 To create a functional controller, you will need the following components:
 
-1. **`capabilities.json`** - Available at [NeuroRobotics Studio](https://neurorobotics.studio/capabilities)
+1. **`capabilities.json`** - Available at [Controller configurator](https://github.com/feagi/controller_configurator)
 2. **`networking.json`** - Included in the controller template
 3. **`controller.py`** - Included in the controller template
 4. **`requirements.txt`** - Included in the controller template
@@ -18,6 +30,8 @@ To create a functional controller, you will need the following components:
    ```bash
    pip3 install feagi_connector
    ```
+   
+
 
 ---
 
