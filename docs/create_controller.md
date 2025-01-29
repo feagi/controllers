@@ -1,97 +1,108 @@
+# The Role of the Controller
+![controller_role.001.jpeg](_static/controller_role.001.jpeg)
+
+On the left is any type of embodiment, which can be WebSocket-based, serial-based, protobuf-based, socket-based, or any other protocol. It can also be a Bluetooth device, robotic arm, drone, or RC vehicle, depending on your embodiment's design. The controller's role in this image is to create a bridge that allows FEAGI to communicate with and control your embodiment while receiving data from both FEAGI and the robot.
+
+When the robot sends data, such as sensor readings or camera feed, it passes through the controller. The controller then processes and sends the updated data to FEAGI. Similarly, when FEAGI wants to control the robot—for example, moving a wheel—it sends data to the controller, which converts the commands based on your robot's capabilities and transmits them in the robot's native protocol. The wheel then moves according to these translated commands. In this way, the controller facilitates bidirectional communication between FEAGI and your robot.
+
+
+# Creation of Custom Controller
+The controller enables communication between FEAGI and your robot. It is designed to allow FEAGI to control your embodiment (such as simulations, models, or physical robots).
+
+If you want to connect FEAGI with your own robot, this is the right place for you. There are three different ways your controller can be used for: the Neurorobotics Studio website, Docker, or locally. The Neurorobotics Studio is a website that requires no setup. We also offer Docker and local options. Docker allows you to open a container without additional setup work. The local option lets you build source code directly and access FEAGI directly.
+
 # How to Create Your Own Controller
+Creating your own controller is a highly customizable process, and there is no single "right way" to approach it. This repository contains multiple controllers because there is no universal standard for generic devices or robots. However, many components share commonalities. For instance, accelerometers typically return x, y, and z coordinates, while batteries provide percentage values.
 
-Everyone has their own preferences for getting started. There is no single right way to build your own controller.
+This guide will walk you through implementing and integrating controllers for new or unfamiliar devices.
 
-As you can see, the repository contains multiple different controllers. Unfortunately, there is no standard approach when it comes to generic devices or robots.
+---
 
-Fortunately, many components are similar. For example, an accelerometer returns x, y, and z coordinates, and a battery returns a percentage.
+## Requirements
 
-This readme will show you how the integration is often used and implemented on unfamiliar controllers.
-# No Controller? No problem! Use the template! 
+To create a functional controller, you will need the following components:
 
-This is the one that Neuraville usually started the base for a new device. 
+1. **`capabilities.json`** - Available at [Controller configurator](https://github.com/feagi/controller_configurator)
+2. **`networking.json`** - Included in the controller template
+3. **`controller.py`** - Included in the controller template
+4. **`requirements.txt`** - Included in the controller template
+5. **`feagi_connector`** - Install using:  
+   ```bash
+   pip3 install feagi_connector
+   ```
+   
 
+
+---
+
+## Understanding `networking.json`
+
+The `networking.json` file enables FEAGI to establish a connection with your controller. Below are the key fields and their purposes:
+
+- **`feagi_host`**: Specifies the host address for FEAGI.  
+  - If running locally, use `127.0.0.1`.  
+  - To connect to another computer, replace this with that computer's IP address.
+  
+- **`magic_link`**: Can be updated by using the `--magic_link` flag such as `python3 controller.py --magic_link "your_magic_paste"
+
+- **`feagi_api_port`**: Defaults to FEAGI's API port.
+
+- **`feagi_url`**: Overrides `feagi_host`.  
+  - If `feagi_url` matches `feagi_host`, it defaults to `feagi_host`.  
+  - If using an API, SDK, or URL-based communication, it skips `feagi_host`.
+
+- **Compression**: Enables ZMQ data compression to improve data exchange speed.
+
+- **Agent-related fields**:
+  - `agent_type`, `agent_id`, and `agent_data_port`: Used by FEAGI to map agents.
+
+---
+
+## Understanding `capabilities.json`
+
+The `capabilities.json` file helps the FEAGI connector understand the features of your embodiment (e.g., simulation, robot, or any device). These capabilities are defined by the controller configurator.
+
+### Data Types
+
+There are two main types of data: **input (sensors)** and **output (actuators)**.
+
+#### Actuators:
+1. **Servo**: Used for incremental or degree-based positioning. Ideal for actuators requiring fixed positions.
+2. **Motor**: Moves continuously and supports a "cool-down" feature (rolling window). For example:
+   - A value of `1`: Power decreases from maximum to 0 immediately.
+   - A value of `4`: Power decreases gradually (e.g., 400 → 300 → 200 → 100 → 0).
+3. **LED**: Controls light sources such as LEDs, light bulbs, or screen backlights.
+4. **Motion Control**: Handles yaw, roll, pitch, and other movement commands (e.g., godot, unreal, simulation, ps5 controller or robots).
+
+#### Sensors:
+1. **Camera**: Captures video or images for vision-based tasks.
+2. **Infrared**: Detects light intensity (dark vs. bright).
+3. **Proximity**: Measures distance using devices like LiDAR, ultrasonic sensors, or range finders.
+4. **Pressure**: Measures force or flex (e.g., pressure sensors).
+5. **Servo Position**: Tracks real-time servo positions using encoders or joint sensors.
+6. **Gyro**: Reads gyroscopic data.
+7. **Accelerometer**: Reads acceleration data along x, y, and z axes.
+8. **Battery**: Monitors battery percentage in real time.
+
+---
+
+## Understanding `requirements.txt`
+
+The `requirements.txt` file documents the dependencies required for your controller to function correctly. To check the installed version of the `feagi_connector`, run:
+
+```bash
+pip3 show feagi_connector
 ```
-#!/usr/bin/env python
 
-import time
-import asyncio
-import traceback
-import threading
-from time import sleep
-from collections import deque
-from version import __version__
-from feagi_connector import sensors
-from feagi_connector import actuators
-from feagi_connector import retina as retina
-from feagi_connector import pns_gateway as pns
-from feagi_connector import feagi_interface as FEAGI
+---
 
-runtime_data = {
-    "current_burst_id": 0,
-    "feagi_state": None,
-    "cortical_list": (),
-    "battery_charge_level": 1,
-    "host_network": {},
-    'motor_status': {},
-    'servo_status': {}
-}
+## Achieving Smooth Robot Movement
 
-previous_frame_data = {}
-rgb = {'camera': {}}
-robot = {'accelerator': {}, "proximity": [], "gyro": [], 'servo_head': [], "battery": [],
-         'lift_height': []}
-camera_data = {"vision": []}
+To ensure smooth operation and avoid conflicts between FEAGI and your robot's internal systems:
 
+1. The robot should only receive action commands from FEAGI.
+2. The robot should only send raw data streams back to FEAGI.
+3. Avoid running additional code directly on the robot itself.
 
-def action(obtained_data):
-    # Example for getting servo and motor from FEAGI
-    recieve_motor_data = actuators.get_motor_data(obtained_data)
-    recieve_servo_data = actuators.get_servo_data(obtained_data)
+The controller acts as a communication bridge between your robot and FEAGI.
 
-
-
-if __name__ == '__main__':
-    config = FEAGI.build_up_from_configuration()
-    feagi_settings = config['feagi_settings'].copy()
-    agent_settings = config['agent_settings'].copy()
-    default_capabilities = config['default_capabilities'].copy()
-    message_to_feagi = config['message_to_feagi'].copy()
-    capabilities = config['capabilities'].copy()
-
-    # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # - - - - - - - - - - - - - - - - - - #
-    feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
-        FEAGI.connect_to_feagi(feagi_settings, runtime_data, agent_settings, capabilities,
-                               __version__)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-    while True:
-        try:
-            message_from_feagi = pns.message_from_feagi
-            if message_from_feagi:
-                obtained_signals = pns.obtain_opu_data(message_from_feagi)
-                action(obtained_signals)
-
-            sleep(feagi_settings['feagi_burst_speed'])
-            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-            message_to_feagi.clear()
-
-        except Exception as e:
-            print("ERROR IN COZMO MAIN CODE: ", e)
-            traceback.print_exc()
-            break
-```
-You can safely copy and paste this into your configuration. You will need to use your configuration as well.
-
-# How do I make robot move so smooth? 
-The robot should not have its own code embedded or any independent code. To allow FEAGI to fully 
-control your robot without confusing FEAGI, ensure that there is no code running on the robot 
-itself. The robot should simply receive data from FEAGI to perform actions and pass the raw data stream back to FEAGI.
-
-The controller will allow your robot to communicate with FEAGI.
-
-# I need a help.
-
-Of course, you do! Just create an issue and ask your question. 
