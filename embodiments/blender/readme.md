@@ -43,6 +43,9 @@ Feagi-connector is the library that enables communication with the brain (FEAGI)
 - If you encounter issues building the controller, please create an issue in the repository
 
 # Goal for this project
+Ultimately, the goal of this project is to build a controller that enables FEAGI to fully control the Blender character, its animations, and the sensors it reads, such as the object's gyroscope and pose, in real time. 
+
+Below is where you can try and start step by step:
 - Control the hand using FEAGI. See the example at the bottom, which is similar to the second video.
   Official Blender animation example showing manual hand movement:
 
