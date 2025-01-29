@@ -1,0 +1,15 @@
+{
+	"capabilities": {
+		"input": {
+			"id_trainer": {
+				"0": {
+					"custom_name": "id ipu",
+					"disabled": false,
+					"feagi_index": 0
+				}
+			}
+		},
+		"output": {
+		}
+	}
+}
