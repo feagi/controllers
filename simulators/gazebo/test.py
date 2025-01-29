@@ -96,6 +96,5 @@ if __name__ == '__main__':
 
         # Sending data to FEAGI
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-        # message_to_feagi.clear()
+        message_to_feagi.clear()
         time.sleep(feagi_settings['feagi_burst_speed'])
-
