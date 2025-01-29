@@ -79,7 +79,7 @@ if __name__ == "__main__":
             'for_feagi_data': {}
         }
 
-    config = FEAGI.build_up_from_configuration()
+    config = FEAGI.build_up_from_configuration(serial_in_use=True)
     feagi_settings = config['feagi_settings'].copy()
     agent_settings = config['agent_settings'].copy()
     default_capabilities = config['default_capabilities'].copy()
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # MYCOBOT SECTION
     mycobot = Arm()
-    arm = mycobot.connection_initialize()
+    arm = mycobot.connection_initialize(agent_settings['usb_port'])
     arm.set_speed(100)
     mycobot.pose_to_default(arm)
     actuators.start_servos(capabilities)

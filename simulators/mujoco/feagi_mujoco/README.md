@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/feagi-connector-mujoco.svg)](https://badge.fury.io/py/feagi-connector-mujoco)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/Neuraville/controllers/blob/14f4f8d6f010f134a48fa40d1e3b25a85a364fe1/LICENSE.txt)
 
-A Python-based connector that enables seamless integration between FEAGI (Fast Extensible Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
+A Python-based connector that enables seamless integration between FEAGI (The Framework for Evolutionary Artificial General Intelligence) and the MuJoCo physics simulation environment. This connector facilitates neural network-driven control of physical simulations.
 
 ## 🚀 Quick Start
 ### Installation
@@ -13,6 +13,17 @@ pip install feagi_connector_mujoco
 
 # Mac/Linux
 pip3 install feagi_connector_mujoco
+```
+
+Prefer to do it in a venv? Do it here:
+```
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 ## 💻 Usage Options
@@ -44,13 +55,13 @@ The Neurorobotics Studio provides a user-friendly web interface for quick setup 
 
 ```
 # Windows
-python -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+python -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 
 # Mac
-mjpython -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+mjpython -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 
 # Linux
-python3 -m feagi_connector_mujoco "YOUR_MAGIC_LINK"
+python3 -m feagi_connector_mujoco --magic_link "YOUR_MAGIC_LINK"
 ```
 
 ### 2. Docker Deployment
