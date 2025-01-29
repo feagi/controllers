@@ -1,0 +1,2 @@
+feagi-connector>=0.0.17
+google-api-python-client==2.160.0
