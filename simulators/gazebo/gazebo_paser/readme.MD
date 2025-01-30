@@ -30,5 +30,17 @@ There are three different ways to install Gazebo. Fortunately, Gazebo supports a
 - sudo apt-get update
 - sudo apt-get install gz-ionic
 
-# Goal of the project  
-The parser should be able to read any SDF and convert it into a tree.json, which contains the translation between Gazebo and FEAGI capabilities, as well as the UI. The parser should also maintain a separate ground truth for sensors/actuators in Gazebo and sensors/actuators in FEAGI. Additionally, this is designed to build capabilities and provide a UI view, allowing users to view the model without requiring any extra work.
+# Goal for this project
+The parser should be able to read any SDF and convert it into a `model_config_tree.json`, which contains the translation between Gazebo and FEAGI capabilities, as well as the UI. The parser should also maintain a separate ground truth for sensors and actuators in both Gazebo and FEAGI. Additionally, it is designed to build capabilities and provide a UI view, allowing users to visualize the model without requiring any extra work.  
+
+See the diagram here:  
+![diagram.png](_static/diagram.png)  
+
+The Gazebo controller is not part of this directory. This directory focuses solely on the Gazebo parser, which is highlighted in green in the diagram. The FEAGI configurator, Gazebo, and the Gazebo controller are outside the scope of the Gazebo parser.  
+
+The Gazebo config template JSON is largely similar to this design:  
+[template.json](../../../embodiments/template/template.json)  
+
+The Gazebo config template will be high-level and should support both input and output, handling multiple types of sensor and actuator data.  
+
+Once the Gazebo parser reads the Gazebo config template, it will process the Gazebo model, create a tree (i.e., a dictionary), and pass it to a new file called `model_config_tree.json`. The FEAGI configurator will then use this file to generate the necessary files for the Gazebo controller. None of the files should be hardcoded, and the parser should work with all types of SDF files.
