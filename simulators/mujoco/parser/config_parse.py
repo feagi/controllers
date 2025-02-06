@@ -1,6 +1,8 @@
 import json
+import mujoco.viewer
 import xml.etree.ElementTree as ET
 
+xml_actuators_type = dict()
 
 TRANSMISSION_TYPES = {
     'position': 'servo',
@@ -172,3 +174,30 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
 
 def convert_dict_to_json(configs):
     return json.dumps(configs)
+
+
+def obtain_xml(xml):
+    return xml
+
+
+def update_actuator_and_sensor(xml_file):
+    model = mujoco.MjModel.from_xml_path(xml_file)
+    files = check_nest_file_from_xml(xml_file)
+    xml_info = get_actuators(files)
+    xml_info = get_sensors(files, xml_info)
+    return model, xml_info, files
+
+def xml_to_config(xml_file):
+    # This will generate all necessary for actuator and sensor information
+    model, xml_actuators_type, files = update_actuator_and_sensor(xml_file)
+
+    # Just obtain the actuator list that mujoco_tree_config needs
+    actuator_information = generate_actuator_list(model, xml_actuators_type)
+
+    # Just obtain the sensor list that mujoco_tree_config needs
+    sensor_information = generate_sensor_list(model, xml_actuators_type)
+
+    config_dict = mujoco_tree_config(files, actuator_information, sensor_information)  # get dict of config
+
+    # This is where you just send json to anywhere.
+    return convert_dict_to_json(config_dict)
