@@ -19,7 +19,7 @@ camera_data = {"vision": {'0': []}}
 previous_frame_data = dict()
 rgb = dict()
 rgb['camera'] = dict()
-raw_data_msg = {'camera': [], "gyro": []}
+raw_data_msg = {'camera': [], "gyro": [], 'ultrasonic': 0}
 FEAGI.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
 
 
@@ -77,7 +77,13 @@ def initalize_gyro():
 
 
 def initalize_camera():
-    topic_command = ["gz", "topic", "-e", "-t", "/Camera0/image", "--json-output"]  # I hardcoded. Otherrobot has this
+    topic_command = ["gz", "topic", "-e", "-t", "/Camera0/image", "--json-output"]
+    topic_process = subprocess.Popen(topic_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return topic_process
+
+
+def initalize_ultrasonic():
+    topic_command = ["gz", "topic", "-e", "-t", "/ultrasonic0", "--json-output"]
     topic_process = subprocess.Popen(topic_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return topic_process
 
@@ -89,6 +95,11 @@ def read_gyro(gyro_instance):
 def get_camera_json(camera_instance):
     while True:
         raw_data_msg['camera'] = json.loads(camera_instance.stdout.readline())
+        time.sleep(0.0001)
+
+def get_ultrasonic_json(ultrasonic_instance):
+    while True:
+        raw_data_msg['ultrasonic'] = json.loads(ultrasonic_instance.stdout.readline())
         time.sleep(0.0001)
 
 
@@ -142,6 +153,9 @@ if __name__ == '__main__':
     # gyro
     gyro_instance = initalize_gyro()
     threading.Thread(target=get_gyro_json, args=(gyro_instance,), daemon=True).start()
+    # ultrasonic
+    ultrasonic_instance = initalize_ultrasonic()
+    threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
     # server_process = subprocess.Popen(server_command, shell=True)
@@ -172,6 +186,11 @@ if __name__ == '__main__':
             if gyro:
                 message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
                                                                  symmetric=True, measure_enable=True)
+            data_from_ultrasonic = raw_data_msg['ultrasonic']
+            if data_from_ultrasonic['ranges'][0] == '-Infinity': # temp workaround
+                data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
+            message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
+                                                             data_from_ultrasonic['ranges'][0], symmetric=True)
 
             # Sending data to FEAGI
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
