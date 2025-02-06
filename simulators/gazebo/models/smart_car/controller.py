@@ -21,6 +21,7 @@ rgb = dict()
 rgb['camera'] = dict()
 raw_data_msg = {'camera': [], "gyro": [], 'ultrasonic': 0}
 FEAGI.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
+gazebo_motor_using_joint_controller = {}
 
 
 def check_the_flag():
@@ -88,6 +89,16 @@ def initalize_ultrasonic():
     return topic_process
 
 
+def send(topic, message_type, data):
+    command_list = [
+        'gz', 'topic',
+        '-t', topic,
+        '-m', message_type,
+        '-p', f'data: {data}'
+    ]
+    subprocess.run(command_list)
+
+
 def read_gyro(gyro_instance):
     return json.loads(gyro_instance.stdout.readline())
 
@@ -96,6 +107,7 @@ def get_camera_json(camera_instance):
     while True:
         raw_data_msg['camera'] = json.loads(camera_instance.stdout.readline())
         time.sleep(0.0001)
+
 
 def get_ultrasonic_json(ultrasonic_instance):
     while True:
@@ -122,6 +134,20 @@ def read_camera(raw_data_msg):
         return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     else:
         return []
+
+
+def action(obtained_data, gazebo_motor_using_joint_controller):
+    recieve_motor_data = actuators.get_motor_data(obtained_data)
+    print("gazebo joint data: ", gazebo_motor_using_joint_controller)
+    print(recieve_motor_data)
+    if recieve_motor_data:
+        for motor_id in recieve_motor_data:
+            if motor_id not in gazebo_motor_using_joint_controller:
+                gazebo_motor_using_joint_controller[motor_id] = recieve_motor_data[motor_id]
+            gazebo_motor_using_joint_controller[motor_id] += recieve_motor_data[motor_id]
+            topic = '/M' + str(motor_id)
+            # send(topic, 'gz.msgs.Double', gazebo_motor_using_joint_controller[motor_id])
+    return gazebo_motor_using_joint_controller
 
 
 if __name__ == '__main__':
@@ -178,6 +204,7 @@ if __name__ == '__main__':
             message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
             if message_from_feagi:
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
+                gazebo_motor_using_joint_controller = action(obtained_signals, gazebo_motor_using_joint_controller)
 
             # Add gyro data into feagi data
             data_from_gyro = raw_data_msg['gyro']
@@ -187,7 +214,7 @@ if __name__ == '__main__':
                 message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
                                                                  symmetric=True, measure_enable=True)
             data_from_ultrasonic = raw_data_msg['ultrasonic']
-            if data_from_ultrasonic['ranges'][0] == '-Infinity': # temp workaround
+            if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
                 data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
             message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
                                                              data_from_ultrasonic['ranges'][0], symmetric=True)
