@@ -19,6 +19,15 @@
 					"threshold_default": 1
 				}
 			},
+			"proximity": {
+				"0": {
+					"custom_name": "proximity_0",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": 3.1,
+					"min_value": 0
+				}
+			},
 			"accelerometer": {
 				"0": {
 					"custom_name": "accelerometer_0",
