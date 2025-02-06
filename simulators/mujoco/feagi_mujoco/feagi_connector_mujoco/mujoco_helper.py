@@ -439,25 +439,40 @@ def generate_config(element, actuator_list, sensor_list):
     part_config = {
         'name': None,
         'type': element.tag,  # Changed from category_type to element.tag
-        'subtype': None,
+        'feagi device type': None,
         'properties': {},
         'description': '',
         'children': []
     }
 
     part_config['name'] = element.attrib.get('name')
-    part_config['properties'] = element.attrib.copy()
     if part_config['name'] in actuator_list:
-        part_config['subtype'] = actuator_list[part_config['name']]['type']
+        part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['name']]['type']]
+        part_config['type'] = 'output'
+        part_config['properties'] = {
+            key: element.attrib[key]
+            for key in element.attrib
+            if key != 'type' and key != 'name'
+        }
     elif part_config['name'] in sensor_list:
-        part_config['subtype'] = sensor_list[part_config['name']]['type']
+        part_config['feagi device type'] = SENSING_TYPES[sensor_list[part_config['name']]['type']]
+        part_config['type'] = 'input'
+        part_config['properties'] = {
+            key: element.attrib[key]
+            for key in element.attrib
+            if key != 'type' and key != 'name'
+        }
+        # part_config['properties'] = element.attrib.copy()
     else:
-        part_config['subtype'] = part_config['type']
+        del part_config['feagi device type']
+        del part_config['properties']
+        part_config['type'] = 'body'
 
     # Recursively process children
     for child in list(element):
         child_config = generate_config(child, actuator_list, sensor_list)  # inception movie
-        part_config['children'].append(child_config)
+        if child.tag in ['body', 'joint', 'motor', 'framequat', 'distance', 'rangefinder']: # whatever gets the ball rolling
+            part_config['children'].append(child_config)
 
     return part_config  # Important to return the config!
 
@@ -476,8 +491,8 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
                     body_config = generate_config(element, actuator_list, sensor_list)
                     configs.append(body_config)
     # Save first config to JSON with nice formatting
-    with open('test.json', 'w') as f:
-        json.dump(configs[0], f, indent=4)
+    with open('sample_json.json', 'w') as f:
+        json.dump(configs, f, indent=4)
 
     print("Saved configuration to test.json")
     print("***" * 20)
