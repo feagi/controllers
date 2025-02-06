@@ -21,7 +21,7 @@ rgb = dict()
 rgb['camera'] = dict()
 raw_data_msg = {'camera': [], "gyro": [], 'ultrasonic': 0}
 FEAGI.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
-gazebo_motor_using_joint_controller = {}
+gazebo_actuator = {'servo': {}, 'motor': {}}
 
 
 def check_the_flag():
@@ -90,13 +90,8 @@ def initalize_ultrasonic():
 
 
 def send(topic, message_type, data):
-    command_list = [
-        'gz', 'topic',
-        '-t', topic,
-        '-m', message_type,
-        '-p', f'data: {data}'
-    ]
-    subprocess.run(command_list)
+    command = f'gz topic -t {topic} -m {message_type} -p "data: {data}" &'
+    subprocess.run(command, shell=True)
 
 
 def read_gyro(gyro_instance):
@@ -136,18 +131,81 @@ def read_camera(raw_data_msg):
         return []
 
 
-def action(obtained_data, gazebo_motor_using_joint_controller):
+def monitor_motor_in_background(gazebo_actuator):
+    previous_state = {
+        'servo': {},
+        'motor': {}
+    }
+
+    while True:
+        # Track what needs to be sent
+        changes_to_send = {
+            'servo': [],
+            'motor': []
+        }
+        # Check each actuator type (servo and motor)
+        for actuator_type in ['servo', 'motor']:
+            current_values = gazebo_actuator[actuator_type]
+            prev_values = previous_state[actuator_type]
+
+            # Check each channel (0,1,2,3...)
+            for channel, value in current_values.items():
+                if channel not in prev_values or value != prev_values[channel]:
+                    changes_to_send[actuator_type].append(channel)
+
+        # Send only what changed
+        if changes_to_send['servo'] or changes_to_send['motor']:
+            for channel in changes_to_send['servo']:
+                topic = f'/S{channel}'
+                send(topic, 'gz.msgs.Double', gazebo_actuator['servo'][channel])
+
+            for channel in changes_to_send['motor']:
+                topic = f'/M{channel}'
+                send(topic, 'gz.msgs.Double', gazebo_actuator['motor'][channel])
+
+        # Update previous state
+        previous_state = {
+            'servo': gazebo_actuator['servo'].copy(),
+            'motor': gazebo_actuator['motor'].copy()
+        }
+
+
+def data_opu(action, gazebo_actuator):
+    old_message = {}
+    while True:
+        message_from_feagi = pns.message_from_feagi
+        if old_message != message_from_feagi:
+            if message_from_feagi:
+                if pns.full_template_information_corticals:
+                    obtained_signals = pns.obtain_opu_data(message_from_feagi)
+                    gazebo_actuator = action(obtained_signals, gazebo_actuator)
+        time.sleep(0.001)
+
+
+def action(obtained_data, gazebo_actuator):
     recieve_motor_data = actuators.get_motor_data(obtained_data)
-    print("gazebo joint data: ", gazebo_motor_using_joint_controller)
-    print(recieve_motor_data)
+    recieve_servo_data = actuators.get_servo_data(obtained_data)
+    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+
+    if recieve_servo_position_data:
+        for servo_id in recieve_servo_position_data:
+            if servo_id not in gazebo_actuator['servo']:
+                gazebo_actuator['servo'][servo_id] = recieve_servo_position_data[servo_id]
+            gazebo_actuator['servo'][servo_id] = recieve_servo_position_data[servo_id]
+
+    if recieve_servo_data:
+        for servo_id in recieve_servo_data:
+            if servo_id not in gazebo_actuator['servo']:
+                gazebo_actuator['servo'][servo_id] = recieve_servo_data[servo_id]
+            gazebo_actuator['servo'][servo_id] = recieve_servo_data[servo_id]
+
+
     if recieve_motor_data:
         for motor_id in recieve_motor_data:
-            if motor_id not in gazebo_motor_using_joint_controller:
-                gazebo_motor_using_joint_controller[motor_id] = recieve_motor_data[motor_id]
-            gazebo_motor_using_joint_controller[motor_id] += recieve_motor_data[motor_id]
-            topic = '/M' + str(motor_id)
-            # send(topic, 'gz.msgs.Double', gazebo_motor_using_joint_controller[motor_id])
-    return gazebo_motor_using_joint_controller
+            if motor_id not in gazebo_actuator:
+                gazebo_actuator[motor_id] = recieve_motor_data[motor_id]
+            gazebo_actuator[motor_id] += recieve_motor_data[motor_id]
+    return gazebo_actuator
 
 
 if __name__ == '__main__':
@@ -182,6 +240,10 @@ if __name__ == '__main__':
     # ultrasonic
     ultrasonic_instance = initalize_ultrasonic()
     threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
+
+    threading.Thread(target=monitor_motor_in_background, args=(gazebo_actuator,),
+                     daemon=True).start()
+    threading.Thread(target=data_opu, args=(action, gazebo_actuator), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
     # server_process = subprocess.Popen(server_command, shell=True)
@@ -204,18 +266,19 @@ if __name__ == '__main__':
             message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
             if message_from_feagi:
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
-                gazebo_motor_using_joint_controller = action(obtained_signals, gazebo_motor_using_joint_controller)
 
             # Add gyro data into feagi data
             data_from_gyro = raw_data_msg['gyro']
-            gyro = {'0': [data_from_gyro['orientation']['x'], data_from_gyro['orientation']['y'],
-                          data_from_gyro['orientation']['z']]}
-            if gyro:
-                message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
-                                                                 symmetric=True, measure_enable=True)
+            if data_from_gyro:
+                gyro = {'0': [data_from_gyro['orientation']['x'], data_from_gyro['orientation']['y'],
+                              data_from_gyro['orientation']['z']]}
+                if gyro:
+                    message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
+                                                                     symmetric=True, measure_enable=True)
             data_from_ultrasonic = raw_data_msg['ultrasonic']
-            if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
-                data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
+            if data_from_ultrasonic:
+                if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
+                    data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
             message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
                                                              data_from_ultrasonic['ranges'][0], symmetric=True)
 
