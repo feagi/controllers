@@ -19,7 +19,7 @@ camera_data = {"vision": {'0': []}}
 previous_frame_data = dict()
 rgb = dict()
 rgb['camera'] = dict()
-raw_data_msg = {'camera': []}
+raw_data_msg = {'camera': [], "gyro": []}
 FEAGI.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
 
 
@@ -72,12 +72,12 @@ def create_entity():
 
 def initalize_gyro():
     topic_command = ["gz", "topic", "-e", "-t", "/imu", "--json-output"]
-    topic_process = subprocess.Popen(topic_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    topic_process = subprocess.Popen(topic_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return topic_process
 
 
 def initalize_camera():
-    topic_command = ["gz", "topic", "-e", "-t", "/camera", "--json-output"]
+    topic_command = ["gz", "topic", "-e", "-t", "/Camera0/image", "--json-output"]  # I hardcoded. Otherrobot has this
     topic_process = subprocess.Popen(topic_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return topic_process
 
@@ -89,6 +89,12 @@ def read_gyro(gyro_instance):
 def get_camera_json(camera_instance):
     while True:
         raw_data_msg['camera'] = json.loads(camera_instance.stdout.readline())
+        time.sleep(0.0001)
+
+
+def get_gyro_json(gyro_instance):
+    while True:
+        raw_data_msg['gyro'] = json.loads(gyro_instance.stdout.readline())
         time.sleep(0.0001)
 
 
@@ -130,6 +136,12 @@ if __name__ == '__main__':
     threading.Thread(target=retina.vision_progress, args=(default_capabilities, feagi_settings, camera_data,),
                      daemon=True).start()
 
+    # camera
+    camera_instance = initalize_camera()
+    threading.Thread(target=get_camera_json, args=(camera_instance,), daemon=True).start()
+    # gyro
+    gyro_instance = initalize_gyro()
+    threading.Thread(target=get_gyro_json, args=(gyro_instance,), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
     # server_process = subprocess.Popen(server_command, shell=True)
@@ -138,9 +150,6 @@ if __name__ == '__main__':
     print("Creating a new entity in Gazebo...")
     time.sleep(2)
     create_entity()
-    gyro_instance = initalize_gyro()
-    camera_instance = initalize_camera()
-    threading.Thread(target=get_camera_json, args=(camera_instance,), daemon=True).start()
     while True:
         try:
             raw_frame = read_camera(raw_data_msg)
@@ -156,13 +165,13 @@ if __name__ == '__main__':
             if message_from_feagi:
                 obtained_signals = pns.obtain_opu_data(message_from_feagi)
 
-            # # Add gyro data into feagi data
-            # data_from_gyro = read_gyro(gyro_instance)
-            # gyro = {'0': [data_from_gyro['orientation']['x'], data_from_gyro['orientation']['y'],
-            #               data_from_gyro['orientation']['z']]}
-            # if gyro:
-            #     message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
-            #                                                      symmetric=True, measure_enable=True)
+            # Add gyro data into feagi data
+            data_from_gyro = raw_data_msg['gyro']
+            gyro = {'0': [data_from_gyro['orientation']['x'], data_from_gyro['orientation']['y'],
+                          data_from_gyro['orientation']['z']]}
+            if gyro:
+                message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
+                                                                 symmetric=True, measure_enable=True)
 
             # Sending data to FEAGI
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
