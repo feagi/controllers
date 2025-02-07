@@ -26,14 +26,14 @@
 						"X offset percentage": 1,
 						"Y offset percentage": 1
 					},
-					"feagi_index": 0,
+					"feagi_index": 1,
 					"index": "00",
 					"mirror": true,
 					"modulation_control": {
 						"X offset percentage": 99,
 						"Y offset percentage": 99
 					},
-					"threshold_default": 1
+					"threshold_default": 50
 				}
 			},
 			"gyro": {
