@@ -131,7 +131,7 @@ def read_camera(raw_data_msg):
         return []
 
 
-def monitor_motor_in_background(gazebo_actuator):
+def monitor_motor_in_background(gazebo_actuator, feagi_settings):
     previous_state = {
         'servo': {},
         'motor': {}
@@ -168,7 +168,8 @@ def monitor_motor_in_background(gazebo_actuator):
             'servo': gazebo_actuator['servo'].copy(),
             'motor': gazebo_actuator['motor'].copy()
         }
-        if changes_to_send['servo']
+        time.sleep(feagi_settings['feagi_burst_speed'])
+
 
 
 def data_opu(action, gazebo_actuator):
@@ -180,6 +181,7 @@ def data_opu(action, gazebo_actuator):
                 if pns.full_template_information_corticals:
                     obtained_signals = pns.obtain_opu_data(message_from_feagi)
                     gazebo_actuator = action(obtained_signals, gazebo_actuator)
+                    old_message = copy.deepcopy(message_from_feagi)
         time.sleep(0.001)
 
 
@@ -202,9 +204,9 @@ def action(obtained_data, gazebo_actuator):
 
     if recieve_motor_data:
         for motor_id in recieve_motor_data:
-            if motor_id not in gazebo_actuator:
-                gazebo_actuator[motor_id] = recieve_motor_data[motor_id]
-            gazebo_actuator[motor_id] += recieve_motor_data[motor_id]
+            if motor_id not in gazebo_actuator['motor']:
+                gazebo_actuator['motor'][motor_id] = recieve_motor_data[motor_id]
+            gazebo_actuator['motor'][motor_id] += recieve_motor_data[motor_id]
     return gazebo_actuator
 
 
@@ -241,6 +243,7 @@ if __name__ == '__main__':
     ultrasonic_instance = initalize_ultrasonic()
     threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
     threading.Thread(target=data_opu, args=(action, gazebo_actuator), daemon=True).start()
+    threading.Thread(target=monitor_motor_in_background, args=(gazebo_actuator,feagi_settings), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
     # server_process = subprocess.Popen(server_command, shell=True)
@@ -274,6 +277,8 @@ if __name__ == '__main__':
             if data_from_ultrasonic:
                 if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
                     data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
+                if data_from_ultrasonic['ranges'][0] == 'Infinity':  # temp workaround
+                    data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['max_value']
                 message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
                                                                  data_from_ultrasonic['ranges'][0], symmetric=True)
 
