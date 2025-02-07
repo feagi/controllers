@@ -452,20 +452,21 @@
           <always_on>1</always_on>
           <topic>Camera0</topic>
           <camera>
-<!--            <horizontal_fov>0.1</horizontal_fov>-->
+            <horizontal_fov>1.047</horizontal_fov>
             <image>
-              <width>600</width>
-              <height>600</height>
-              <format>L_INT8</format>
-<!--              <anti-aliasing>1</anti-aliasing>-->
+              <width>320</width>
+              <height>240</height>
             </image>
             <clip>
               <near>0.1</near>
-              <far>10</far>
+              <far>100</far>
             </clip>
-            <scale_to_hfov>true</scale_to_hfov>
           </camera>
-      </sensor>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <topic>camera</topic>
+        </sensor>
     </link>
 
       <link name='right_IR'>
@@ -644,8 +645,8 @@
       </joint>
       <!--      M2 topic-->
     <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>rear_left_wheel_joint</joint_name>
                 <topic>M2</topic>
     </plugin>
@@ -681,8 +682,8 @@
       </joint>
       <!--      M3 topic-->
     <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>rear_right_wheel_joint</joint_name>
                 <topic>M3</topic>
     </plugin>
@@ -719,8 +720,8 @@
       </joint>
       <!--      M0 topic-->
     <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>front_left_wheel_joint</joint_name>
                 <topic>M0</topic>
     </plugin>
@@ -756,8 +757,8 @@
       </joint>
       <!--      M1 topic-->
     <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>front_right_wheel_joint</joint_name>
                 <topic>M1</topic>
     </plugin>
@@ -798,8 +799,8 @@
       </joint>
             <!--      S0 topic-->
     <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>head_attach</joint_name>
                 <topic>S0</topic>
                 <p_gain>10</p_gain>
@@ -842,8 +843,8 @@
   </joint>
             <!--      S1 topic-->
       <plugin
-          filename="ignition-gazebo-joint-position-controller-system"
-          name="ignition::gazebo::systems::JointPositionController">
+          filename="gz-sim-joint-position-controller-system"
+          name="gz::sim::systems::JointPositionController">
           <joint_name>head_attach2</joint_name>
                 <topic>S1</topic>
                 <p_gain>10</p_gain>
@@ -881,8 +882,8 @@
     <child>middle_IR</child>
   </joint>
 
-    <plugin filename="ignition-gazebo-linearbatteryplugin-system"
-        name="ignition::gazebo::systems::LinearBatteryPlugin">
+    <plugin filename="gz-sim-linearbatteryplugin-system"
+        name="gz::sim::systems::LinearBatteryPlugin">
         <!--Li-ion battery spec from LIR18650 datasheet-->
         <battery_name>linear_battery</battery_name>
         <voltage>8.40</voltage>
@@ -903,8 +904,8 @@
       </plugin>
 
   <plugin
-      filename="ignition-gazebo-sensors-system"
-      name="ignition::gazebo::systems::Sensors">
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
   </plugin>
 
