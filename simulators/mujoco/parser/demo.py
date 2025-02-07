@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 """
-import config_parse
+import config_parser
 
 if __name__ == '__main__':
-    config_parse.xml_to_config('./humanoid.xml')
+    config_parser.xml_to_config('replace_file_name_here')
