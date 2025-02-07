@@ -1,0 +1,39 @@
+{
+    "actuator": {
+        "position": "servo",
+        "motor": "motor",
+        "general": "motor"
+    },
+    "sensor": {
+        "framequat": "gyro",
+        "distance": "proximity",
+        "rangefinder": "camera"
+    },
+    "sensor_tag_to_name": {
+        "distance": "geom1",
+        "rangefinder": "site",
+        "framequat": "objname"
+    },
+    "ignore_list": [
+        "disabled",
+        "type",
+        "description",
+        "optional",
+        "feagi_index",
+        "threshold_default",
+        "custom_name",
+        "index",
+        "mirror"
+    ],
+    "allow_list": [
+        "body",
+        "joint",
+        "motor",
+        "framequat",
+        "distance",
+        "rangefinder",
+        "camera",
+        "site",
+        "replicate"
+    ]
+}
