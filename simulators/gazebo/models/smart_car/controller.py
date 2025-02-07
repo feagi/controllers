@@ -168,6 +168,7 @@ def monitor_motor_in_background(gazebo_actuator):
             'servo': gazebo_actuator['servo'].copy(),
             'motor': gazebo_actuator['motor'].copy()
         }
+        if changes_to_send['servo']
 
 
 def data_opu(action, gazebo_actuator):
@@ -198,7 +199,6 @@ def action(obtained_data, gazebo_actuator):
             if servo_id not in gazebo_actuator['servo']:
                 gazebo_actuator['servo'][servo_id] = recieve_servo_data[servo_id]
             gazebo_actuator['servo'][servo_id] = recieve_servo_data[servo_id]
-
 
     if recieve_motor_data:
         for motor_id in recieve_motor_data:
@@ -240,9 +240,6 @@ if __name__ == '__main__':
     # ultrasonic
     ultrasonic_instance = initalize_ultrasonic()
     threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
-
-    threading.Thread(target=monitor_motor_in_background, args=(gazebo_actuator,),
-                     daemon=True).start()
     threading.Thread(target=data_opu, args=(action, gazebo_actuator), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
@@ -261,16 +258,14 @@ if __name__ == '__main__':
                 default_capabilities,
                 previous_frame_data,
                 rgb, capabilities)
-            message_from_feagi = pns.message_from_feagi
             # INSERT SENSORS INTO the FEAGI DATA SECTION BEGIN
             message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
-            if message_from_feagi:
-                obtained_signals = pns.obtain_opu_data(message_from_feagi)
 
             # Add gyro data into feagi data
             data_from_gyro = raw_data_msg['gyro']
             if data_from_gyro:
-                gyro = {'0': [data_from_gyro['orientation']['x'], data_from_gyro['orientation']['y'],
+                gyro = {'0': [data_from_gyro['orientation']['x'],
+                              data_from_gyro['orientation']['y'],
                               data_from_gyro['orientation']['z']]}
                 if gyro:
                     message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
@@ -279,8 +274,8 @@ if __name__ == '__main__':
             if data_from_ultrasonic:
                 if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
                     data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['min_value']
-            message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
-                                                             data_from_ultrasonic['ranges'][0], symmetric=True)
+                message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
+                                                                 data_from_ultrasonic['ranges'][0], symmetric=True)
 
             # Sending data to FEAGI
             pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
