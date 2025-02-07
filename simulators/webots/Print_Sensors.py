@@ -57,7 +57,8 @@ for sensor in sensors:
 
 # Main loop:
 while robot.step(timestep) != -1:
-    for sensor in sensors:
-        print(f"{sensor.getName()} Value: {sensor.getValue()}")
+    #Uncomment this loop when you want a continuous printout of sensor values
+    #for sensor in sensors:
+    #    print(f"{sensor.getName()} Value: {sensor.getValue()}")
 
     pass
