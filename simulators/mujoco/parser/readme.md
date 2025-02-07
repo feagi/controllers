@@ -8,5 +8,19 @@ Here is the diagram:
 ![diagram.png](_static/diagram.png)
 
 
-# How to Use Config Parser Library in demo.py
-Replace `replace_file_name_here` with your filename to generate the config.
+# Using the Config Parser Library
+
+## Quick Start
+```python
+import config_parser
+
+# Generate config of json from your XML file
+config = config_parser.xml_to_config('your_model.xml')
+```
+
+## Overview
+The Config Parser Library provides a simple way to convert MuJoCo XML model files into `model_config_tree.json`. 
+## Usage
+1. Import the library in your Python script
+2. Call the `xml_to_config()` function with your XML filename
+3. The function returns a `model_config_tree.json`
