@@ -18,6 +18,8 @@ limitations under the License.
 """
 
 import copy
+import json
+
 import numpy as np
 from feagi_connector import retina
 import xml.etree.ElementTree as ET
@@ -33,7 +35,6 @@ SENSING_TYPES = {
     'distance': 'proximity',
     'rangefinder': 'camera'
 }
-
 
 def validate_name(name):
     symbols = ['/', '\\']
@@ -160,8 +161,7 @@ def get_actuators(files):
                     name = "actuator_" + str(counter)
                     counter += 1
                 name = validate_name(name)
-                actuators['output'][name] = {
-                    'type': actuator.tag}
+                actuators['output'][name] = {'type': actuator.tag}
     return actuators
 
 
@@ -180,6 +180,16 @@ def get_sensors(files, sensors):
             for sensor in sensor_section:
                 name = sensor.get('name')
                 sensors['input'][name] = {'type': sensor.tag}
+
+                # Get all attributes of the sensor
+                for attr_name, attr_value in sensor.attrib.items():
+                    if attr_name != 'name':  # Skip name as we already stored it
+                        sensors['input'][name][attr_name] = attr_value
+
+                # Get text content if it exists
+                if sensor.text and sensor.text.strip():
+                    sensors['input'][name]['value'] = sensor.text.strip()
+
     return sensors
 
 
@@ -386,3 +396,120 @@ def read_lidar(data, sensor_information):
             raw_frame = retina.RGB_list_to_ndarray(flat_result, [16, 16])
             camera_data = {str(index): retina.update_astype(raw_frame)}
     return camera_data
+
+
+def mujoco_config_parser(category_type, parts_dictionary, config_tree):
+    """
+    Adds parts configuration to the MuJoCo config tree.
+
+    Args:
+        category_type (str): Type category of the parts (e.g., 'sensor', 'actuator')
+        parts_dictionary (dict): Dictionary containing part configurations
+        config_tree (list): List to store the processed configurations
+
+    Returns:
+        list: Updated config tree with new part configurations
+    """
+    part_config = {
+        'name': None,
+        'type': category_type,
+        'subtype': None,
+        'properties': {},
+        'children': []
+    }
+
+    for part_name, part_data in parts_dictionary.items():
+        # Create a new configuration for each part
+        current_config = part_config.copy()
+        current_config['name'] = part_name
+        current_config['subtype'] = part_data['type']
+
+
+        current_config['properties'] = {
+            key: value for key, value in part_data.items()
+            if key != 'type' and key != 'name'
+        }
+
+        config_tree.append(copy.deepcopy(current_config))
+    return config_tree
+
+
+
+def generate_config(element, actuator_list, sensor_list):
+    part_config = {
+        'name': None,
+        'type': element.tag,  # Changed from category_type to element.tag
+        'feagi device type': None,
+        'properties': {},
+        'description': '',
+        'children': []
+    }
+
+    part_config['name'] = element.attrib.get('name')
+    if part_config['name'] in actuator_list:
+        part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['name']]['type']]
+        part_config['type'] = 'output'
+        part_config['properties'] = {
+            key: element.attrib[key]
+            for key in element.attrib
+            if key != 'type' and key != 'name'
+        }
+    elif part_config['name'] in sensor_list:
+        part_config['feagi device type'] = SENSING_TYPES[sensor_list[part_config['name']]['type']]
+        part_config['type'] = 'input'
+        part_config['properties'] = {
+            key: element.attrib[key]
+            for key in element.attrib
+            if key != 'type' and key != 'name'
+        }
+        # part_config['properties'] = element.attrib.copy()
+    else:
+        del part_config['feagi device type']
+        del part_config['properties']
+        part_config['type'] = 'body'
+
+    # Recursively process children
+    for child in list(element):
+        child_config = generate_config(child, actuator_list, sensor_list)  # inception movie
+        if child.tag in ['body', 'joint', 'motor', 'framequat', 'distance', 'rangefinder']: # whatever gets the ball rolling
+            part_config['children'].append(child_config)
+
+    return part_config  # Important to return the config!
+
+
+def mujoco_tree_config(xml_file, actuator_list, sensor_list):
+    configs = []  # List to store configurations for each file
+
+    for xml_path in xml_file:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+        body_elements = root.findall('.//worldbody')
+
+        for body in body_elements:
+            for element in list(body):
+                if element.tag == 'body':
+                    body_config = generate_config(element, actuator_list, sensor_list)
+                    configs.append(body_config)
+    # Save first config to JSON with nice formatting
+    with open('sample_json.json', 'w') as f:
+        json.dump(configs, f, indent=4)
+
+    print("Saved configuration to test.json")
+    print("***" * 20)
+
+    return configs
+    # print("test: ", xml_file)
+    # for xml_path in xml_file:
+    #     # Parse the XML file
+    #     print("HERE: ", xml_path)
+    #     tree = ET.parse(xml_path)
+    #     root = tree.getroot()
+    #     child_elements = list(root)  # or root.getchildren() in older versions
+    #     print("Child elements:", [child.tag for child in child_elements])
+    #     print(root, "\n\n")
+    #
+    #     # Find the sensor section
+    #     sensor_section = root.find('worldbody')
+    #     child_elements = list(sensor_section)  # or root.getchildren() in older versions
+    #     for i in child_elements:
+    #         print(list(i))
