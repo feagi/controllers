@@ -119,7 +119,7 @@ def get_sensors(files, sensors):
 
 
 def generate_config(element, actuator_list, sensor_list):
-    ignore_list = ['disabled', 'type', 'description', 'optional', 'feagi_index', 'threshold_default', 'custom_name', "index", "mirror"]
+    ignore_list = config['ignore_list']
     part_config = {'name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
                    'description': '', 'children': []}
     with open("./template.json", "r") as f:
@@ -155,8 +155,7 @@ def generate_config(element, actuator_list, sensor_list):
     # Recursively process children
     for child in list(element):
         child_config = generate_config(child, actuator_list, sensor_list)  # inception movie
-        if child.tag in ['body', 'joint', 'motor', 'framequat', 'distance',
-                         'rangefinder', 'camera', 'site', 'replicate', ]:  # whatever gets the ball rolling
+        if child.tag in config['allow_list']:  # whatever gets the ball rolling
             part_config['children'].append(child_config)
 
     return part_config  # Important to return the config!
