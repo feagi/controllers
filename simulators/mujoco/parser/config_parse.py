@@ -1,20 +1,15 @@
+import copy
 import json
 import mujoco.viewer
 import xml.etree.ElementTree as ET
 
 xml_actuators_type = dict()
 
-TRANSMISSION_TYPES = {
-    'position': 'servo',
-    'motor': 'motor',
-    'general': 'motor'
-}
-
-SENSING_TYPES = {
-    'framequat': 'gyro',
-    'distance': 'proximity',
-    'rangefinder': 'camera'
-}
+with open('mujoco_config_template.json', 'r') as f:
+    config = json.load(f)
+TRANSMISSION_TYPES = config['actuator']
+SENSING_TYPES = config['sensor']
+sensor_tag_to_name = config['sensor_tag_to_name']
 
 
 def validate_name(name):
@@ -40,15 +35,19 @@ def generate_actuator_list(model, xml_actuators_type):
 
 
 def generate_sensor_list(model, xml_actuators_type):
-    sensor_information = {}
-    for i in range(model.nsensor):
-        sensor = model.sensor(i)
-        sensor_name = sensor.name
-        if sensor.type == 7:
-            sensor_name = sensor_name[:-4]
-        sensor_type = xml_actuators_type['input'][sensor_name]['type']
-        sensor_information[sensor_name] = {"type": sensor_type}
-    return sensor_information
+    # sensor_information = {}
+    # for i in range(model.nsensor):
+    #     sensor = model.sensor(i)
+    #     sensor_name = sensor.name
+    #     if sensor.type == 7:
+    #         sensor_name = sensor_name[:-4]
+    #     sensor_type = xml_actuators_type['input'][sensor_name]['type']
+    #     sensor_information[sensor_name] = {"type": sensor_type}
+    # print("****" * 20)
+    # print(sensor_information)
+    return xml_actuators_type['input']
+
+
 def check_nest_file_from_xml(xml_path):
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -105,7 +104,7 @@ def get_sensors(files, sensors):
         if sensor_section is not None:
             # Get all children of sensor section (all types of sensors)
             for sensor in sensor_section:
-                name = sensor.get('name')
+                name = sensor_tag_to_name[sensor.tag]
                 sensors['input'][name] = {'type': sensor.tag}
 
                 # Get all attributes of the sensor
@@ -116,30 +115,38 @@ def get_sensors(files, sensors):
                 # Get text content if it exists
                 if sensor.text and sensor.text.strip():
                     sensors['input'][name]['value'] = sensor.text.strip()
-
     return sensors
 
+
 def generate_config(element, actuator_list, sensor_list):
+    ignore_list = ['disabled', 'type', 'description', 'optional', 'feagi_index', 'threshold_default', 'custom_name', "index", "mirror"]
     part_config = {'name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
                    'description': '', 'children': []}
+    with open("./template.json", "r") as f:
+        template = json.load(f)
 
     if part_config['name'] in actuator_list:
         part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['name']]['type']]
         part_config['type'] = 'output'
-        part_config['properties'] = {
-            key: element.attrib[key]
-            for key in element.attrib
-            if key != 'type' and key != 'name'
-        }
-    elif part_config['name'] in sensor_list:
-        part_config['feagi device type'] = SENSING_TYPES[sensor_list[part_config['name']]['type']]
+        part_config['properties'] = {}
+        for parameter_list in template['output'][part_config['feagi device type']]['parameters']:
+            if parameter_list['label'] not in ignore_list:
+                part_config['properties'][parameter_list['label']] = parameter_list['default']
+    elif part_config['name'] in sensor_list or part_config['type'] in sensor_list:
+        # print(sensor_list, " and part config: ", part_config['name'], " and sensing type: ", SENSING_TYPES)
+        get_type = ""
+        for x in sensor_list:
+            for key in sensor_list[x]:
+                if part_config['name'] in sensor_list[x][key]:
+                    get_type = sensor_list[x]['type']
+                    break
+        part_config['feagi device type'] = SENSING_TYPES[get_type]
         part_config['type'] = 'input'
-        part_config['properties'] = {
-            key: element.attrib[key]
-            for key in element.attrib
-            if key != 'type' and key != 'name'
-        }
-        # part_config['properties'] = element.attrib.copy()
+        part_config['properties'] = {}
+        for parameter_list in template['input'][part_config['feagi device type']]['parameters']:
+            if parameter_list['label'] not in ignore_list:
+                if 'default' in parameter_list:
+                    part_config['properties'][parameter_list['label']] = parameter_list['default']
     else:
         del part_config['feagi device type']
         del part_config['properties']
@@ -149,7 +156,7 @@ def generate_config(element, actuator_list, sensor_list):
     for child in list(element):
         child_config = generate_config(child, actuator_list, sensor_list)  # inception movie
         if child.tag in ['body', 'joint', 'motor', 'framequat', 'distance',
-                         'rangefinder']:  # whatever gets the ball rolling
+                         'rangefinder', 'camera', 'site', 'replicate', ]:  # whatever gets the ball rolling
             part_config['children'].append(child_config)
 
     return part_config  # Important to return the config!
@@ -187,6 +194,13 @@ def update_actuator_and_sensor(xml_file):
     xml_info = get_sensors(files, xml_info)
     return model, xml_info, files
 
+
+def save_file_as_json(data, file="model_config_tree.json"):
+    print("saved to ", file)
+    with open(file, "w") as f:
+        json.dump(data, f, indent=4)
+
+
 def xml_to_config(xml_file):
     # This will generate all necessary for actuator and sensor information
     model, xml_actuators_type, files = update_actuator_and_sensor(xml_file)
@@ -198,6 +212,8 @@ def xml_to_config(xml_file):
     sensor_information = generate_sensor_list(model, xml_actuators_type)
 
     config_dict = mujoco_tree_config(files, actuator_information, sensor_information)  # get dict of config
+
+    save_file_as_json(config_dict)
 
     # This is where you just send json to anywhere.
     return convert_dict_to_json(config_dict)
