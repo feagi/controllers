@@ -1,28 +1,28 @@
 [
     {
-        "name": "torso",
+        "custom_name": "torso",
         "type": "body",
         "description": "",
         "children": [
             {
-                "name": "back",
+                "custom_name": "back",
                 "type": "body",
                 "description": "",
                 "children": []
             },
             {
-                "name": "side",
+                "custom_name": "side",
                 "type": "body",
                 "description": "",
                 "children": []
             },
             {
-                "name": "head",
+                "custom_name": "head",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "name": "head_gyro_mount",
+                        "custom_name": "head_gyro_mount",
                         "type": "input",
                         "feagi device type": "gyro",
                         "properties": {
@@ -41,23 +41,23 @@
                         "children": []
                     },
                     {
-                        "name": "egocentric",
+                        "custom_name": "egocentric",
                         "type": "body",
                         "description": "",
                         "children": []
                     },
                     {
-                        "name": null,
+                        "custom_name": null,
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "name": null,
+                                "custom_name": null,
                                 "type": "body",
                                 "description": "",
                                 "children": [
                                     {
-                                        "name": "rf",
+                                        "custom_name": "rf",
                                         "type": "input",
                                         "feagi device type": "camera",
                                         "properties": {},
@@ -71,17 +71,17 @@
                 ]
             },
             {
-                "name": "waist_lower",
+                "custom_name": "waist_lower",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "name": "abdomen_z",
+                        "custom_name": "abdomen_z",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 0.794,
+                            "min_value": -0.578,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -89,12 +89,12 @@
                         "children": []
                     },
                     {
-                        "name": "abdomen_y",
+                        "custom_name": "abdomen_y",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 0.531,
+                            "min_value": -0.509,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -102,17 +102,17 @@
                         "children": []
                     },
                     {
-                        "name": "pelvis",
+                        "custom_name": "pelvis",
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "name": "abdomen_x",
+                                "custom_name": "abdomen_x",
                                 "type": "output",
                                 "feagi device type": "servo",
                                 "properties": {
-                                    "max_value": 1,
-                                    "min_value": 0,
+                                    "max_value": 0.619,
+                                    "min_value": -0.619,
                                     "max_power": 10,
                                     "default_value": 0
                                 },
@@ -120,17 +120,17 @@
                                 "children": []
                             },
                             {
-                                "name": "thigh_right",
+                                "custom_name": "thigh_right",
                                 "type": "body",
                                 "description": "",
                                 "children": [
                                     {
-                                        "name": "hip_x_right",
+                                        "custom_name": "hip_x_right",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.162,
+                                            "min_value": -0.533,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -138,12 +138,12 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "hip_z_right",
+                                        "custom_name": "hip_z_right",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.621,
+                                            "min_value": -0.567,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -151,12 +151,12 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "hip_y_right",
+                                        "custom_name": "hip_y_right",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.358,
+                                            "min_value": -2.63,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -164,17 +164,17 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "shin_right",
+                                        "custom_name": "shin_right",
                                         "type": "body",
                                         "description": "",
                                         "children": [
                                             {
-                                                "name": "knee_right",
+                                                "custom_name": "knee_right",
                                                 "type": "output",
                                                 "feagi device type": "servo",
                                                 "properties": {
-                                                    "max_value": 1,
-                                                    "min_value": 0,
+                                                    "max_value": 0.0443,
+                                                    "min_value": -2.8,
                                                     "max_power": 10,
                                                     "default_value": 0
                                                 },
@@ -182,23 +182,23 @@
                                                 "children": []
                                             },
                                             {
-                                                "name": "foot_right",
+                                                "custom_name": "foot_right",
                                                 "type": "body",
                                                 "description": "",
                                                 "children": [
                                                     {
-                                                        "name": "foot",
+                                                        "custom_name": "foot",
                                                         "type": "body",
                                                         "description": "",
                                                         "children": []
                                                     },
                                                     {
-                                                        "name": "ankle_y_right",
+                                                        "custom_name": "ankle_y_right",
                                                         "type": "output",
                                                         "feagi device type": "servo",
                                                         "properties": {
-                                                            "max_value": 1,
-                                                            "min_value": 0,
+                                                            "max_value": 0.882,
+                                                            "min_value": -0.882,
                                                             "max_power": 10,
                                                             "default_value": 0
                                                         },
@@ -206,12 +206,12 @@
                                                         "children": []
                                                     },
                                                     {
-                                                        "name": "ankle_x_right",
+                                                        "custom_name": "ankle_x_right",
                                                         "type": "output",
                                                         "feagi device type": "servo",
                                                         "properties": {
-                                                            "max_value": 1,
-                                                            "min_value": 0,
+                                                            "max_value": 0.882,
+                                                            "min_value": -0.883,
                                                             "max_power": 10,
                                                             "default_value": 0
                                                         },
@@ -225,17 +225,17 @@
                                 ]
                             },
                             {
-                                "name": "thigh_left",
+                                "custom_name": "thigh_left",
                                 "type": "body",
                                 "description": "",
                                 "children": [
                                     {
-                                        "name": "hip_x_left",
+                                        "custom_name": "hip_x_left",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.132,
+                                            "min_value": -0.5,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -243,12 +243,12 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "hip_z_left",
+                                        "custom_name": "hip_z_left",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.621,
+                                            "min_value": -1.06,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -256,12 +256,12 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "hip_y_left",
+                                        "custom_name": "hip_y_left",
                                         "type": "output",
                                         "feagi device type": "servo",
                                         "properties": {
-                                            "max_value": 1,
-                                            "min_value": 0,
+                                            "max_value": 0.358,
+                                            "min_value": -2.63,
                                             "max_power": 10,
                                             "default_value": 0
                                         },
@@ -269,17 +269,17 @@
                                         "children": []
                                     },
                                     {
-                                        "name": "shin_left",
+                                        "custom_name": "shin_left",
                                         "type": "body",
                                         "description": "",
                                         "children": [
                                             {
-                                                "name": "knee_left",
+                                                "custom_name": "knee_left",
                                                 "type": "output",
                                                 "feagi device type": "servo",
                                                 "properties": {
-                                                    "max_value": 1,
-                                                    "min_value": 0,
+                                                    "max_value": 0.0443,
+                                                    "min_value": -2.8,
                                                     "max_power": 10,
                                                     "default_value": 0
                                                 },
@@ -287,17 +287,17 @@
                                                 "children": []
                                             },
                                             {
-                                                "name": "foot_left",
+                                                "custom_name": "foot_left",
                                                 "type": "body",
                                                 "description": "",
                                                 "children": [
                                                     {
-                                                        "name": "ankle_y_left",
+                                                        "custom_name": "ankle_y_left",
                                                         "type": "output",
                                                         "feagi device type": "servo",
                                                         "properties": {
-                                                            "max_value": 1,
-                                                            "min_value": 0,
+                                                            "max_value": 0.882,
+                                                            "min_value": -0.882,
                                                             "max_power": 10,
                                                             "default_value": 0
                                                         },
@@ -305,12 +305,12 @@
                                                         "children": []
                                                     },
                                                     {
-                                                        "name": "ankle_x_left",
+                                                        "custom_name": "ankle_x_left",
                                                         "type": "output",
                                                         "feagi device type": "servo",
                                                         "properties": {
-                                                            "max_value": 1,
-                                                            "min_value": 0,
+                                                            "max_value": 0.882,
+                                                            "min_value": -0.882,
                                                             "max_power": 10,
                                                             "default_value": 0
                                                         },
@@ -328,17 +328,17 @@
                 ]
             },
             {
-                "name": "upper_arm_right",
+                "custom_name": "upper_arm_right",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "name": "shoulder1_right",
+                        "custom_name": "shoulder1_right",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 1.05,
+                            "min_value": -1.49,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -346,12 +346,12 @@
                         "children": []
                     },
                     {
-                        "name": "shoulder2_right",
+                        "custom_name": "shoulder2_right",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 0.835,
+                            "min_value": -1.49,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -359,17 +359,17 @@
                         "children": []
                     },
                     {
-                        "name": "lower_arm_right",
+                        "custom_name": "lower_arm_right",
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "name": "elbow_right",
+                                "custom_name": "elbow_right",
                                 "type": "output",
                                 "feagi device type": "servo",
                                 "properties": {
-                                    "max_value": 1,
-                                    "min_value": 0,
+                                    "max_value": 0.882,
+                                    "min_value": -1.75,
                                     "max_power": 10,
                                     "default_value": 0
                                 },
@@ -377,7 +377,7 @@
                                 "children": []
                             },
                             {
-                                "name": "hand_right",
+                                "custom_name": "hand_right",
                                 "type": "body",
                                 "description": "",
                                 "children": []
@@ -387,17 +387,17 @@
                 ]
             },
             {
-                "name": "upper_arm_left",
+                "custom_name": "upper_arm_left",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "name": "shoulder1_left",
+                        "custom_name": "shoulder1_left",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 1.05,
+                            "min_value": -1.49,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -405,12 +405,12 @@
                         "children": []
                     },
                     {
-                        "name": "shoulder2_left",
+                        "custom_name": "shoulder2_left",
                         "type": "output",
                         "feagi device type": "servo",
                         "properties": {
-                            "max_value": 1,
-                            "min_value": 0,
+                            "max_value": 1.06,
+                            "min_value": -1.49,
                             "max_power": 10,
                             "default_value": 0
                         },
@@ -418,17 +418,17 @@
                         "children": []
                     },
                     {
-                        "name": "lower_arm_left",
+                        "custom_name": "lower_arm_left",
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "name": "elbow_left",
+                                "custom_name": "elbow_left",
                                 "type": "output",
                                 "feagi device type": "servo",
                                 "properties": {
-                                    "max_value": 1,
-                                    "min_value": 0,
+                                    "max_value": 0.882,
+                                    "min_value": -1.75,
                                     "max_power": 10,
                                     "default_value": 0
                                 },
@@ -436,7 +436,7 @@
                                 "children": []
                             },
                             {
-                                "name": "hand_left",
+                                "custom_name": "hand_left",
                                 "type": "body",
                                 "description": "",
                                 "children": []
