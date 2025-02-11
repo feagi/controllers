@@ -76,15 +76,15 @@ while robot.step(timestep) != -1:
                     
         elif type(sensor).__name__ == "Camera":
             print("Sensor: " + sensor.getName() + 
-                  "\n\tImage: " + str(sensor.getImage()))
+                  "\n\tImage: " + str(sensor.getImageArray()))
                                   
         elif type(sensor).__name__ == "RangeFinder":
             print("Sensor: " + sensor.getName() + 
-                  "\n\tRange: " + str(sensor.getRangeImage()))
+                  "\n\tRange: " + str(sensor.getRangeImageArray()))
                 
         elif type(sensor).__name__ == "Lidar":
             print("Sensor: " + sensor.getName() + 
-                  "\n\tRange: " + str(sensor.getRangeImage()))
+                  "\n\tRange: " + str(sensor.getRangeImageArray()))
             
         elif type(sensor).__name__ == "Accelerometer":
             print("Sensor: " + sensor.getName() + 
