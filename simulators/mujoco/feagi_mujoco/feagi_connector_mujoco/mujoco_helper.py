@@ -17,25 +17,12 @@ limitations under the License.
 ==============================================================================
 """
 
-import copy
 import json
-
+import copy
 import numpy as np
 from feagi_connector import retina
 import xml.etree.ElementTree as ET
-
-TRANSMISSION_TYPES = {
-    'position': 'servo',
-    'motor': 'motor',
-    'general': 'motor',
-    'muscle': 'motor'
-}
-
-SENSING_TYPES = {
-    'framequat': 'gyro',
-    'distance': 'proximity',
-    'rangefinder': 'camera'
-}
+from feagi_connector_mujoco.mujoco_config_template import *
 
 def validate_name(name):
     symbols = ['/', '\\']
