@@ -27,7 +27,8 @@ import xml.etree.ElementTree as ET
 TRANSMISSION_TYPES = {
     'position': 'servo',
     'motor': 'motor',
-    'general': 'motor'
+    'general': 'motor',
+    'muscle': 'motor'
 }
 
 SENSING_TYPES = {
