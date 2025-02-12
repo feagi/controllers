@@ -1,8 +1,8 @@
-import copy
 import json
+import copy
 import mujoco.viewer
-import xml.etree.ElementTree as ET
 import feagi_connector_mujoco
+import xml.etree.ElementTree as ET
 
 xml_actuators_type = dict()
 
