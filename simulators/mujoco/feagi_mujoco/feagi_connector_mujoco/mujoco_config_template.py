@@ -1,0 +1,12 @@
+TRANSMISSION_TYPES = {
+    'position': 'servo',
+    'motor': 'motor',
+    'general': 'motor',
+    'muscle': 'motor'
+}
+
+SENSING_TYPES = {
+    'framequat': 'gyro',
+    'distance': 'proximity',
+    'rangefinder': 'camera'
+}
