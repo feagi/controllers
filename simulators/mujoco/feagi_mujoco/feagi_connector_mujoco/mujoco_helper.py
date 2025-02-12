@@ -20,9 +20,16 @@ limitations under the License.
 import json
 import copy
 import numpy as np
+import feagi_connector_mujoco
 from feagi_connector import retina
 import xml.etree.ElementTree as ET
-from feagi_connector_mujoco.mujoco_config_template import *
+
+current_path = feagi_connector_mujoco.__path__
+with open(str(current_path[0]) + '/mujoco_config_template.json', 'r') as f:
+    config = json.load(f)
+TRANSMISSION_TYPES = config['TRANSMISSION_TYPES']
+SENSING_TYPES = config['SENSING_TYPES']
+
 
 def validate_name(name):
     symbols = ['/', '\\']
