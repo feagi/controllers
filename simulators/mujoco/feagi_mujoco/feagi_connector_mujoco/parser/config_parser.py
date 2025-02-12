@@ -2,10 +2,12 @@ import copy
 import json
 import mujoco.viewer
 import xml.etree.ElementTree as ET
+import feagi_connector_mujoco
 
 xml_actuators_type = dict()
 
-with open('mujoco_config_template.json', 'r') as f:
+current_path = feagi_connector_mujoco.parser.__path__
+with open(str(current_path[0]) + '/mujoco_config_template.json', 'r') as f:
     config = json.load(f)
 TRANSMISSION_TYPES = config['actuator']
 SENSING_TYPES = config['sensor']
@@ -120,24 +122,28 @@ def get_sensors(files, sensors):
 
 def generate_config(element, actuator_list, sensor_list):
     ignore_list = config['ignore_list']
-    part_config = {'name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
+    part_config = {'custom_name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
                    'description': '', 'children': []}
-    with open("./template.json", "r") as f:
+    with open(str(current_path[0]) + "./feagi_config_template.json", "r") as f:
         template = json.load(f)
 
-    if part_config['name'] in actuator_list:
-        part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['name']]['type']]
+    if part_config['custom_name'] in actuator_list:
+        part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['custom_name']]['type']]
         part_config['type'] = 'output'
         part_config['properties'] = {}
         for parameter_list in template['output'][part_config['feagi device type']]['parameters']:
             if parameter_list['label'] not in ignore_list:
                 part_config['properties'][parameter_list['label']] = parameter_list['default']
-    elif part_config['name'] in sensor_list or part_config['type'] in sensor_list:
-        # print(sensor_list, " and part config: ", part_config['name'], " and sensing type: ", SENSING_TYPES)
+                if parameter_list['label'] == 'max_value':
+                    part_config['properties'][parameter_list['label']] = actuator_list[part_config['custom_name']]['range'][1]
+                elif parameter_list['label'] == 'min_value':
+                    part_config['properties'][parameter_list['label']] = actuator_list[part_config['custom_name']]['range'][0]
+    elif part_config['custom_name'] in sensor_list or part_config['type'] in sensor_list:
+        # print(sensor_list, " and part config: ", part_config['custom_name'], " and sensing type: ", SENSING_TYPES)
         get_type = ""
         for x in sensor_list:
             for key in sensor_list[x]:
-                if part_config['name'] in sensor_list[x][key]:
+                if part_config['custom_name'] in sensor_list[x][key]:
                     get_type = sensor_list[x]['type']
                     break
         part_config['feagi device type'] = SENSING_TYPES[get_type]

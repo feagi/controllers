@@ -2,7 +2,8 @@
     "actuator": {
         "position": "servo",
         "motor": "motor",
-        "general": "motor"
+        "general": "motor",
+        "muscle": "motor"
     },
     "sensor": {
         "framequat": "gyro",
