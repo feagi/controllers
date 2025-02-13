@@ -1,6 +1,6 @@
 {
-    "model": {
-		
+	"actuator": {
+
 	},
 	"sensor": {
 		"rgbd_camera": "camera",
@@ -12,6 +12,7 @@
     ],
     "allow_list": [
 		"link",
-		"joint"
+		"joint", //could be considered a servo, has min and max values
+		"collision"
     ]
 }
