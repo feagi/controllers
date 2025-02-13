@@ -1,0 +1,17 @@
+{
+    "model": {
+		
+	},
+	"sensor": {
+		"rgbd_camera": "camera",
+		"imu": "gyro",
+		"gpu_lidar": "proximity"
+    },
+	"ignore_list": [
+
+    ],
+    "allow_list": [
+		"link",
+		"joint"
+    ]
+}
