@@ -11,7 +11,7 @@ def sdf_to_xml(fp):
         print(f"Couldn't parse SDF file\n{e}")
         return None
     except FileNotFoundError:
-        print(f"File couldn't be found : {file_path}")
+        print(f"File couldn't be found : {fp}")
         return None
 
 def print_xml_tree(element, indent=0):
@@ -33,6 +33,8 @@ def main():
     try:
         with open(sys.argv[2], 'r') as config:
             config_json = json.load(config)
+            TRANSMISSION_TYPES = config_json['actuator']
+            SENSING_TYPES = config_json['sensor']
 
     except FileNotFoundError as e:
         print(f"Couldn't open the gazebo config template <" + sys.argv[2] + ">\n{e}")
