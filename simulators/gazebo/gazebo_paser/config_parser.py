@@ -9,6 +9,10 @@ def sdf_to_xml(fp):
         return tree
     except ET.ParseError as e:
         print(f"Couldn't parse SDF file\n{e}")
+        return None
+    except FileNotFoundError:
+        print(f"File couldn't be found : {file_path}")
+        return None
 
 def print_element_info(element, indent=""):
     print(f"{indent}<{element.tag}>")
@@ -24,11 +28,12 @@ def process_xml_tree(xml_tree):
         print_element_info(root)
 
 def main():
+    # Requires 2 items <target sdf> and <gazebo_template.json>
     if len(sys.argv) != 3:
         print("Incorrect usage please use python config_parser.py <filename.sdf> <gazebo_template.json>")
         return
 
-    #begin opening files
+    # Loads gazebo template json component
     try:
         with open(sys.argv[2], 'r') as config:
             config_json = json.load(config)
@@ -37,17 +42,14 @@ def main():
         print(f"Couldn't open the gazebo config template <" + sys.argv[2] + ">\n{e}")
         quit()
 
-    try:
-        with open(sys.argv[1], 'r') as sdf:
-            sdf_file = sdf.read()
-            
-    except FileNotFoundError as e:
-        print(f"Couldn't open the target sdf file <" + sys.argv[1] + ">\n{e}");
-        quit()
+    # Imports the sdf file as an xml structure to navigate through
+    xml_tree = sdf_to_xml(sys.argv[1])
+
+    # Prints out the elements in the 
+    process_xml_tree(xml_tree)
+
+    print("\n~Opened all files successfully~\n")
     
-    #print(config_json)
-    process_xml_tree(sdf_to_xml(sys.argv[2]))
-    #print(sdf_file)
     return
 
 if __name__ =="__main__":
