@@ -4,6 +4,46 @@
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot
 
+#prints the robot's actuators        
+def print_actuators():
+    print("Actuators: \n")
+    for actuator in robot_actuators:
+        print("\t Name: " + actuator.getName() + 
+            "\n\t\tType: " + type(actuator).__name__ + "\n")
+        
+#prints the robot's sensors
+def print_sensors():
+    print("Sensors:\n")
+    for sensor in robot_sensors:
+        print("\tName: " + sensor.getName() + 
+            "\n\t\tType: " + type(sensor).__name__)
+
+#prints the given sensors data, assumes that the sensor is enabled     
+def print_sensor_data(sensor):
+    if type(sensor).__name == "TouchSensor":
+        if sensor.getType() == "WB_TOUCH_SENSOR_BUMPER" or "WB_TOUCH_SENSOR_FORCE":
+            print(str(sensor.getValue()))
+        else:
+            print(str(sensor.getValues()))
+    elif type(sensor).__name__ == "DistanceSensor" or "LightSensor" or "PositionSensor":
+        print(str(sensor.getValue()))
+    elif type(sensor).__name__ == "Accelerometer" or "Compass" or "GPS" or "Gyro":
+        print(str(sensor.getValues()))
+    elif type(sensor).__name__ == "Camera":
+        print(str(sensor.getImageArray()))
+    elif type(sensor).__name__ == "InertialUnit":
+        print(str(sensor.getRollPitchYaw()))
+    elif type(sensor).__name__ == "Lidar":
+        print(str(sensor.getRangeImageArray()))
+    elif type(sensor).__name__ == "Radar":
+        print(str(sensor.getTargets()))
+    elif type(sensor).__name__ == "RangeFinder":
+        print(str(sensor.getRangeImageArray()))
+    elif type(sensor).__name__ == "Receiver":
+        if sensor.getQueueLength != 0:
+            print(str(sensor.getBytes()))
+        
+
 #all possible types of actuators
 all_actuators = ["Brake", "Connector", "Display", "Emitter", "LinearMotor", "LED", 
                  "Muscle", "Pen", "Propeller", "RotationalMotor", "Speaker", "Track", "Motor"]
@@ -38,25 +78,6 @@ for i in range(num_devices):
     elif type(device).__name__ in all_actuators:
         robot_actuators.append(device)
 
-#prints the robot's actuators        
-def print_actuators():
-    print("Actuators: \n")
-    for actuator in robot_actuators:
-        print("\t Name: " + actuator.getName() + 
-            "\n\t\tType: " + type(actuator).__name__ + "\n")
-        
-#prints the robot's sensors
-def print_sensors():
-    print("Sensors:\n")
-    for sensor in robot_sensors:
-        print("\tName: " + sensor.getName() + 
-            "\n\t\tType: " + type(sensor).__name__)
-
-#prints the given sensors data     
-def print_sensor_data(sensor):
-    print()
-
-
 print_actuators()
 print_sensors()
 
@@ -66,44 +87,6 @@ while robot.step(timestep) != -1:
 
     # Process sensor data here.
     
-    #print sensor data
-    # for sensor in robot_sensors:
-    #     if type(sensor).__name__ == "PositionSensor":
-    #          print("Sensor: " + sensor.getName() + 
-    #                "\n\tValue: " + str(sensor.getValue()))
-                    
-    #     elif type(sensor).__name__ == "Camera":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tImage: " + str(sensor.getImageArray()))
-                                  
-    #     elif type(sensor).__name__ == "RangeFinder":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tRange: " + str(sensor.getRangeImageArray()))
-                
-    #     elif type(sensor).__name__ == "Lidar":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tRange: " + str(sensor.getRangeImageArray()))
-            
-    #     elif type(sensor).__name__ == "Accelerometer":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tValues: " + str(sensor.getValues()))
-            
-    #     elif type(sensor).__name__ == "InertialUnit":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tValue: " + str(sensor.getRollPitchYaw()))
-            
-    #     elif type(sensor).__name__ == "Gyro":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tAngular Velocities: " + str(sensor.getValues()))
-            
-    #     elif type(sensor).__name__ == "TouchSensor":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tForce: " + str(sensor.getValue()))
-            
-    #     elif type(sensor).__name__ == "DistanceSensor":
-    #         print("Sensor: " + sensor.getName() + 
-    #               "\n\tDistance: " + str(sensor.getValue()))            
-
     # Enter here functions to send actuator commands:
 
     pass
