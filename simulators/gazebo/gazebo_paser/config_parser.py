@@ -3,6 +3,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 
+
 def sdf_to_xml(fp):
     try:
         tree = ET.parse(fp)
@@ -14,6 +15,13 @@ def sdf_to_xml(fp):
         print(f"File couldn't be found : {fp}")
         return None
 
+
+def save_file_as_json(data, file="model_config_tree.json"):
+    print("saved to ", file)
+    with open(file, "w") as f:
+        json.dump(data, f, indent=4)
+
+
 def print_xml_tree(element, indent=0):
     """Prints an XML element and its children in a tree format."""
     print("  " * indent + "<" + element.tag + ">")
@@ -22,6 +30,7 @@ def print_xml_tree(element, indent=0):
     if element.text is not None and element.text.strip():
          print("  " * (indent+1) + element.text.strip())
     print("  " * indent + "</" + element.tag + ">")
+
 
 def main():
     # Requires 2 items <target sdf> and <gazebo_template.json>
@@ -48,7 +57,9 @@ def main():
     print_xml_tree(root)
 
     print("\n~Opened all files successfully~\n")
-    
+
+    xml_actuators_type = dict()
+
     return
 
 if __name__ =="__main__":
