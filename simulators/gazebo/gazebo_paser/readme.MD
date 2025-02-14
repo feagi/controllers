@@ -48,6 +48,3 @@ The Gazebo config template JSON is largely similar to this design:
 The Gazebo config template will be high-level and should support both input and output, handling multiple types of sensor and actuator data.  
 
 Once the Gazebo parser reads the Gazebo config template, it will process the Gazebo model, create a tree (i.e., a dictionary), and pass it to a new file called `model_config_tree.json`. The FEAGI configurator will then use this file to generate the necessary files for the Gazebo controller. None of the files should be hardcoded, and the parser should work with all types of SDF files.
-
-## Current Tasks:
-Begin creating SDF template
