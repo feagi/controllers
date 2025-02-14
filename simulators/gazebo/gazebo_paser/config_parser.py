@@ -14,18 +14,14 @@ def sdf_to_xml(fp):
         print(f"File couldn't be found : {file_path}")
         return None
 
-def print_element_info(element, indent=""):
-    print(f"{indent}<{element.tag}>")
-    if element.text and element.text.strip():
-        print(f"{indent}  {element.text.strip()}")
-    for subelement in element:
-        print_element_info(subelement, indent + "  ")
-        print(f"{indent}</{element.tag}>")
-
-def process_xml_tree(xml_tree):
-    if xml_tree is not None:
-        root = xml_tree.getroot()
-        print_element_info(root)
+def print_xml_tree(element, indent=0):
+    """Prints an XML element and its children in a tree format."""
+    print("  " * indent + "<" + element.tag + ">")
+    for child in element:
+        print_xml_tree(child, indent + 1)
+    if element.text is not None and element.text.strip():
+         print("  " * (indent+1) + element.text.strip())
+    print("  " * indent + "</" + element.tag + ">")
 
 def main():
     # Requires 2 items <target sdf> and <gazebo_template.json>
@@ -45,8 +41,9 @@ def main():
     # Imports the sdf file as an xml structure to navigate through
     xml_tree = sdf_to_xml(sys.argv[1])
 
-    # Prints out the elements in the 
-    process_xml_tree(xml_tree)
+    # Prints out the elements in the tree
+    root = xml_tree.getroot()
+    print_xml_tree(root)
 
     print("\n~Opened all files successfully~\n")
     
