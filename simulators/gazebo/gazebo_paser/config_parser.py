@@ -4,7 +4,7 @@ import os
 
 def main():
     if len(sys.argv) != 3:
-        print("Incorrect usage please use python config_parser.py <filename.sdf> <feagiTemplate.json>")
+        print("Incorrect usage please use python config_parser.py <filename.sdf> <gazebo_template.json>")
         return
 
     #begin opening files
@@ -13,7 +13,7 @@ def main():
             config_json = json.load(config)
 
     except FileNotFoundError:
-        print("Couldn't open the feagi config template <" + sys.argv[2] + ">")
+        print("Couldn't open the gazebo config template <" + sys.argv[2] + ">")
         quit()
 
     try:
