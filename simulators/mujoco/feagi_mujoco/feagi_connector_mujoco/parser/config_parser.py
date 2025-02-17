@@ -153,8 +153,6 @@ def generate_config(element, actuator_list, sensor_list):
                     part_config['properties'][parameter_list['label']] = calculate_increment(
                         actuator_list[part_config['custom_name']]['range'][0],
                         actuator_list[part_config['custom_name']]['range'][1])
-                    print("value: ", calculate_increment(actuator_list[part_config['custom_name']]['range'][0],
-                                                         actuator_list[part_config['custom_name']]['range'][1]))
                 if parameter_list['label'] == 'max_power' and part_config['feagi device type'] == 'motor':
                     part_config['properties'][parameter_list['label']] = \
                         actuator_list[part_config['custom_name']]['range'][1]
