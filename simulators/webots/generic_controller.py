@@ -3,14 +3,15 @@
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
 from controller import Robot
+import inspect
 
-#prints the robot's actuators        
+#prints the robot's actuators
 def print_actuators():
     print("Actuators: \n")
     for actuator in robot_actuators:
         print("\t Name: " + actuator.getName() + 
             "\n\t\tType: " + type(actuator).__name__ + "\n")
-        
+
 #prints the robot's sensors
 def print_sensors():
     print("Sensors:\n")
@@ -42,6 +43,39 @@ def print_sensor_data(sensor):
     elif type(sensor).__name__ == "Receiver":
         if sensor.getQueueLength() != 0:
             print(str(sensor.getBytes()))
+
+#print all object methods
+def print_methods():
+    print("Sensors:\n")
+    for i in range(num_devices):
+        device = robot.getDeviceByIndex(i)
+        print("\tName: " + device.getName() + "\n\t\tType: " + type(device).__name__ + "\n")
+        keys = [method for method, _ in inspect.getmembers(device, predicate=inspect.ismethod)]
+        print(keys)
+
+def print_all_ds():
+    for ds in robot_sensors:
+        if "ds" in ds.getName():
+            print(f"{ds.getName()} - {ds.getValue()}")
+
+#move the motors to make the robot spin
+def pioneer2_wheel_movements():
+    #gets the motors
+    left_wheel = robot.getDevice("left wheel motor")
+    right_wheel = robot.getDevice("right wheel motor")
+
+    print_all_ds()
+            
+    #sets velocities opposite eachother, moves and then stops
+    left_wheel.setVelocity(-3)
+    right_wheel.setVelocity(3)
+    robot.step(10 * timestep)
+    left_wheel.setVelocity(0)
+    right_wheel.setVelocity(0)
+
+    print_all_ds()
+
+
 
 def pr2_move_arm(arm, positions):
     """
