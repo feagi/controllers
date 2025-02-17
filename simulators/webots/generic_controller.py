@@ -20,14 +20,14 @@ def print_sensors():
 
 #prints the given sensors data, assumes that the sensor is enabled     
 def print_sensor_data(sensor):
-    if type(sensor).__name == "TouchSensor":
-        if sensor.getType() == "WB_TOUCH_SENSOR_BUMPER" or "WB_TOUCH_SENSOR_FORCE":
+    if type(sensor).__name__ == "TouchSensor":
+        if sensor.getType() in ("WB_TOUCH_SENSOR_BUMPER", "WB_TOUCH_SENSOR_FORCE"):
             print(str(sensor.getValue()))
         else:
             print(str(sensor.getValues()))
-    elif type(sensor).__name__ == "DistanceSensor" or "LightSensor" or "PositionSensor":
+    elif type(sensor).__name__ in ("DistanceSensor", "LightSensor", "PositionSensor"):
         print(str(sensor.getValue()))
-    elif type(sensor).__name__ == "Accelerometer" or "Compass" or "GPS" or "Gyro":
+    elif type(sensor).__name__ in ("Accelerometer", "Compass", "GPS", "Gyro"):
         print(str(sensor.getValues()))
     elif type(sensor).__name__ == "Camera":
         print(str(sensor.getImageArray()))
@@ -40,14 +40,55 @@ def print_sensor_data(sensor):
     elif type(sensor).__name__ == "RangeFinder":
         print(str(sensor.getRangeImageArray()))
     elif type(sensor).__name__ == "Receiver":
-        if sensor.getQueueLength != 0:
+        if sensor.getQueueLength() != 0:
             print(str(sensor.getBytes()))
-        
 
-#all possible types of actuators
-all_actuators = ["Brake", "Connector", "Display", "Emitter", "LinearMotor", "LED", 
-                 "Muscle", "Pen", "Propeller", "RotationalMotor", "Speaker", "Track", "Motor"]
-      
+def pr2_move_arm(arm, positions):
+    """
+    Move the PR2 arm to a specified position.
+    :param arm: "left" or "right"
+    :param positions: Dict with joint angles {joint_name: angle}
+    """
+    """
+    Here is an example of how to call this function:
+    move_arm("right", {
+        "shoulder_pan": 0.0,
+        "shoulder_lift": 0.5,
+        "upper_arm_roll": 0.0,
+        "elbow_lift": -0.5,
+        "wrist_roll": 0.0
+    })
+    """
+    # Get PR2 motors for the right arm
+    right_arm_motors = {
+        "shoulder_pan": robot.getDevice("r_shoulder_pan_joint"),
+        "shoulder_lift": robot.getDevice("r_shoulder_lift_joint"),
+        "upper_arm_roll": robot.getDevice("r_upper_arm_roll_joint"),
+        "elbow_lift": robot.getDevice("r_elbow_flex_joint"),
+        "wrist_roll": robot.getDevice("r_wrist_roll_joint")
+    }
+    # Get PR2 motors for the left arm
+    left_arm_motors = {
+        "shoulder_pan": robot.getDevice("l_shoulder_pan_joint"),
+        "shoulder_lift": robot.getDevice("l_shoulder_lift_joint"),
+        "upper_arm_roll": robot.getDevice("l_upper_arm_roll_joint"),
+        "elbow_lift": robot.getDevice("l_elbow_flex_joint"),
+        "wrist_roll": robot.getDevice("l_wrist_roll_joint")
+    }
+    if arm == "right":
+        motors = right_arm_motors
+    elif arm == "left":
+        motors = left_arm_motors
+    else:
+        print("Invalid arm name. Use 'left' or 'right'.")
+        return
+    for joint, angle in positions.items():
+        if joint in motors:
+            motors[joint].setPosition(angle)
+        else:
+            print(f"Invalid joint name: {joint}")
+        
+              
 #all possible types of sensors           
 all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
                "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
@@ -73,9 +114,8 @@ for i in range(num_devices):
     #append to the correct list
     if type(device).__name__ in all_sensors:
         device.enable(timestep)
-        robot_sensors.append(device)
-        
-    elif type(device).__name__ in all_actuators:
+        robot_sensors.append(device)  
+    else:
         robot_actuators.append(device)
 
 print_actuators()
