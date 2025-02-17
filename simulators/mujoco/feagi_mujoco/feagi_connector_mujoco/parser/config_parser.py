@@ -124,9 +124,10 @@ def generate_config(element, actuator_list, sensor_list):
     ignore_list = config['ignore_list']
     part_config = {'custom_name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
                    'description': '', 'children': []}
-    with open(str(current_path[0]) + "./feagi_config_template.json", "r") as f:
+    with open(str(current_path[0]) + "/feagi_config_template.json", "r") as f:
         template = json.load(f)
 
+    print('element: ', element.tag)
     if part_config['custom_name'] in actuator_list:
         part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['custom_name']]['type']]
         part_config['type'] = 'output'
@@ -175,7 +176,13 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
     for xml_path in xml_file:
         tree = ET.parse(xml_path)
         root = tree.getroot()
-        body_elements = root.findall('.//worldbody')
+        worldbody = root.findall('.//worldbody')
+        include_elements = tree.getroot()
+        if include_elements.tag == 'mujocoinclude':
+            body_elements = include_elements
+        else:
+            body_elements = worldbody
+
 
         for body in body_elements:
             for element in list(body):
@@ -185,36 +192,13 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
                         for include in includes:
                             include_element = include.get('file')
                             hidden_file_inside_body.append(include_element)
-                            print("found new file: ", include_element)
-                            # inner_tree = ET.parse(include_element)
-                            # inner_root = inner_tree.getroot()
-                            # inner_body_elements = inner_root.findall('.//worldbody')
-                            # for inner_body in inner_body_elements:
-                            #     print("FOUND INNER: ", inner_body)
-                            #     for inner_element in list(inner_body):
-                            #         if inner_element.tag == 'body':
-                            #             inner_body_config = generate_config(inner_element, actuator_list, sensor_list)
-                            #             configs.append(inner_body_config)
                     body_config = generate_config(element, actuator_list, sensor_list)
                     configs.append(body_config)
     if hidden_file_inside_body:
         updated_data = mujoco_tree_config(hidden_file_inside_body, actuator_list, sensor_list)
-        print("updated: ", updated_data)
         if updated_data:
             for x in range(len(updated_data)):
                 configs.append(updated_data[x])
-    # for xml_path in hidden_file_inside_body:
-    #     print(hidden_file_inside_body)
-    #     tree = ET.parse(xml_path)
-    #     root = tree.getroot()
-    #     body_elements = root.findall('.//worldbody')
-    #     for body in body_elements:
-    #         for element in list(body):
-    #             print(element.tag)
-    #             if element.tag == 'body':
-    #                 print(element)
-    #                 body_config = generate_config(element, actuator_list, sensor_list)
-    #                 configs.append(body_config)
 
     return configs
 
