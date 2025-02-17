@@ -1,4 +1,5 @@
 import json
+import math
 import copy
 import mujoco.viewer
 import feagi_connector_mujoco
@@ -37,16 +38,6 @@ def generate_actuator_list(model, xml_actuators_type):
 
 
 def generate_sensor_list(model, xml_actuators_type):
-    # sensor_information = {}
-    # for i in range(model.nsensor):
-    #     sensor = model.sensor(i)
-    #     sensor_name = sensor.name
-    #     if sensor.type == 7:
-    #         sensor_name = sensor_name[:-4]
-    #     sensor_type = xml_actuators_type['input'][sensor_name]['type']
-    #     sensor_information[sensor_name] = {"type": sensor_type}
-    # print("****" * 20)
-    # print(sensor_information)
     return xml_actuators_type['input']
 
 
@@ -106,28 +97,45 @@ def get_sensors(files, sensors):
         if sensor_section is not None:
             # Get all children of sensor section (all types of sensors)
             for sensor in sensor_section:
-                name = sensor_tag_to_name[sensor.tag]
-                sensors['input'][name] = {'type': sensor.tag}
+                if sensor.tag in sensor_tag_to_name:
+                    name = sensor_tag_to_name[sensor.tag]
+                    sensors['input'][name] = {'type': sensor.tag}
 
-                # Get all attributes of the sensor
-                for attr_name, attr_value in sensor.attrib.items():
-                    if attr_name != 'name':  # Skip name as we already stored it
-                        sensors['input'][name][attr_name] = attr_value
+                    # Get all attributes of the sensor
+                    for attr_name, attr_value in sensor.attrib.items():
+                        if attr_name != 'name':  # Skip name as we already stored it
+                            sensors['input'][name][attr_name] = attr_value
 
-                # Get text content if it exists
-                if sensor.text and sensor.text.strip():
-                    sensors['input'][name]['value'] = sensor.text.strip()
+                    # Get text content if it exists
+                    if sensor.text and sensor.text.strip():
+                        sensors['input'][name]['value'] = sensor.text.strip()
+                else:
+                    print(sensor.tag, " is not supported yet.")
     return sensors
+
+
+def calculate_increment(min_value, max_value):
+    range_value = abs(max_value - min_value)
+    target_steps = 30  # Aim for about 30 steps
+    magnitude = int(math.log10(range_value))
+    increment = pow(10, magnitude) / 10
+    if range_value / increment > target_steps * 2:
+        increment *= 5
+    elif range_value / increment > target_steps:
+        increment *= 2
+    elif range_value / increment < target_steps / 2:
+        increment /= 2
+    return increment
 
 
 def generate_config(element, actuator_list, sensor_list):
     ignore_list = config['ignore_list']
-    part_config = {'custom_name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None, 'properties': {},
+    part_config = {'custom_name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None,
+                   'properties': {},
                    'description': '', 'children': []}
     with open(str(current_path[0]) + "/feagi_config_template.json", "r") as f:
         template = json.load(f)
 
-    print('element: ', element.tag)
     if part_config['custom_name'] in actuator_list:
         part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['custom_name']]['type']]
         part_config['type'] = 'output'
@@ -135,10 +143,21 @@ def generate_config(element, actuator_list, sensor_list):
         for parameter_list in template['output'][part_config['feagi device type']]['parameters']:
             if parameter_list['label'] not in ignore_list:
                 part_config['properties'][parameter_list['label']] = parameter_list['default']
-                if parameter_list['label'] == 'max_value':
-                    part_config['properties'][parameter_list['label']] = actuator_list[part_config['custom_name']]['range'][1]
-                elif parameter_list['label'] == 'min_value':
-                    part_config['properties'][parameter_list['label']] = actuator_list[part_config['custom_name']]['range'][0]
+                if parameter_list['label'] == 'max_value' and part_config['feagi device type'] == 'servo':
+                    part_config['properties'][parameter_list['label']] = \
+                        actuator_list[part_config['custom_name']]['range'][1]
+                elif parameter_list['label'] == 'min_value' and part_config['feagi device type'] == 'servo':
+                    part_config['properties'][parameter_list['label']] = \
+                        actuator_list[part_config['custom_name']]['range'][0]
+                elif parameter_list['label'] == 'max_power' and part_config['feagi device type'] == 'servo':
+                    part_config['properties'][parameter_list['label']] = calculate_increment(
+                        actuator_list[part_config['custom_name']]['range'][0],
+                        actuator_list[part_config['custom_name']]['range'][1])
+                    print("value: ", calculate_increment(actuator_list[part_config['custom_name']]['range'][0],
+                                                         actuator_list[part_config['custom_name']]['range'][1]))
+                if parameter_list['label'] == 'max_power' and part_config['feagi device type'] == 'motor':
+                    part_config['properties'][parameter_list['label']] = \
+                        actuator_list[part_config['custom_name']]['range'][1]
     elif part_config['custom_name'] in sensor_list or part_config['type'] in sensor_list:
         # print(sensor_list, " and part config: ", part_config['custom_name'], " and sensing type: ", SENSING_TYPES)
         get_type = ""
@@ -172,7 +191,6 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
     configs = []  # List to store configurations for each file
     hidden_file_inside_body = []
 
-    print(xml_file, " and hidden list: ", hidden_file_inside_body)
     for xml_path in xml_file:
         tree = ET.parse(xml_path)
         root = tree.getroot()
@@ -183,22 +201,10 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
         else:
             body_elements = worldbody
 
-
         for body in body_elements:
             for element in list(body):
-                if element.tag == 'body':
-                    includes = element.findall('./include')
-                    if includes:
-                        for include in includes:
-                            include_element = include.get('file')
-                            hidden_file_inside_body.append(include_element)
-                    body_config = generate_config(element, actuator_list, sensor_list)
-                    configs.append(body_config)
-    if hidden_file_inside_body:
-        updated_data = mujoco_tree_config(hidden_file_inside_body, actuator_list, sensor_list)
-        if updated_data:
-            for x in range(len(updated_data)):
-                configs.append(updated_data[x])
+                body_config = generate_config(element, actuator_list, sensor_list)
+                configs.append(body_config)
 
     return configs
 
