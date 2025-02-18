@@ -128,7 +128,7 @@ def calculate_increment(min_value, max_value):
     return increment
 
 
-def generate_config(element, actuator_list, sensor_list):
+def generate_config(element, actuator_list, sensor_list, dict_increment):
     ignore_list = config['ignore_list']
     part_config = {'custom_name': element.attrib.get('name'), 'type': element.tag, 'feagi device type': None,
                    'properties': {},
@@ -140,6 +140,10 @@ def generate_config(element, actuator_list, sensor_list):
         part_config['feagi device type'] = TRANSMISSION_TYPES[actuator_list[part_config['custom_name']]['type']]
         part_config['type'] = 'output'
         part_config['properties'] = {}
+        if part_config['feagi device type'] not in dict_increment:
+            dict_increment[part_config['feagi device type']] = 0
+        else:
+            dict_increment[part_config['feagi device type']] += 1
         for parameter_list in template['output'][part_config['feagi device type']]['parameters']:
             if parameter_list['label'] not in ignore_list:
                 part_config['properties'][parameter_list['label']] = parameter_list['default']
@@ -156,6 +160,8 @@ def generate_config(element, actuator_list, sensor_list):
                 if parameter_list['label'] == 'max_power' and part_config['feagi device type'] == 'motor':
                     part_config['properties'][parameter_list['label']] = \
                         actuator_list[part_config['custom_name']]['range'][1]
+                if parameter_list['label'] == 'feagi_index':
+                    part_config['properties'][parameter_list['label']] = dict_increment[part_config['feagi device type']]
     elif part_config['custom_name'] in sensor_list or part_config['type'] in sensor_list:
         # print(sensor_list, " and part config: ", part_config['custom_name'], " and sensing type: ", SENSING_TYPES)
         get_type = ""
@@ -165,6 +171,12 @@ def generate_config(element, actuator_list, sensor_list):
                     get_type = sensor_list[x]['type']
                     break
         part_config['feagi device type'] = SENSING_TYPES[get_type]
+        if part_config['feagi device type'] not in dict_increment:
+            dict_increment[part_config['feagi device type']] = 0
+        else:
+            dict_increment[part_config['feagi device type']] += 1
+
+
         part_config['type'] = 'input'
         part_config['properties'] = {}
         for parameter_list in template['input'][part_config['feagi device type']]['parameters']:
@@ -178,7 +190,7 @@ def generate_config(element, actuator_list, sensor_list):
 
     # Recursively process children
     for child in list(element):
-        child_config = generate_config(child, actuator_list, sensor_list)  # inception movie
+        child_config = generate_config(child, actuator_list, sensor_list, dict_increment)  # inception movie
         if child.tag in config['allow_list']:  # whatever gets the ball rolling
             part_config['children'].append(child_config)
 
@@ -188,6 +200,7 @@ def generate_config(element, actuator_list, sensor_list):
 def mujoco_tree_config(xml_file, actuator_list, sensor_list):
     configs = []  # List to store configurations for each file
     hidden_file_inside_body = []
+    feagi_index_increment = {}
 
     for xml_path in xml_file:
         tree = ET.parse(xml_path)
@@ -201,7 +214,7 @@ def mujoco_tree_config(xml_file, actuator_list, sensor_list):
 
         for body in body_elements:
             for element in list(body):
-                body_config = generate_config(element, actuator_list, sensor_list)
+                body_config = generate_config(element, actuator_list, sensor_list, feagi_index_increment)
                 configs.append(body_config)
 
     return configs
