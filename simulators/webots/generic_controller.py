@@ -53,6 +53,7 @@ def print_methods():
         keys = [method for method, _ in inspect.getmembers(device, predicate=inspect.ismethod)]
         print(keys)
 
+#prints all distance sensors
 def print_all_ds():
     for ds in robot_sensors:
         if "ds" in ds.getName():
@@ -64,7 +65,9 @@ def pioneer2_wheel_movements():
     left_wheel = robot.getDevice("left wheel motor")
     right_wheel = robot.getDevice("right wheel motor")
 
+    print("Pre-move sensors")
     print_all_ds()
+    print()
             
     #sets velocities opposite eachother, moves and then stops
     left_wheel.setVelocity(-3)
@@ -73,9 +76,12 @@ def pioneer2_wheel_movements():
     left_wheel.setVelocity(0)
     right_wheel.setVelocity(0)
 
+    print("Post-move sensors")
     print_all_ds()
-
-
+    print("\n")
+    
+    #3 seconds
+    robot.step(3000)
 
 def pr2_move_arm(arm, positions):
     """
