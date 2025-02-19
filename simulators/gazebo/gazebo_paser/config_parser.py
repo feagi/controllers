@@ -25,7 +25,7 @@ def sdf_to_xml(fp):
 def strip_tree (element, found_elements): 
     for child in element:
         #print(element.tag)
-        if element.tag in g_config['allow_list']:
+        if element.tag in g_config['allow_list'] and element not in found_elements:
             found_elements.append(element)
         else:
             strip_tree(child, found_elements)
@@ -83,7 +83,8 @@ def main():
         print("Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
         return
     
-    print(found_elements)
+    for element in found_elements:
+        print(element.get('name'))
     return
 
 if __name__ =="__main__":
