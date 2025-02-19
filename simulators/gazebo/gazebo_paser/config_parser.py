@@ -26,9 +26,10 @@ def strip_tree (element, found_elements):
     for child in element:
         #print(element.tag)
         if element.tag in g_config['allow_list'] and element not in found_elements:
-            found_elements.append(element)
-        else:
-            strip_tree(child, found_elements)
+            if element.get('name') and element.get('type'):
+                found_elements.append(element)
+        
+        strip_tree(child, found_elements)
             
 # Description : used to load all 3 necessary files (feagi template config, gazebo template config, and the target sdf file) 
 # INPUT : gazebo config file path, feagi config file path, target sdf file path, array to store found elements in
@@ -83,8 +84,9 @@ def main():
         print("Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
         return
     
-    for element in found_elements:
-        print(element.get('name'))
+    for e in found_elements:
+        print(e.get('name') + " : " + e.get('type'))
+             
     return
 
 if __name__ =="__main__":
