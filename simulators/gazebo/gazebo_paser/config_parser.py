@@ -29,8 +29,19 @@ def strip_tree (element, found_elements):
             if element.get('name') and element.get('type'):
                 found_elements.append(element)
         
-        strip_tree(child, found_elements)
-            
+        strip_tree(child, found_elements)        
+ 
+def find_element_by_tag(element, tag):
+    # Check if current element matches
+    if element.tag == tag:
+        return element
+    # Recursively check child elements
+    for child in element:
+        result = find_element_by_tag(child, tag)
+        if result is not None:
+            return result
+    return None     
+
 # Description : used to load all 3 necessary files (feagi template config, gazebo template config, and the target sdf file) 
 # INPUT : gazebo config file path, feagi config file path, target sdf file path, array to store found elements in
 # Output on success : Populates found_elements with all allowed elements from the sdf
@@ -85,7 +96,14 @@ def main():
         return
     
     for e in found_elements:
-        print(e.get('name') + " : " + e.get('type'))
+        if e.tag == 'joint':
+            upper = find_element_by_tag(e, 'upper')
+            lower = find_element_by_tag(e, 'lower')
+            
+            print("<" + e.tag + "> " + e.get('name'))
+            if upper != None and lower != None:
+                print("Upper Limit : " + upper.text + "\nLower Limit : " + lower.text)
+
              
     return
 
