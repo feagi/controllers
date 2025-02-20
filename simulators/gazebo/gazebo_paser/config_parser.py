@@ -90,6 +90,7 @@ def create_json(mylist, jlist):
             custom_name = e.get('name')
             type = 'input'
             feagi_dev_type = g_config['sensor'][e.get('type')]
+            #properties = {}
             description = ""
             children = []
 
@@ -98,6 +99,7 @@ def create_json(mylist, jlist):
             custom_name = e.get('name')
             type = 'output'
             feagi_dev_type = g_config['actuator'][e.get('type')]
+            #properties = {}
             description = ""
             children = []
 
@@ -106,6 +108,7 @@ def create_json(mylist, jlist):
             custom_name = e.get('name')
             type = e.tag
             feagi_dev_type = None
+            #properties = {}
             description = ""
             children = []
 
@@ -115,10 +118,38 @@ def create_json(mylist, jlist):
                 'description': description,
                 'children': children}
         
-        # if sensor or actuator, add in extra lines to dict
+        # handle device type and parameters/properties if sensor or actuator
         if feagi_dev_type is not None:
+            # retrieve all properties necessary for sensor / actuator
+            props = find_properties(feagi_dev_type, type)
+
+            # insert data into parameters/properties
+            # TYPES ARE: gyro, servo, proximity, camera
+            if feagi_dev_type == 'servo':
+                min = find_element_by_tag(e, 'upper')
+                max = find_element_by_tag(e, 'lower')
+                if min is not None:
+                    props["min_value"] = float(min.text)
+                if max is not None:
+                    props["max_value"] = float(max.text)
+            elif feagi_dev_type == 'gyro':
+                pass
+            elif feagi_dev_type == 'proximity':
+                min = find_element_by_tag(e, 'min')
+                max = find_element_by_tag(e, 'max')
+                if min is not None:
+                    props["min_value"] = float(min.text)
+                if max is not None:
+                    props["max_value"] = float(max.text)
+            elif feagi_dev_type == 'camera':
+                pass
+            else:
+                pass
+
+            # add in extra lines to dict
             temp = list(toadd.items())
             temp.insert(2, ('feagi device type', feagi_dev_type ))
+            temp.insert(3, ('properties', props ))
             toadd = dict(temp)              
 
         # add to json list that will be sent to file
@@ -138,6 +169,30 @@ def print_json(mylist, jlist):
     file.close()
     
     return
+
+# Description : Strip data down to found paramaters from ignore list
+# INPUT : Device type and xml element type
+# Output on success : Dictionary
+# Output on fail : None
+def find_properties(devtype, ftype):
+    # removes all properties on ignore_list
+    properties_list = []
+    start = f_config[ftype][devtype]["parameters"]
+    for i in start:
+        if i['label'] not in g_config['ignore_list']:
+
+            if 'parameters' in i:
+                littlelist = []
+                for j in i['parameters']:
+                    if j['label'] not in g_config['ignore_list']:
+                        littlelist.append((j['label'], j['default']))
+                properties_list.append((i['label'], dict(littlelist)))
+
+            else:
+                properties_list.append((i['label'], i['default']))
+
+    toret = dict(properties_list)
+    return toret
 
 def main():
     # CMD LINE USAGE :

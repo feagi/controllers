@@ -9,6 +9,18 @@
         "custom_name": "imu",
         "type": "input",
         "feagi device type": "gyro",
+        "properties": {
+            "min_value": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "max_value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
         "description": "",
         "children": []
     },
@@ -70,6 +82,10 @@
         "custom_name": "gpu_lidar",
         "type": "input",
         "feagi device type": "proximity",
+        "properties": {
+            "max_value": 4.0,
+            "min_value": 0.12
+        },
         "description": "",
         "children": []
     },
@@ -77,6 +93,16 @@
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
+        "properties": {
+            "eccentricity_control": {
+                "X offset percentage": 1,
+                "Y offset percentage": 1
+            },
+            "modulation_control": {
+                "X offset percentage": 99,
+                "Y offset percentage": 99
+            }
+        },
         "description": "",
         "children": []
     },
@@ -90,6 +116,16 @@
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
+        "properties": {
+            "eccentricity_control": {
+                "X offset percentage": 1,
+                "Y offset percentage": 1
+            },
+            "modulation_control": {
+                "X offset percentage": 99,
+                "Y offset percentage": 99
+            }
+        },
         "description": "",
         "children": []
     },
@@ -103,6 +139,16 @@
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
+        "properties": {
+            "eccentricity_control": {
+                "X offset percentage": 1,
+                "Y offset percentage": 1
+            },
+            "modulation_control": {
+                "X offset percentage": 99,
+                "Y offset percentage": 99
+            }
+        },
         "description": "",
         "children": []
     },
@@ -116,6 +162,16 @@
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
+        "properties": {
+            "eccentricity_control": {
+                "X offset percentage": 1,
+                "Y offset percentage": 1
+            },
+            "modulation_control": {
+                "X offset percentage": 99,
+                "Y offset percentage": 99
+            }
+        },
         "description": "",
         "children": []
     },
@@ -123,6 +179,12 @@
         "custom_name": "rear_left_wheel_joint",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": -1.79769e+308,
+            "min_value": 1.79769e+308,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
@@ -130,6 +192,12 @@
         "custom_name": "rear_right_wheel_joint",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": -1.79769e+308,
+            "min_value": 1.79769e+308,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
@@ -137,6 +205,12 @@
         "custom_name": "front_left_wheel_joint",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": -1.79769e+308,
+            "min_value": 1.79769e+308,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
@@ -144,6 +218,12 @@
         "custom_name": "front_right_wheel_joint",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": -1.79769e+308,
+            "min_value": 1.79769e+308,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
@@ -157,6 +237,12 @@
         "custom_name": "head_attach",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": 0.1,
+            "min_value": 3.1,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
@@ -164,6 +250,12 @@
         "custom_name": "head_attach2",
         "type": "output",
         "feagi device type": "servo",
+        "properties": {
+            "max_value": -0.2,
+            "min_value": 1.6,
+            "max_power": 10,
+            "default_value": 0
+        },
         "description": "",
         "children": []
     },
