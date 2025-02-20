@@ -92,6 +92,7 @@ def create_json(mylist, jlist):
             feagi_dev_type = g_config['sensor'][e.get('type')]
             description = ""
             children = []
+
         elif e.get('type') in g_config['actuator']: # actuator
         # Create Vars for Actuator element 
             custom_name = e.get('name')
@@ -99,6 +100,7 @@ def create_json(mylist, jlist):
             feagi_dev_type = g_config['actuator'][e.get('type')]
             description = ""
             children = []
+
         else: # link / body
         # Create Vars for links / bodys
             custom_name = e.get('name')
@@ -107,16 +109,19 @@ def create_json(mylist, jlist):
             description = ""
             children = []
 
+        # setting up general structure
         toadd = {'custom_name': custom_name,
                 'type': type,
                 'description': description,
                 'children': children}
         
+        # if sensor or actuator, add in extra lines to dict
         if feagi_dev_type is not None:
             temp = list(toadd.items())
             temp.insert(2, ('feagi device type', feagi_dev_type ))
             toadd = dict(temp)              
 
+        # add to json list that will be sent to file
         jlist.append(toadd)
 
     return
