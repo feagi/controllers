@@ -103,23 +103,33 @@ def main():
         print("Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
         return
     
+    file = open("model_config_tree_development.json", "w")
+
     for e in found_elements:
        if e.tag == 'joint':
            upper = find_element_by_tag(e, 'upper')
            lower = find_element_by_tag(e, 'lower')
             
            print("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + "> " )
+           file.write("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + "> " + "\n")
            if upper != None and lower != None:
                print("Upper Limit : " + upper.text + "\nLower Limit : " + lower.text)
+               file.write("Upper Limit : " + upper.text + "\nLower Limit : " + lower.text + "\n")
+            
        elif e.tag == 'sensor':
            min = find_element_by_tag(e, 'min')
            max = find_element_by_tag(e, 'max')
 
            print("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + ">")
+           file.write("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + ">" +"\n")
            if min != None and max != None:
                print("Min: " + min.text + "\nMax: " + max.text)
+               file.write("Min: " + min.text + "\nMax: " + max.text +"\n")
        else:
-           print("<" + e.tag + " name=" + e.get('name') + ">")
+           print("<" + e.tag + " name=" + e.get('name') + ">" )
+           file.write("<" + e.tag + "name=" + e.get('name') + ">" +"\n")
+
+    file.close()
 
     # for element in found_elements:
     #     print("<" + element.tag + " name=" + element.get('name') + ">")

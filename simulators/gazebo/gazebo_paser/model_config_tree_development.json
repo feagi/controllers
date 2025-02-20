@@ -1,0 +1,45 @@
+<linkname=chassis>
+<sensor name=imu type=imu>
+<linkname=rod_one>
+<linkname=second_rod>
+<linkname=rear_left_wheel>
+<linkname=rear_right_wheel>
+<linkname=front_left_wheel>
+<linkname=front_right_wheel>
+<linkname=head>
+<linkname=head2>
+<linkname=sensor>
+<sensor name=gpu_lidar type=gpu_lidar>
+Min: 0.120000
+Max: 4
+<sensor name=rgbd_camera type=rgbd_camera>
+<linkname=right_IR>
+<sensor name=rgbd_camera type=rgbd_camera>
+<linkname=left_IR>
+<sensor name=rgbd_camera type=rgbd_camera>
+<linkname=middle_IR>
+<sensor name=rgbd_camera type=rgbd_camera>
+<joint name=rear_left_wheel_joint type=revolute> 
+Upper Limit : 1.79769e+308
+Lower Limit : -1.79769e+308
+<joint name=rear_right_wheel_joint type=revolute> 
+Upper Limit : 1.79769e+308
+Lower Limit : -1.79769e+308
+<joint name=front_left_wheel_joint type=revolute> 
+Upper Limit : 1.79769e+308
+Lower Limit : -1.79769e+308
+<joint name=front_right_wheel_joint type=revolute> 
+Upper Limit : 1.79769e+308
+Lower Limit : -1.79769e+308
+<joint name=ultrasonic type=fixed> 
+<joint name=head_attach type=revolute> 
+Upper Limit : 3.1
+Lower Limit : 0.1
+<joint name=head_attach2 type=revolute> 
+Upper Limit : 1.6
+Lower Limit : -0.2
+<joint name=rod1 type=fixed> 
+<joint name=board type=fixed> 
+<joint name=IR_right type=fixed> 
+<joint name=IR_left type=fixed> 
+<joint name=IR_middle type=fixed> 
