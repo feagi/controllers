@@ -26,7 +26,9 @@ def strip_tree (element, found_elements):
     for child in element:
         #print(element.tag)
         if element.tag in g_config['allow_list'] and element not in found_elements:
-            if element.get('name') and element.get('type'):
+            # if element.get('name') and element.get('type'):
+            #     found_elements.append(element)
+            if element.get('name'):
                 found_elements.append(element)
         
         strip_tree(child, found_elements)        
@@ -70,6 +72,12 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
     root = tree.getroot()
     strip_tree(root, found_elements)
 
+def print_all(list):
+    for element in list:
+         print(element.tag)# + " name=" + element.get('name'))
+         children = element.findall('*')
+         print_all(children)
+
 def main():
     # CMD LINE USAGE :
     # 1 - python config_parser.py <target.sdf> 
@@ -96,13 +104,26 @@ def main():
         return
     
     for e in found_elements:
-        if e.tag == 'joint':
-            upper = find_element_by_tag(e, 'upper')
-            lower = find_element_by_tag(e, 'lower')
+       if e.tag == 'joint':
+           upper = find_element_by_tag(e, 'upper')
+           lower = find_element_by_tag(e, 'lower')
             
-            print("<" + e.tag + "> " + e.get('name'))
-            if upper != None and lower != None:
-                print("Upper Limit : " + upper.text + "\nLower Limit : " + lower.text)
+           print("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + "> " )
+           if upper != None and lower != None:
+               print("Upper Limit : " + upper.text + "\nLower Limit : " + lower.text)
+       elif e.tag == 'sensor':
+           min = find_element_by_tag(e, 'min')
+           max = find_element_by_tag(e, 'max')
+
+           print("<" + e.tag + " name=" + e.get('name') + " type=" + e.get('type') + ">")
+           if min != None and max != None:
+               print("Min: " + min.text + "\nMax: " + max.text)
+       else:
+           print("<" + e.tag + " name=" + e.get('name') + ">")
+
+    # for element in found_elements:
+    #     print("<" + element.tag + " name=" + element.get('name') + ">")
+    # print_all(found_elements)
 
              
     return
