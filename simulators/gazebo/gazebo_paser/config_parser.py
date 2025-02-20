@@ -78,6 +78,46 @@ def print_all(list):
          children = element.findall('*')
          print_all(children)
 
+# Description : Take in list of elements found from SDF and convert into a json file
+# INPUT : list of found elements, list of json object to be built
+# Output on success : JSON Object
+# Output on fail : None
+def create_json(list, jlist):
+    # Loop through each found element from the SDF
+    for e in list:
+        # Create Vars for Sensor element
+        if e.tag in g_config['sensor']: # sensor
+            custom_name = e.get('name')
+            type = 'input'
+            feagi_dev_type = None
+            description = ""
+        elif e.tag in g_config['actuator'] # actuator
+        # Create Vars for Actuator element 
+            custom_name = e.get('name')
+            type = 'output'
+            feagi_dev_type = None
+            description = ""
+        else: # link / body
+        # Create Vars for links / bodys
+            custom_name = e.get('name')
+            type = e.tag
+            description = ""
+
+    return
+
+# Description : Take in list of elements found from SDF and print into a json file
+# INPUT : list of found elements
+# Output on success : JSON file
+# Output on fail : None
+def print_json(list, jlist):
+    
+    file = open("model_config_tree.json", "w")
+    create_json(list, jlist)
+    json.dump(jlist, file)
+    file.close()
+    
+    return
+
 def main():
     # CMD LINE USAGE :
     # 1 - python config_parser.py <target.sdf> 
@@ -127,9 +167,13 @@ def main():
                file.write("Min: " + min.text + "\nMax: " + max.text +"\n")
        else:
            print("<" + e.tag + " name=" + e.get('name') + ">" )
-           file.write("<" + e.tag + "name=" + e.get('name') + ">" +"\n")
+           file.write("<" + e.tag + " name=" + e.get('name') + ">" +"\n")
 
     file.close()
+
+    push_to_file = []
+
+    create_json(found_elements, push_to_file)
 
     # for element in found_elements:
     #     print("<" + element.tag + " name=" + element.get('name') + ">")
