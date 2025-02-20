@@ -1,23 +1,23 @@
-<linkname=chassis>
+<link name=chassis>
 <sensor name=imu type=imu>
-<linkname=rod_one>
-<linkname=second_rod>
-<linkname=rear_left_wheel>
-<linkname=rear_right_wheel>
-<linkname=front_left_wheel>
-<linkname=front_right_wheel>
-<linkname=head>
-<linkname=head2>
-<linkname=sensor>
+<link name=rod_one>
+<link name=second_rod>
+<link name=rear_left_wheel>
+<link name=rear_right_wheel>
+<link name=front_left_wheel>
+<link name=front_right_wheel>
+<link name=head>
+<link name=head2>
+<link name=sensor>
 <sensor name=gpu_lidar type=gpu_lidar>
 Min: 0.120000
 Max: 4
 <sensor name=rgbd_camera type=rgbd_camera>
-<linkname=right_IR>
+<link name=right_IR>
 <sensor name=rgbd_camera type=rgbd_camera>
-<linkname=left_IR>
+<link name=left_IR>
 <sensor name=rgbd_camera type=rgbd_camera>
-<linkname=middle_IR>
+<link name=middle_IR>
 <sensor name=rgbd_camera type=rgbd_camera>
 <joint name=rear_left_wheel_joint type=revolute> 
 Upper Limit : 1.79769e+308

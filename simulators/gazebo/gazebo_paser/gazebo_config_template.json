@@ -1,6 +1,6 @@
 {
 	"actuator": {
-		"joint": "servo"
+		"revolute": "servo"
 	},
 	"sensor": {
 		"rgbd_camera": "camera",

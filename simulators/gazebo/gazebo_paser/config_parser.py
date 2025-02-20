@@ -82,26 +82,42 @@ def print_all(list):
 # INPUT : list of found elements, list of json object to be built
 # Output on success : JSON Object
 # Output on fail : None
-def create_json(list, jlist):
+def create_json(mylist, jlist):
     # Loop through each found element from the SDF
-    for e in list:
+    for e in mylist:
         # Create Vars for Sensor element
-        if e.tag in g_config['sensor']: # sensor
+        if e.get('type') in g_config['sensor']: # sensor
             custom_name = e.get('name')
             type = 'input'
-            feagi_dev_type = None
+            feagi_dev_type = g_config['sensor'][e.get('type')]
             description = ""
-        elif e.tag in g_config['actuator'] # actuator
+            children = []
+        elif e.get('type') in g_config['actuator']: # actuator
         # Create Vars for Actuator element 
             custom_name = e.get('name')
             type = 'output'
-            feagi_dev_type = None
+            feagi_dev_type = g_config['actuator'][e.get('type')]
             description = ""
+            children = []
         else: # link / body
         # Create Vars for links / bodys
             custom_name = e.get('name')
             type = e.tag
+            feagi_dev_type = None
             description = ""
+            children = []
+
+        toadd = {'custom_name': custom_name,
+                'type': type,
+                'description': description,
+                'children': children}
+        
+        if feagi_dev_type is not None:
+            temp = list(toadd.items())
+            temp.insert(2, ('feagi device type', feagi_dev_type ))
+            toadd = dict(temp)              
+
+        jlist.append(toadd)
 
     return
 
@@ -109,11 +125,11 @@ def create_json(list, jlist):
 # INPUT : list of found elements
 # Output on success : JSON file
 # Output on fail : None
-def print_json(list, jlist):
+def print_json(mylist, jlist):
     
     file = open("model_config_tree.json", "w")
-    create_json(list, jlist)
-    json.dump(jlist, file)
+    create_json(mylist, jlist)
+    json.dump(jlist, file, indent=4)
     file.close()
     
     return
@@ -173,7 +189,7 @@ def main():
 
     push_to_file = []
 
-    create_json(found_elements, push_to_file)
+    print_json(found_elements, push_to_file)
 
     # for element in found_elements:
     #     print("<" + element.tag + " name=" + element.get('name') + ">")
