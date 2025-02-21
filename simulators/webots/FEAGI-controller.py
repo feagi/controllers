@@ -115,6 +115,29 @@ if __name__ == "__main__":
 
     timestep = int(robot.getBasicTimeStep())
 
+    #all possible types of sensors           
+    all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
+                "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
+                "Receiver", "TouchSensor"]
+
+    #arrays to store the robots sensors and actuators
+    robot_sensors = []
+    robot_actuators = []
+
+    num_devices = robot.getNumberOfDevices()
+
+    #put devices into correct arrays and enable sensors
+    for i in range(num_devices):
+        device = robot.getDeviceByIndex(i)
+        device_name = device.getName()
+                
+        #append to the correct list
+        if type(device).__name__ in all_sensors:
+            device.enable(timestep)
+            robot_sensors.append(device)  
+        else:
+            robot_actuators.append(device)
+
     while True:
         # The controller will grab the data from FEAGI in real-time
         message_from_feagi = pns.message_from_feagi
