@@ -19,6 +19,7 @@ limitations under the License.
 
 import threading
 from time import sleep
+from controller import Robot
 from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import retina as retina
@@ -45,6 +46,7 @@ def action(obtained_data, capabilities):
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
     if recieve_servo_position_data:
+        #print(recieve_servo_position_data)
         pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
 
     if recieve_servo_data:
@@ -86,12 +88,9 @@ if __name__ == "__main__":
     # the rest of controller runtime.
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
 
-    # This is for processing the data and updating in real-time based on the user's activity in BV,
-    # such as cortical size, blink, reload genome, and other backend tasks.
-    if "camera" in capabilities['input']:
-        threading.Thread(target=retina.vision_progress,
-                         args=(default_capabilities, feagi_settings, camera_data['vision'],),
-                         daemon=True).start()
+    robot = Robot()
+
+    timestep = int(robot.getBasicTimeStep())
 
     while True:
         # The controller will grab the data from FEAGI in real-time
@@ -100,15 +99,25 @@ if __name__ == "__main__":
             # Translate from feagi data to human readable data
             obtained_signals = pns.obtain_opu_data(message_from_feagi)
             action(obtained_signals, capabilities)
+            print(obtained_signals)
 
-        # Example to send data to FEAGI. This is basically reading the joint. R
+
+        left_Motor = robot.getDevice("left wheel motor")
+
+        left_Motor_sensor = left_Motor.getPositionSensor()
+
+        left_Motor_sensor.enable(timestep)
+
+        sensor_data = left_Motor_sensor.getValue()
+
+        print(sensor_data)
+
         message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi,
-                                                         current_data=joint_read, symmetric=True)
-        # Sends to feagi data
-        pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-
-        # Clear data that is created by controller such as sensors
+                                                         current_data=sensor_data, symmetric=True)
+        
         message_to_feagi.clear()
 
         # cool down everytime
         sleep(feagi_settings['feagi_burst_speed'])
+
+        robot.step(timestep)
