@@ -30,6 +30,43 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
+# create the Robot instance.
+robot = Robot()
+
+# get the time step of the current world.
+timestep = int(robot.getBasicTimeStep())
+
+#all possible types of sensors           
+all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
+            "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
+            "Receiver", "TouchSensor"]
+
+#arrays to store the robots sensors and actuators
+robot_sensors = []
+robot_actuators = []
+
+num_devices = robot.getNumberOfDevices()
+
+def action(obtained_data, capabilities):
+    """
+    This is where you can make the robot do something based on FEAGI data. The variable
+    obtained_data contains the data from FEAGI. The variable capabilities comes from
+    the configuration.json file. It will need the capability to measure how much power it can control
+    and calculate using the FEAGI data.
+
+    obtained_data: dictionary.
+    capabilities: dictionary.
+    """
+    #recieve_motor_data = actuators.get_motor_data(obtained_data)
+    #recieve_servo_data = actuators.get_servo_data(obtained_data)
+    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+
+    if recieve_servo_position_data:
+        #actuators.setPosition(obtained_data)
+        pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
+
+
+#returns the data of given sensor
 def get_sensor_data(sensor):
     if type(sensor).__name__ == "TouchSensor":
         if sensor.getType() in ("WB_TOUCH_SENSOR_BUMPER", "WB_TOUCH_SENSOR_FORCE"):
@@ -53,34 +90,12 @@ def get_sensor_data(sensor):
     elif type(sensor).__name__ == "Receiver":
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
-
-def action(obtained_data, capabilities):
-    """
-    This is where you can make the robot do something based on FEAGI data. The variable
-    obtained_data contains the data from FEAGI. The variable capabilities comes from
-    the configuration.json file. It will need the capability to measure how much power it can control
-    and calculate using the FEAGI data.
-
-    obtained_data: dictionary.
-    capabilities: dictionary.
-    """
-    recieve_motor_data = actuators.get_motor_data(obtained_data)
-    recieve_servo_data = actuators.get_servo_data(obtained_data)
-    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
-
-    if recieve_servo_position_data:
-        #print(recieve_servo_position_data)
-        pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
-
-    if recieve_servo_data:
-        pass  # example output: {0: 0.245, 2: 1.0}
-
-    if recieve_motor_data: # example output: {0: 0.245, 2: 1.0}
-        pass
+    
 
 
 
 if __name__ == "__main__":
+
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
@@ -111,20 +126,9 @@ if __name__ == "__main__":
     # the rest of controller runtime.
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
 
-    robot = Robot()
+    
 
-    timestep = int(robot.getBasicTimeStep())
 
-    #all possible types of sensors           
-    all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
-                "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
-                "Receiver", "TouchSensor"]
-
-    #arrays to store the robots sensors and actuators
-    robot_sensors = []
-    robot_actuators = []
-
-    num_devices = robot.getNumberOfDevices()
 
     #put devices into correct arrays and enable sensors
     for i in range(num_devices):
@@ -134,10 +138,10 @@ if __name__ == "__main__":
         #append to the correct list
         if type(device).__name__ in all_sensors:
             device.enable(timestep)
-            robot_sensors.append(device)  
+            robot_sensors.append(device)
         else:
             robot_actuators.append(device)
-
+    
     while True:
         # The controller will grab the data from FEAGI in real-time
         message_from_feagi = pns.message_from_feagi
@@ -145,25 +149,19 @@ if __name__ == "__main__":
             # Translate from feagi data to human readable data
             obtained_signals = pns.obtain_opu_data(message_from_feagi)
             action(obtained_signals, capabilities)
-            print(obtained_signals)
 
-
-        left_Motor = robot.getDevice("left wheel motor")
-
-        left_Motor_sensor = left_Motor.getPositionSensor()
-
-        left_Motor_sensor.enable(timestep)
-
-        sensor_data = left_Motor_sensor.getValue()
-
-        print(sensor_data)
-
-        message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi,
-                                                         current_data=sensor_data, symmetric=True)
-        
-        message_to_feagi.clear()
-
+        #for every sensor, send their names and data to FEAGI
+        for sensor in robot_sensors:
+            sensor_name = sensor.getName()
+            sensor_data = get_sensor_data(sensor)
+            #print(sensor_name)
+            message_to_feagi = sensors.create_data_for_feagi(sensor_name, capabilities, message_to_feagi,\
+                                                             current_data=sensor_data, symmetric=True)
+            
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            message_to_feagi.clear()
+            
+    
         # cool down everytime
         sleep(feagi_settings['feagi_burst_speed'])
-
         robot.step(timestep)
