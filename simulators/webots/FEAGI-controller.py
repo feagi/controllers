@@ -30,6 +30,29 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
+def get_sensor_data(sensor):
+    if type(sensor).__name__ == "TouchSensor":
+        if sensor.getType() in ("WB_TOUCH_SENSOR_BUMPER", "WB_TOUCH_SENSOR_FORCE"):
+            return sensor.getValue()
+        else:
+            return sensor.getValues()
+    elif type(sensor).__name__ in ("DistanceSensor", "LightSensor", "PositionSensor"):
+        return sensor.getValue()
+    elif type(sensor).__name__ in ("Accelerometer", "Compass", "GPS", "Gyro"):
+        return sensor.getValues()
+    elif type(sensor).__name__ == "Camera":
+        return sensor.getImageArray()
+    elif type(sensor).__name__ == "InertialUnit":
+        return sensor.getRollPitchYaw()
+    elif type(sensor).__name__ == "Lidar":
+        return sensor.getRangeImageArray()
+    elif type(sensor).__name__ == "Radar":
+        return sensor.getTargets()
+    elif type(sensor).__name__ == "RangeFinder":
+        return sensor.getRangeImageArray()
+    elif type(sensor).__name__ == "Receiver":
+        if sensor.getQueueLength() != 0:
+            return sensor.getBytes()
 
 def action(obtained_data, capabilities):
     """
