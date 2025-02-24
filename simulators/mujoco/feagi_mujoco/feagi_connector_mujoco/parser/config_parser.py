@@ -292,8 +292,8 @@ def xml_file_to_config(xml_file):
     return convert_dict_to_json(config_dict)
 
 
-def raw_xml_string_to_config(xml_file):
-    model, xml_actuators_type, files = update_actuator_and_sensor_with_string_input(xml_file)
+def raw_xml_string_to_config(string_xml_file):
+    model, xml_actuators_type, files = update_actuator_and_sensor_with_string_input(string_xml_file)
 
     # Just obtain the actuator list that mujoco_tree_config needs
     actuator_information = generate_actuator_list(model, xml_actuators_type)
