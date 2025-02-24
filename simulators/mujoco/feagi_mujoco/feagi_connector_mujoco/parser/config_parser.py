@@ -42,7 +42,7 @@ def generate_sensor_list(model, xml_actuators_type):
 
 
 def check_nest_file_from_xml(xml_path):
-    root=xml_type_check(xml_path)
+    root, tree=xml_type_check(xml_path)
 
     # Store file paths
     files = [xml_path]
@@ -60,7 +60,7 @@ def check_nest_file_from_xml(xml_path):
 
 
 def check_nest_file_from_xml_string(xml_string):
-    root = xml_type_check(xml_string)
+    root, tree = xml_type_check(xml_string)
 
     # Store file paths
     files = [root]
@@ -76,38 +76,13 @@ def check_nest_file_from_xml_string(xml_string):
                 files.append(file_path)
     return files
 
-
-# def get_actuators_string_input(files):
-#     # Store actuator information in a dictionary
-#     actuators = {'output': {}}
-#     counter = 0
-#     for xml_path in files:
-#         # Parse the XML file
-#         xmlstr = ET.tostring(xml_path, encoding='utf8')
-#         root = ET.fromstring(xmlstr)
-#
-#         # Find the actuator section
-#         actuator_section = root.find('actuator')
-#
-#         if actuator_section is not None:
-#             # Get all children of actuator section (all types of actuators)
-#             for actuator in actuator_section:
-#                 name = actuator.get('name')
-#                 if name is None:
-#                     name = "actuator_" + str(counter)
-#                     counter += 1
-#                 name = validate_name(name)
-#                 actuators['output'][name] = {'type': actuator.tag}
-#     return actuators
-
-
 def get_actuators(files):
     # Store actuator information in a dictionary
     actuators = {'output': {}}
     counter = 0
     for xml_path in files:
         # Parse the XML file
-        root = xml_type_check(xml_path)
+        root, tree = xml_type_check(xml_path)
 
         # Find the actuator section
         actuator_section = root.find('actuator')
@@ -128,7 +103,7 @@ def get_sensors(files, sensors):
     sensors['input'] = {}
     for xml_path in files:
         # Parse the XML file
-        root = xml_type_check(xml_path)
+        root, tree = xml_type_check(xml_path)
 
         # Find the sensor section
         sensor_section = root.find('sensor')
@@ -152,36 +127,6 @@ def get_sensors(files, sensors):
                     print(sensor.tag, " is not supported yet.")
     return sensors
 
-
-# def get_sensors_string_input(files, sensors):
-#     sensors['input'] = {}
-#     for xml_path in files:
-#         # Parse the XML file
-#
-#
-#         # Find the sensor section
-#         sensor_section = root.find('sensor')
-#
-#         if sensor_section is not None:
-#             # Get all children of sensor section (all types of sensors)
-#             for sensor in sensor_section:
-#                 if sensor.tag in sensor_tag_to_name:
-#                     name = sensor_tag_to_name[sensor.tag]
-#                     sensors['input'][name] = {'type': sensor.tag}
-#
-#                     # Get all attributes of the sensor
-#                     for attr_name, attr_value in sensor.attrib.items():
-#                         if attr_name != 'name':  # Skip name as we already stored it
-#                             sensors['input'][name][attr_name] = attr_value
-#
-#                     # Get text content if it exists
-#                     if sensor.text and sensor.text.strip():
-#                         sensors['input'][name]['value'] = sensor.text.strip()
-#                 else:
-#                     print(sensor.tag, " is not supported yet.")
-#     return sensors
-
-
 def calculate_increment(min_value, max_value):
     range_value = abs(max_value - min_value)
     target_steps = 30  # Aim for about 30 steps
@@ -199,11 +144,11 @@ def calculate_increment(min_value, max_value):
 def xml_type_check(xml_data):
     if isinstance(xml_data, str):
         tree = ET.parse(xml_data)
-        data = tree.getroot()
+        root = tree.getroot()
     elif isinstance(xml_data, ET.Element):
-        xmlstr = ET.tostring(xml_data, encoding='utf8')
-        data = ET.fromstring(xmlstr)
-    return data
+        tree = ET.tostring(xml_data, encoding='utf8')
+        root = ET.fromstring(tree)
+    return root, tree
 
 
 def generate_config(element, actuator_list, sensor_list, dict_increment):
@@ -242,7 +187,6 @@ def generate_config(element, actuator_list, sensor_list, dict_increment):
                     part_config['properties'][parameter_list['label']] = dict_increment[
                         part_config['feagi device type']]
     elif part_config['custom_name'] in sensor_list or part_config['type'] in sensor_list:
-        # print(sensor_list, " and part config: ", part_config['custom_name'], " and sensing type: ", SENSING_TYPES)
         get_type = ""
         for x in sensor_list:
             for key in sensor_list[x]:
@@ -277,13 +221,16 @@ def generate_config(element, actuator_list, sensor_list, dict_increment):
 
 def mujoco_tree_config(xml_file, actuator_list, sensor_list):
     configs = []  # List to store configurations for each file
-    hidden_file_inside_body = []
     feagi_index_increment = {}
 
     for xml_path in xml_file:
-        root = xml_type_check(xml_path)
+        root, tree = xml_type_check(xml_path)
         worldbody = root.findall('.//worldbody')
-        include_elements = tree.getroot()
+        if isinstance(tree, bytes):
+            tree = ET.fromstring(tree)
+            include_elements = tree
+        else:
+            include_elements = tree.getroot()
         if include_elements.tag == 'mujocoinclude':
             body_elements = include_elements
         else:
@@ -306,7 +253,6 @@ def obtain_xml(xml):
 
 
 def update_actuator_and_sensor(xml_file):
-    print("data: ", xml_file, " and type: ", type(xml_file))
     model = mujoco.MjModel.from_xml_path(xml_file)
     files = check_nest_file_from_xml(xml_file)
     xml_info = get_actuators(files)
@@ -316,7 +262,8 @@ def update_actuator_and_sensor(xml_file):
 
 def update_actuator_and_sensor_with_string_input(xml_file_string):
     model = mujoco.MjModel.from_xml_string(xml_file_string)
-    files = check_nest_file_from_xml_string(xml_file_string)
+    xml_data = ET.fromstring(xml_file_string)
+    files = check_nest_file_from_xml_string(xml_data)
     xml_info = get_actuators(files)
     xml_info = get_sensors(files, xml_info)
     return model, xml_info, files
