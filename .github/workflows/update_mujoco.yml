@@ -36,6 +36,6 @@ jobs:
         cd simulators/mujoco/feagi_mujoco/
         python3 -m twine upload -u $TWINE_USERNAME -p $TWINE_PASSWORD dist/*
       env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME_TOKEN }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD_TOKEN }}
+        TWINE_USERNAME: "__token__"
+        TWINE_PASSWORD: ${{ secrets.PYPI_MUJOCO_TOKEN }}
 
