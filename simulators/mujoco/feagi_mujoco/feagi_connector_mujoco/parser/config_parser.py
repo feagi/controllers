@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+
+"""
+Copyright 2016-2025 Neuraville Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+"""
+
+
 import json
 import math
 import copy
@@ -42,8 +62,7 @@ def generate_sensor_list(model, xml_actuators_type):
 
 
 def check_nest_file_from_xml(xml_path):
-    tree = ET.parse(xml_path)
-    root = tree.getroot()
+    root, tree=xml_type_check(xml_path)
 
     # Store file paths
     files = [xml_path]
@@ -60,14 +79,30 @@ def check_nest_file_from_xml(xml_path):
     return files
 
 
+def check_nest_file_from_xml_string(xml_string):
+    root, tree = xml_type_check(xml_string)
+
+    # Store file paths
+    files = [root]
+
+    # Find all include elements directly
+    include_elements = root.findall('.//include')
+
+    if include_elements:
+        for include in include_elements:
+            file_path = include.get('file')
+            if file_path:
+                print("Found included file:", file_path)
+                files.append(file_path)
+    return files
+
 def get_actuators(files):
     # Store actuator information in a dictionary
     actuators = {'output': {}}
     counter = 0
     for xml_path in files:
         # Parse the XML file
-        tree = ET.parse(xml_path)
-        root = tree.getroot()
+        root, tree = xml_type_check(xml_path)
 
         # Find the actuator section
         actuator_section = root.find('actuator')
@@ -88,8 +123,7 @@ def get_sensors(files, sensors):
     sensors['input'] = {}
     for xml_path in files:
         # Parse the XML file
-        tree = ET.parse(xml_path)
-        root = tree.getroot()
+        root, tree = xml_type_check(xml_path)
 
         # Find the sensor section
         sensor_section = root.find('sensor')
@@ -113,7 +147,6 @@ def get_sensors(files, sensors):
                     print(sensor.tag, " is not supported yet.")
     return sensors
 
-
 def calculate_increment(min_value, max_value):
     range_value = abs(max_value - min_value)
     target_steps = 30  # Aim for about 30 steps
@@ -126,6 +159,16 @@ def calculate_increment(min_value, max_value):
     elif range_value / increment < target_steps / 2:
         increment /= 2
     return increment
+
+
+def xml_type_check(xml_data):
+    if isinstance(xml_data, str):
+        tree = ET.parse(xml_data)
+        root = tree.getroot()
+    elif isinstance(xml_data, ET.Element):
+        tree = ET.tostring(xml_data, encoding='utf8')
+        root = ET.fromstring(tree)
+    return root, tree
 
 
 def generate_config(element, actuator_list, sensor_list, dict_increment):
@@ -161,9 +204,9 @@ def generate_config(element, actuator_list, sensor_list, dict_increment):
                     part_config['properties'][parameter_list['label']] = \
                         actuator_list[part_config['custom_name']]['range'][1]
                 if parameter_list['label'] == 'feagi_index':
-                    part_config['properties'][parameter_list['label']] = dict_increment[part_config['feagi device type']]
+                    part_config['properties'][parameter_list['label']] = dict_increment[
+                        part_config['feagi device type']]
     elif part_config['custom_name'] in sensor_list or part_config['type'] in sensor_list:
-        # print(sensor_list, " and part config: ", part_config['custom_name'], " and sensing type: ", SENSING_TYPES)
         get_type = ""
         for x in sensor_list:
             for key in sensor_list[x]:
@@ -175,7 +218,6 @@ def generate_config(element, actuator_list, sensor_list, dict_increment):
             dict_increment[part_config['feagi device type']] = 0
         else:
             dict_increment[part_config['feagi device type']] += 1
-
 
         part_config['type'] = 'input'
         part_config['properties'] = {}
@@ -199,14 +241,16 @@ def generate_config(element, actuator_list, sensor_list, dict_increment):
 
 def mujoco_tree_config(xml_file, actuator_list, sensor_list):
     configs = []  # List to store configurations for each file
-    hidden_file_inside_body = []
     feagi_index_increment = {}
 
     for xml_path in xml_file:
-        tree = ET.parse(xml_path)
-        root = tree.getroot()
+        root, tree = xml_type_check(xml_path)
         worldbody = root.findall('.//worldbody')
-        include_elements = tree.getroot()
+        if isinstance(tree, bytes):
+            tree = ET.fromstring(tree)
+            include_elements = tree
+        else:
+            include_elements = tree.getroot()
         if include_elements.tag == 'mujocoinclude':
             body_elements = include_elements
         else:
@@ -236,15 +280,40 @@ def update_actuator_and_sensor(xml_file):
     return model, xml_info, files
 
 
+def update_actuator_and_sensor_with_string_input(xml_file_string):
+    model = mujoco.MjModel.from_xml_string(xml_file_string)
+    xml_data = ET.fromstring(xml_file_string)
+    files = check_nest_file_from_xml_string(xml_data)
+    xml_info = get_actuators(files)
+    xml_info = get_sensors(files, xml_info)
+    return model, xml_info, files
+
+
 def save_file_as_json(data, file="model_config_tree.json"):
     print("saved to ", file)
     with open(file, "w") as f:
         json.dump(data, f, indent=4)
 
 
-def xml_to_config(xml_file):
-    # This will generate all necessary for actuator and sensor information
+def xml_file_to_config(xml_file):
     model, xml_actuators_type, files = update_actuator_and_sensor(xml_file)
+
+    # Just obtain the actuator list that mujoco_tree_config needs
+    actuator_information = generate_actuator_list(model, xml_actuators_type)
+
+    # Just obtain the sensor list that mujoco_tree_config needs
+    sensor_information = generate_sensor_list(model, xml_actuators_type)
+
+    config_dict = mujoco_tree_config(files, actuator_information, sensor_information)  # get dict of config
+
+    save_file_as_json(config_dict)
+
+    # This is where you just send json to anywhere.
+    return convert_dict_to_json(config_dict)
+
+
+def raw_xml_string_to_config(string_xml_file):
+    model, xml_actuators_type, files = update_actuator_and_sensor_with_string_input(string_xml_file)
 
     # Just obtain the actuator list that mujoco_tree_config needs
     actuator_information = generate_actuator_list(model, xml_actuators_type)
