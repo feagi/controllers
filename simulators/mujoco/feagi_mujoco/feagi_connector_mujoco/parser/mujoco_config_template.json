@@ -2,7 +2,8 @@
     "actuator": {
         "position": "servo",
         "motor": "motor",
-        "general": "motor"
+        "general": "motor",
+        "muscle": "motor"
     },
     "sensor": {
         "framequat": "gyro",
@@ -19,7 +20,6 @@
         "type",
         "description",
         "optional",
-        "feagi_index",
         "threshold_default",
         "custom_name",
         "index",

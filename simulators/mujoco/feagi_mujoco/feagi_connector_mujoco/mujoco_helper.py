@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Copyright 2016-present Neuraville Inc. All Rights Reserved.
+Copyright 2016-2025 Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,24 +17,19 @@ limitations under the License.
 ==============================================================================
 """
 
-import copy
 import json
-
+import copy
 import numpy as np
+import feagi_connector_mujoco
 from feagi_connector import retina
 import xml.etree.ElementTree as ET
 
-TRANSMISSION_TYPES = {
-    'position': 'servo',
-    'motor': 'motor',
-    'general': 'motor'
-}
+current_path = feagi_connector_mujoco.__path__
+with open(str(current_path[0]) + '/mujoco_config_template.json', 'r') as f:
+    config = json.load(f)
+TRANSMISSION_TYPES = config['TRANSMISSION_TYPES']
+SENSING_TYPES = config['SENSING_TYPES']
 
-SENSING_TYPES = {
-    'framequat': 'gyro',
-    'distance': 'proximity',
-    'rangefinder': 'camera'
-}
 
 def validate_name(name):
     symbols = ['/', '\\']
