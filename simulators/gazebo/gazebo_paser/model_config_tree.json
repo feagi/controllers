@@ -3,27 +3,7 @@
         "custom_name": "chassis",
         "type": "link",
         "description": "",
-        "children": [
-            {
-                "custom_name": "imu",
-                "type": "input",
-                "feagi device type": "gyro",
-                "properties": {
-                    "min_value": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "max_value": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "description": "",
-                "children": []
-            }
-        ]
+        "children": []
     },
     {
         "custom_name": "imu",
@@ -43,89 +23,6 @@
         },
         "description": "",
         "children": []
-    },
-    {
-        "custom_name": "rod_one",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "second_rod",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "rear_left_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "rear_right_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "front_left_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "front_right_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "head",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "head2",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "sensor",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "gpu_lidar",
-                "type": "input",
-                "feagi device type": "proximity",
-                "properties": {
-                    "max_value": 4.0,
-                    "min_value": 0.12
-                },
-                "description": "",
-                "children": []
-            },
-            {
-                "custom_name": "rgbd_camera",
-                "type": "input",
-                "feagi device type": "camera",
-                "properties": {
-                    "eccentricity_control": {
-                        "X offset percentage": 1,
-                        "Y offset percentage": 1
-                    },
-                    "modulation_control": {
-                        "X offset percentage": 99,
-                        "Y offset percentage": 99
-                    }
-                },
-                "description": "",
-                "children": []
-            }
-        ]
     },
     {
         "custom_name": "gpu_lidar",
@@ -156,30 +53,6 @@
         "children": []
     },
     {
-        "custom_name": "right_IR",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "rgbd_camera",
-                "type": "input",
-                "feagi device type": "camera",
-                "properties": {
-                    "eccentricity_control": {
-                        "X offset percentage": 1,
-                        "Y offset percentage": 1
-                    },
-                    "modulation_control": {
-                        "X offset percentage": 99,
-                        "Y offset percentage": 99
-                    }
-                },
-                "description": "",
-                "children": []
-            }
-        ]
-    },
-    {
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
@@ -197,30 +70,6 @@
         "children": []
     },
     {
-        "custom_name": "left_IR",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "rgbd_camera",
-                "type": "input",
-                "feagi device type": "camera",
-                "properties": {
-                    "eccentricity_control": {
-                        "X offset percentage": 1,
-                        "Y offset percentage": 1
-                    },
-                    "modulation_control": {
-                        "X offset percentage": 99,
-                        "Y offset percentage": 99
-                    }
-                },
-                "description": "",
-                "children": []
-            }
-        ]
-    },
-    {
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
@@ -236,30 +85,6 @@
         },
         "description": "",
         "children": []
-    },
-    {
-        "custom_name": "middle_IR",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "rgbd_camera",
-                "type": "input",
-                "feagi device type": "camera",
-                "properties": {
-                    "eccentricity_control": {
-                        "X offset percentage": 1,
-                        "Y offset percentage": 1
-                    },
-                    "modulation_control": {
-                        "X offset percentage": 99,
-                        "Y offset percentage": 99
-                    }
-                },
-                "description": "",
-                "children": []
-            }
-        ]
     },
     {
         "custom_name": "rgbd_camera",
@@ -289,7 +114,14 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rear_left_wheel",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "rear_right_wheel_joint",
@@ -302,7 +134,14 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rear_right_wheel",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "front_left_wheel_joint",
@@ -315,7 +154,14 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "front_left_wheel",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "front_right_wheel_joint",
@@ -328,13 +174,27 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "front_right_wheel",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "ultrasonic",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "sensor",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "head_attach",
@@ -347,7 +207,14 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "head",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "head_attach2",
@@ -360,36 +227,78 @@
             "default_value": 0
         },
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "head2",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "rod1",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rod_one",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "board",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "second_rod",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "IR_right",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "right_IR",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "IR_left",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "left_IR",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "IR_middle",
         "type": "joint",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "middle_IR",
+                "type": "link",
+                "description": "",
+                "children": []
+            }
+        ]
     }
 ]
