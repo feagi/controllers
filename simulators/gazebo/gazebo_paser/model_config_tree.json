@@ -3,7 +3,27 @@
         "custom_name": "chassis",
         "type": "link",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "imu",
+                "type": "input",
+                "feagi device type": "gyro",
+                "properties": {
+                    "min_value": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "max_value": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "imu",
@@ -76,7 +96,36 @@
         "custom_name": "sensor",
         "type": "link",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "gpu_lidar",
+                "type": "input",
+                "feagi device type": "proximity",
+                "properties": {
+                    "max_value": 4.0,
+                    "min_value": 0.12
+                },
+                "description": "",
+                "children": []
+            },
+            {
+                "custom_name": "rgbd_camera",
+                "type": "input",
+                "feagi device type": "camera",
+                "properties": {
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    }
+                },
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "gpu_lidar",
@@ -110,7 +159,25 @@
         "custom_name": "right_IR",
         "type": "link",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rgbd_camera",
+                "type": "input",
+                "feagi device type": "camera",
+                "properties": {
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    }
+                },
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "rgbd_camera",
@@ -133,7 +200,25 @@
         "custom_name": "left_IR",
         "type": "link",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rgbd_camera",
+                "type": "input",
+                "feagi device type": "camera",
+                "properties": {
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    }
+                },
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "rgbd_camera",
@@ -156,7 +241,25 @@
         "custom_name": "middle_IR",
         "type": "link",
         "description": "",
-        "children": []
+        "children": [
+            {
+                "custom_name": "rgbd_camera",
+                "type": "input",
+                "feagi device type": "camera",
+                "properties": {
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    }
+                },
+                "description": "",
+                "children": []
+            }
+        ]
     },
     {
         "custom_name": "rgbd_camera",

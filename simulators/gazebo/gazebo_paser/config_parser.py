@@ -83,37 +83,129 @@ def print_all(list):
 # Output on success : JSON Object
 # Output on fail : None
 def create_json(mylist, jlist):
+    
     # Loop through each found element from the SDF
     for e in mylist:
-        # Create Vars for Sensor element
-        if e.get('type') in g_config['sensor']: # sensor
-            custom_name = e.get('name')
+        child_arr = []
+        for child in e:
+            if child in mylist:
+                if child not in child_arr:
+                    child_arr.append(child)
+        #print(child_arr)
+
+        if e not in child_arr:
+            print(e.get('name'))
+            for i in child_arr:
+                print(child.get('name'))
+            # Create Vars for Sensor element
+            if e.get('type') in g_config['sensor']: # sensor
+                custom_name = e.get('name')
+                type = 'input'
+                feagi_dev_type = g_config['sensor'][e.get('type')]
+                #properties = {}
+                description = ""
+                children = []
+                for i in child_arr:
+                    children.append(create_child(i))
+
+            elif e.get('type') in g_config['actuator']: # actuator
+            # Create Vars for Actuator element 
+                custom_name = e.get('name')
+                type = 'output'
+                feagi_dev_type = g_config['actuator'][e.get('type')]
+                #properties = {}
+                description = ""
+                children = []
+                for i in child_arr:
+                    children.append(create_child(i))
+
+            else: # link / body
+            # Create Vars for links / bodys
+                custom_name = e.get('name')
+                type = e.tag
+                feagi_dev_type = None
+                #properties = {}
+                description = ""
+                children = []
+                for i in child_arr:
+                    children.append(create_child(i))
+
+            # setting up general structure
+            toadd = {'custom_name': custom_name,
+                    'type': type,
+                    'description': description,
+                    'children': children}
+            
+            # handle device type and parameters/properties if sensor or actuator
+            if feagi_dev_type is not None:
+                # retrieve all properties necessary for sensor / actuator
+                props = find_properties(feagi_dev_type, type)
+
+                # insert data into parameters/properties
+                # TYPES ARE: gyro, servo, proximity, camera
+                if feagi_dev_type == 'servo':
+                    min = find_element_by_tag(e, 'upper')
+                    max = find_element_by_tag(e, 'lower')
+                    if min is not None:
+                        props["min_value"] = float(min.text)
+                    if max is not None:
+                        props["max_value"] = float(max.text)
+                elif feagi_dev_type == 'gyro':
+                    pass
+                elif feagi_dev_type == 'proximity':
+                    min = find_element_by_tag(e, 'min')
+                    max = find_element_by_tag(e, 'max')
+                    if min is not None:
+                        props["min_value"] = float(min.text)
+                    if max is not None:
+                        props["max_value"] = float(max.text)
+                elif feagi_dev_type == 'camera':
+                    pass
+                else:
+                    pass
+
+                # add in extra lines to dict
+                temp = list(toadd.items())
+                temp.insert(2, ('feagi device type', feagi_dev_type ))
+                temp.insert(3, ('properties', props ))
+                toadd = dict(temp)              
+
+            # add to json list that will be sent to file
+            jlist.append(toadd)
+
+    return
+
+def create_child(child):
+        
+    # Create Vars for Sensor element
+        if child.get('type') in g_config['sensor']: # sensor
+            custom_name = child.get('name')
             type = 'input'
-            feagi_dev_type = g_config['sensor'][e.get('type')]
+            feagi_dev_type = g_config['sensor'][child.get('type')]
             #properties = {}
             description = ""
             children = []
 
-        elif e.get('type') in g_config['actuator']: # actuator
+        elif child.get('type') in g_config['actuator']: # actuator
         # Create Vars for Actuator element 
-            custom_name = e.get('name')
+            custom_name = child.get('name')
             type = 'output'
-            feagi_dev_type = g_config['actuator'][e.get('type')]
+            feagi_dev_type = g_config['actuator'][child.get('type')]
             #properties = {}
             description = ""
             children = []
 
         else: # link / body
         # Create Vars for links / bodys
-            custom_name = e.get('name')
-            type = e.tag
+            custom_name = child.get('name')
+            type = child.tag
             feagi_dev_type = None
             #properties = {}
             description = ""
             children = []
 
         # setting up general structure
-        toadd = {'custom_name': custom_name,
+        child_data = {'custom_name': custom_name,
                 'type': type,
                 'description': description,
                 'children': children}
@@ -126,8 +218,8 @@ def create_json(mylist, jlist):
             # insert data into parameters/properties
             # TYPES ARE: gyro, servo, proximity, camera
             if feagi_dev_type == 'servo':
-                min = find_element_by_tag(e, 'upper')
-                max = find_element_by_tag(e, 'lower')
+                min = find_element_by_tag(child, 'upper')
+                max = find_element_by_tag(child, 'lower')
                 if min is not None:
                     props["min_value"] = float(min.text)
                 if max is not None:
@@ -135,8 +227,8 @@ def create_json(mylist, jlist):
             elif feagi_dev_type == 'gyro':
                 pass
             elif feagi_dev_type == 'proximity':
-                min = find_element_by_tag(e, 'min')
-                max = find_element_by_tag(e, 'max')
+                min = find_element_by_tag(child, 'min')
+                max = find_element_by_tag(child, 'max')
                 if min is not None:
                     props["min_value"] = float(min.text)
                 if max is not None:
@@ -147,15 +239,12 @@ def create_json(mylist, jlist):
                 pass
 
             # add in extra lines to dict
-            temp = list(toadd.items())
+            temp = list(child_data.items())
             temp.insert(2, ('feagi device type', feagi_dev_type ))
             temp.insert(3, ('properties', props ))
-            toadd = dict(temp)              
+            child_data = dict(temp)              
 
-        # add to json list that will be sent to file
-        jlist.append(toadd)
-
-    return
+        return child_data
 
 # Description : Take in list of elements found from SDF and print into a json file
 # INPUT : list of found elements
