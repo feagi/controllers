@@ -199,7 +199,7 @@
                     "feagi_index": 0,
                     "max_value": 0,
                     "min_value": 0
-                },-
+                },
                 "11": {
                     "custom_name": "head_2_joint_sensor",
                     "disabled": false,
