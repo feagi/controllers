@@ -263,12 +263,12 @@ def sort_nesting_rec_child(mylist, jlist, checked_items, parent):
         for i in jlist:
             if i['custom_name'] == child.text:
                 newchild = i
-                print("found!")
+                #print("found!")
                 jlist.remove(i)
         for i in jlist:
             if i['custom_name'] == parent.get('name'):
                 i['children'].append(newchild)
-                print("added!")
+                #print("added!")
         nextparent = None
         for i in mylist:
             if child.text == i.get('name'):
@@ -289,7 +289,35 @@ def sort_nesting_rec_child(mylist, jlist, checked_items, parent):
 #   that parent). this makes our lives easier so that there is not a weird doubly loop or adding things 2 times.
 
 # function to do nesting - parents
+
+# Description : Sort through current JSON elements and append children to parent JSON object
+# INPUT : list of SDF elements, list of JSON objects, and current child element
+# Output on success : Correctly nests children into parent JSON object
+# Output on fail : None
 def sort_nesting_rec_parent(mylist, jlist, checked_items, child):
+
+    # Find parent tag for current element
+    parent = find_element_by_tag(child, 'parent')
+    
+    if parent is not None:
+        tempChild = {}
+        for i in jlist:
+            if i['custom_name'] == child.get('name'):
+                tempChild = i
+                jlist.remove(i)
+        for i in jlist:
+            if i['custom_name'] == parent.text:
+                i['children'].append(tempChild)
+        nextChild = None
+        for i in mylist:
+            if child == i:
+                mylist.remove(i)
+            else:
+                print(i.get('name'))
+                nextChild = find_element_by_tag(i, 'parent')
+                if nextChild is not None:
+                    nextChild = i
+                    sort_nesting_rec_parent(mylist, jlist, checked_items, nextChild)
 
     return
 
@@ -378,6 +406,7 @@ def print_json(mylist, jlist):
     for e in mylist:
         if e.get('name') not in checked_items:
             sort_nesting_rec_child(mylist, jlist, checked_items, e)
+            sort_nesting_rec_parent(mylist, jlist, checked_items, e)
     json.dump(jlist, file, indent=4)
     file.close()
     
