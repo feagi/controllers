@@ -1,0 +1,27 @@
+{
+	"actuator": {
+		"revolute": "servo"
+	},
+	"sensor": {
+		"rgbd_camera": "camera",
+		"imu": "gyro",
+		"gpu_lidar": "proximity",
+		"battery_name": "battery"
+    },
+	"ignore_list": [
+        "disabled",
+        "type",
+        "description",
+        "optional",
+        "feagi_index",
+    	"threshold_default",
+        "custom_name",
+        "index",
+        "mirror"
+    ],
+    "allow_list": [
+		"link",
+		"joint",
+		"sensor"
+    ]
+}
