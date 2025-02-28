@@ -86,26 +86,26 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
 
 
 # function to do nesting - children
-def sort_nesting_rec_child(mylist, jlist, parent):
+def sort_nesting_rec_child(found_elements, json_list, parent):
 
     #checked_items.append(parent.get('name'))          i dont think we need this actually
     child = find_element_by_tag(parent, 'child')
     if child is not None:
         newchild = {}
-        for i in jlist:
+        for i in json_list:
             if i['custom_name'] == child.text:
                 newchild = i
                 #print("found!")
-                jlist.remove(i)
-        for i in jlist:
+                json_list.remove(i)
+        for i in json_list:
             if i['custom_name'] == parent.get('name'):
                 i['children'].append(newchild)
                 #print("added!")
         nextparent = None
-        for i in mylist:
+        for i in found_elements:
             if child.text == i.get('name'):
                 nextparent = i
-        sort_nesting_rec_child(mylist, jlist, nextparent)
+        sort_nesting_rec_child(found_elements, json_list, nextparent)
 
     return
 
@@ -126,30 +126,30 @@ def sort_nesting_rec_child(mylist, jlist, parent):
 # INPUT : list of SDF elements, list of JSON objects, and current child element
 # Output on success : Correctly nests children into parent JSON object
 # Output on fail : None
-def sort_nesting_rec_parent(mylist, jlist, child):
+def sort_nesting_rec_parent(found_elements, json_list, child):
 
     # Find parent tag for current element
     parent = find_element_by_tag(child, 'parent')
     
     if parent is not None:
         tempChild = {}
-        for i in jlist:
+        for i in json_list:
             if i['custom_name'] == child.get('name'):
                 tempChild = i
-                jlist.remove(i)
-        for i in jlist:
+                json_list.remove(i)
+        for i in json_list:
             if i['custom_name'] == parent.text:
                 i['children'].append(tempChild)
         nextChild = None
-        for i in mylist:
+        for i in found_elements:
             if child == i:
-                mylist.remove(i)
+                found_elements.remove(i)
             else:
                 print(i.get('name'))
                 nextChild = find_element_by_tag(i, 'parent')
                 if nextChild is not None:
                     nextChild = i
-                    sort_nesting_rec_parent(mylist, jlist, nextChild)
+                    sort_nesting_rec_parent(found_elements, json_list, nextChild)
 
     return
 
