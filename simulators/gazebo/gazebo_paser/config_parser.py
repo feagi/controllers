@@ -85,10 +85,13 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
 
 
 
-# function to do nesting - children
+# Description : Sort through current JSON elements and append children to current element's JSON object
+# INPUT : list of SDF elements, list of JSON objects, and current parent element
+# Output on success : Correctly nests children into parent JSON object
+# Output on fail : None
 def sort_nesting_rec_child(found_elements, json_list, parent):
-
     #checked_items.append(parent.get('name'))          i dont think we need this actually
+
     child = find_element_by_tag(parent, 'child')
     if child is not None:
         newchild = {}
@@ -122,7 +125,7 @@ def sort_nesting_rec_child(found_elements, json_list, parent):
 
 # function to do nesting - parents
 
-# Description : Sort through current JSON elements and append children to parent JSON object
+# Description : Sort through current JSON elements and append current element to parent JSON object
 # INPUT : list of SDF elements, list of JSON objects, and current child element
 # Output on success : Correctly nests children into parent JSON object
 # Output on fail : None
@@ -153,6 +156,73 @@ def sort_nesting_rec_parent(found_elements, json_list, child):
 
     return
 
+def nest_elements(found_elements, json_list):
+    search_parent = False
+    for xml_element in found_elements:
+        # locate the corresponding json element
+        for json_element in json_list:
+            if json_element['custom_name'] == xml_element.get('name'):
+                pass
+        search_parent = True
+        parent = find_element_by_tag(xml_element, 'parent')
+        if parent and search_parent:
+           for json_element in json_list:
+                if json_element['custom_name'] == parent.text:
+                    # found the parent json element
+                    pass
+
+            # locate child, save, and remove child element
+        for json_element in json_list:
+                if json_element['custom_name'] == child.get('name'):
+                    temp_element = json_element
+                    json_list.remove(temp_element)
+        if temp_element is None:
+                print("Could not locate the child element with name : " + child.get('name'))
+            
+            #locate parent, and append child to its children list
+        for json_element in json_list:
+                if json_element['custom_name'] == parent.text:
+                    json_element['children'].append(child)
+
+def sort_nesting_rec_parent_2(found_elements, json_list, child):
+    # Find parent tag for current element
+    parent = find_element_by_tag(child, 'parent')
+    
+    if parent is not None:
+        tempChild = {}
+        for i in json_list:
+            if i['custom_name'] == child.get('name'):
+                tempChild = i
+                json_list.remove(i)
+            else:
+                for z in i['children']:
+                    if z['custom_name'] == child.get('name'):
+                        tempChild = z
+                        json_list.remove(z)
+                    else:
+                        for k in z['children']:
+                            if k['custom_name'] == child.get('name'):
+                                tempChild = k
+                                json_list.remove(k)
+        for i in json_list:
+            if i['custom_name'] == parent.text:
+                i['children'].append(tempChild)
+            else:
+                print("Parent  " + parent.text + " was not found\nFor child  " + json.dumps(tempChild))
+                for z in i['children']:
+                    if z['custom_name'] == parent.text:
+                        z['children'].append(tempChild)
+        nextChild = None
+        for i in found_elements:
+            if parent.text == i.get('name'):
+                nextChild = i
+            if nextChild is not None:
+                #print(nextChild.get('name'))
+                #print("---------------------")
+                sort_nesting_rec_parent_2(found_elements, json_list, nextChild)
+
+    return
+
 def create_json(found_elements, json_list):
     
     # Loop through each found element from the SDF
@@ -160,36 +230,36 @@ def create_json(found_elements, json_list):
         
         # Create Vars for Sensor element
         if elements.get('type') in g_config['sensor']: # sensor
-            custom_name = elements.get('name')
+            # custom_name = elements.get('name')
             type = 'input'
             feagi_dev_type = g_config['sensor'][elements.get('type')]
             #properties = {}
-            description = ""
-            children = []
+            # description = ""
+            # children = []
 
         elif elements.get('type') in g_config['actuator']: # actuator
         # Create Vars for Actuator element 
-            custom_name = elements.get('name')
+            # custom_name = elements.get('name')
             type = 'output'
             feagi_dev_type = g_config['actuator'][elements.get('type')]
             #properties = {}
-            description = ""
-            children = []
+            # description = ""
+            # children = []
 
         else: # link / body
         # Create Vars for links / bodys
-            custom_name = elements.get('name')
+            # custom_name = elements.get('name')
             type = elements.tag
             feagi_dev_type = None
             #properties = {}
-            description = ""
-            children = []
+            # description = ""
+            # children = []
 
         # setting up general structure
-        toadd = {'custom_name': custom_name,
+        toadd = {'custom_name': elements.get('name'),
                 'type': type,
-                'description': description,
-                'children': children}
+                'description': "",
+                'children': []}
         
         # handle device type and parameters/properties if sensor or actuator
         if feagi_dev_type is not None:
@@ -237,12 +307,18 @@ def create_json(found_elements, json_list):
 def print_json(found_elements, json_list):
     
     file = open("model_config_tree.json", "w")
+
+    # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
 
+    # Take existing data and sort into nested structure
     for element in found_elements:
         if element.get('name'):
             sort_nesting_rec_child(found_elements, json_list, element)
-            sort_nesting_rec_parent(found_elements, json_list, element)
+
+    for element in found_elements:
+        if element.get('name'):       
+            sort_nesting_rec_parent_2(found_elements, json_list, element)
 
     json.dump(json_list, file, indent=4)
     file.close()

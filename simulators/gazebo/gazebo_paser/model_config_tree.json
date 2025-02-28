@@ -25,19 +25,6 @@
                 ]
             },
             {
-                "custom_name": "front_left_wheel_joint",
-                "type": "output",
-                "feagi device type": "servo",
-                "properties": {
-                    "max_value": -1.79769e+308,
-                    "min_value": 1.79769e+308,
-                    "max_power": 10,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": []
-            },
-            {
                 "custom_name": "rear_right_wheel_joint",
                 "type": "output",
                 "feagi device type": "servo",
@@ -48,7 +35,34 @@
                     "default_value": 0
                 },
                 "description": "",
-                "children": []
+                "children": [
+                    {
+                        "custom_name": "rear_right_wheel",
+                        "type": "link",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "front_left_wheel_joint",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": -1.79769e+308,
+                    "min_value": 1.79769e+308,
+                    "max_power": 10,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "front_left_wheel",
+                        "type": "link",
+                        "description": "",
+                        "children": []
+                    }
+                ]
             },
             {
                 "custom_name": "front_right_wheel_joint",
@@ -61,10 +75,15 @@
                     "default_value": 0
                 },
                 "description": "",
-                "children": []
+                "children": [
+                    {
+                        "custom_name": "front_right_wheel",
+                        "type": "link",
+                        "description": "",
+                        "children": []
+                    }
+                ]
             },
-            {},
-            {},
             {
                 "custom_name": "head_attach",
                 "type": "output",
@@ -76,16 +95,28 @@
                     "default_value": 0
                 },
                 "description": "",
-                "children": []
+                "children": [
+                    {
+                        "custom_name": "head",
+                        "type": "link",
+                        "description": "",
+                        "children": []
+                    }
+                ]
             },
-            {},
             {
                 "custom_name": "rod1",
                 "type": "joint",
                 "description": "",
-                "children": []
-            },
-            {}
+                "children": [
+                    {
+                        "custom_name": "rod_one",
+                        "type": "link",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            }
         ]
     },
     {
@@ -104,106 +135,6 @@
                 0.0
             ]
         },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "rod_one",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "board",
-                "type": "joint",
-                "description": "",
-                "children": []
-            },
-            {}
-        ]
-    },
-    {
-        "custom_name": "second_rod",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "IR_right",
-                "type": "joint",
-                "description": "",
-                "children": []
-            },
-            {
-                "custom_name": "IR_left",
-                "type": "joint",
-                "description": "",
-                "children": []
-            },
-            {},
-            {
-                "custom_name": "IR_middle",
-                "type": "joint",
-                "description": "",
-                "children": []
-            },
-            {}
-        ]
-    },
-    {
-        "custom_name": "rear_right_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "front_left_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "front_right_wheel",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "head",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "head_attach2",
-                "type": "output",
-                "feagi device type": "servo",
-                "properties": {
-                    "max_value": -0.2,
-                    "min_value": 1.6,
-                    "max_power": 10,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": []
-            },
-            {}
-        ]
-    },
-    {
-        "custom_name": "head2",
-        "type": "link",
-        "description": "",
-        "children": [
-            {
-                "custom_name": "ultrasonic",
-                "type": "joint",
-                "description": "",
-                "children": []
-            },
-            {}
-        ]
-    },
-    {
-        "custom_name": "sensor",
-        "type": "link",
         "description": "",
         "children": []
     },
@@ -236,12 +167,6 @@
         "children": []
     },
     {
-        "custom_name": "right_IR",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
@@ -259,12 +184,6 @@
         "children": []
     },
     {
-        "custom_name": "left_IR",
-        "type": "link",
-        "description": "",
-        "children": []
-    },
-    {
         "custom_name": "rgbd_camera",
         "type": "input",
         "feagi device type": "camera",
@@ -278,12 +197,6 @@
                 "Y offset percentage": 99
             }
         },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "middle_IR",
-        "type": "link",
         "description": "",
         "children": []
     },
