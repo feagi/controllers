@@ -24,7 +24,6 @@ from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import retina as retina
 from feagi_connector import pns_gateway as pns
-
 from feagi_connector.version import __version__
 from feagi_connector import feagi_interface as feagi
 
@@ -128,7 +127,8 @@ if __name__ == "__main__":
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
 
     
-
+    threading.Thread(target=retina.vision_progress,
+                     args=(default_capabilities,feagi_settings, camera_data), daemon=True).start()
 
 
     #put devices into correct arrays and enable sensors
@@ -142,106 +142,21 @@ if __name__ == "__main__":
             robot_sensors.append(device)
         else:
             robot_actuators.append(device)
-
-
-
-
-
-
-
-
-
-
-
-
-        #add types of sensors to each category
-        #Gyros
-        gyros = []
-        for sensor in robot_sensors:
-                if "Gyro" == type(sensor).__name__:
-                    gyros.append(sensor)
-
-        #Sort list by getName value
-        gyros = sorted(gyros, key=lambda sensor: sensor.getName())
-
-
-        #Position Sensors
-        positionSensors = []
-        for sensor in robot_sensors:
-                if "PositionSensor" == type(sensor).__name__:
-                    positionSensors.append(sensor)
-
-        #Sort list by getName value
-        positionSensors = sorted(positionSensors, key=lambda sensor: sensor.getName())
-
-        #Cameras
-        cameras = []
-        for sensor in robot_sensors:
-                if "Camera" == type(sensor).__name__:
-                    cameras.append(sensor)
-
-        #Sort list by getName value
-        cameras = sorted(cameras, key=lambda sensor: sensor.getName())
-
-        #Lidars
-        lidars = []
-        for sensor in robot_sensors:
-                if "Lidar" == type(sensor).__name__:
-                    lidars.append(sensor)
-
-        #Sort list by getName value
-        lidars = sorted(lidars, key=lambda sensor: sensor.getName())
-
-
-
-
     
     while True:
         # The controller will grab the data from FEAGI in real-time
         message_from_feagi = pns.message_from_feagi
         if message_from_feagi: # Verify if the feagi data is not empty
             # Translate from feagi data to human readable data
-
-
-        # #for every sensor, send their names and data to FEAGI
-        # for sensor in robot_sensors:
-        #     sensor_name = sensor.getName()
-        #     sensor_data = get_sensor_data(sensor)
-        #     #print(sensor_name)
-        #     message_to_feagi = sensors.create_data_for_feagi(sensor_name, capabilities, message_to_feagi,\
-        #                                                      current_data=sensor_data, symmetric=True)
-            
-        #     pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-        #     message_to_feagi.clear()
-
-
             obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
             action(obtained_signals, capabilities) # THis is for actuator
-
-        
-
-        
-        for num, gyro in enumerate(gyros):
-            gyro_data = {"0": gyro.getValues()}
-
+            gyro_data = {'0': robot_sensors[17].getValues()} # An example. Hardcoded. We should do this better way
+            message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
             
-
-        print(f"{gyro_data}")
-
-        message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
-
-        pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-
-        message_to_feagi.clear()
-
-
-        # gyro_data = {'0': robot_sensors[17].getValues()} # An example. Hardcoded. We should do this better way
-        # message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
-
-        # pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-        # message_to_feagi.clear()
-
-
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            message_to_feagi.clear()
+            
+    
         # cool down everytime
         sleep(feagi_settings['feagi_burst_speed'])
         robot.step(timestep)
