@@ -83,163 +83,48 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
     root = tree.getroot()
     strip_tree(root, found_elements)
 
+def find_json_element(json_list, json_name):
+    for json_elements in json_list:
+        if json_elements['custom_name'] == json_name:
+            return json_elements
+        # Recursively check children
+        result = find_json_element(json_elements['children'], json_name)
+        if result is not None:
+            return result
+    return None
 
 
-# Description : Sort through current JSON elements and append children to current element's JSON object
-# INPUT : list of SDF elements, list of JSON objects, and current parent element
-# Output on success : Correctly nests children into parent JSON object
-# Output on fail : None
-def sort_nesting_rec_child(found_elements, json_list, parent):
-    #checked_items.append(parent.get('name'))          i dont think we need this actually
-    child = find_element_by_tag(parent, 'child')
-    if child is not None:
-        newchild = {}
-        for dictItem in json_list:
-            if dictItem['custom_name'] == child.text:
-                newchild = dictItem
-                json_list.remove(dictItem)
+def nest(found_elements, json_list):
+    for xml_elements in found_elements:
+        # Find tags for current element
+        parent = find_element_by_tag(xml_elements, 'parent')
+        child = find_element_by_tag(xml_elements, 'child')
 
-        for dictItem in json_list:
-            if dictItem['custom_name'] == parent.get('name'):
-                dictItem['children'].append(newchild)
-                #print("added!")
-        nextparent = None
-        for dictItem in found_elements:
-            if child.text == dictItem.get('name'):
-                nextparent = dictItem
-        sort_nesting_rec_child(found_elements, json_list, nextparent)
+        # Begin nesting 
+        if child is not None:
 
-    return
-
-# NOTES / PLAN / WHAT I WANT IT TO DO: (for above function)
-
-#   right now, its removing a child from the prepared list at its current spot, and moving it to the parent's children list.
-
-#   now it just needs to look through parents and move things accordingly to finish connecting everything.
-
-#   probably worth having this as a separate function (i started it below, probably dont need checked_items)
-
-#   it appears that there is only one pointer each way (if a parent points to a child, that child does not point back to
-#   that parent). this makes our lives easier so that there is not a weird doubly loop or adding things 2 times.
-
-# function to do nesting - parents
-
-# Description : Sort through current JSON elements and append current element to parent JSON object
-# INPUT : list of SDF elements, list of JSON objects, and current child element
-# Output on success : Correctly nests children into parent JSON object
-# Output on fail : None
-
-# def sort_nesting_rec_parent(found_elements, json_list, child):
-
-#     # Find parent tag for current element
-#     parent = find_element_by_tag(child, 'parent')
-    
-#     if parent is not None:
-#         tempChild = {}
-#         for i in json_list:
-#             if i['custom_name'] == child.get('name'):
-#                 tempChild = i
-#                 json_list.remove(i)
-#         for i in json_list:
-#             if i['custom_name'] == parent.text:
-#                 i['children'].append(tempChild)
-#         nextChild = None
-#         for i in found_elements:
-#             if child == i:
-#                 found_elements.remove(i)
-#             else:
-#                 print(i.get('name'))
-#                 nextChild = find_element_by_tag(i, 'parent')
-#                 if nextChild is not None:
-#                     nextChild = i
-#                     sort_nesting_rec_parent(found_elements, json_list, nextChild)
-
-#     return
-
-# def nest_elements(found_elements, json_list):
-#     search_parent = False
-#     for xml_element in found_elements:
-#         # locate the corresponding json element
-#         for json_element in json_list:
-#             if json_element['custom_name'] == xml_element.get('name'):
-#                 pass
-#         search_parent = True
-#         parent = find_element_by_tag(xml_element, 'parent')
-#         if parent and search_parent:
-#            for json_element in json_list:
-#                 if json_element['custom_name'] == parent.text:
-#                     # found the parent json element
-#                     pass
-
-#             # locate child, save, and remove child element
-#         for json_element in json_list:
-#                 if json_element['custom_name'] == child.get('name'):
-#                     temp_element = json_element
-#                     json_list.remove(temp_element)
-#         if temp_element is None:
-#                 print("Could not locate the child element with name : " + child.get('name'))
+            # Find child Json element
+            json_child = find_json_element(json_list, child.text)
             
-#             #locate parent, and append child to its children list
-#         for json_element in json_list:
-#                 if json_element['custom_name'] == parent.text:
-#                     json_element['children'].append(child)
+            if json_child:
+                # Finds parent Json element
+                json_parent = find_json_element(json_list, xml_elements.get('name'))
 
-def sort_nesting_rec_parent_2(found_elements, json_list, child):
-    # Find parent tag for current element
-    parent = find_element_by_tag(child, 'parent')
-    
-    if parent is not None:
-        tempList = []
-        tempChild = {}
-        for i in json_list:
-            if i['custom_name'] == child.get('name'):
-                tempChild = i
-                json_list.remove(i)
-                tempList.append(tempChild)
-                print(tempChild['custom_name'])
-                break
-            else:
-                for z in i['children']:
-                    if z['custom_name'] == child.get('name'):
-                        tempChild = z
-                        json_list.remove(z)
-                        tempList.append(tempChild)
-                        break
-                    else:
-                        for k in z['children']:
-                            if k['custom_name'] == child.get('name'):
-                                tempChild = k
-                                json_list.remove(k)
-                                tempList.append(tempChild)
-                                break
-        for i in json_list:
-            if i['custom_name'] == parent.text:
-                #print(tempChild['custom_name'])
-                for j in tempList:
-                    i['children'].append(j)
-                    tempList.remove(j)
-            else:
-                #print("Parent  " + parent.text + " was not found\nFor child  " + json.dumps(tempChild))
-                for z in i['children']:
-                    # if z['custom_name'] == parent.text:
-                    #     #print(tempChild['custom_name'])
-                    #     z['children'].append(tempChild)
-                    for z in tempList:
-                        i['children'].append(z)
-                        tempList.remove(z)
-        nextChild = None
-        for i in found_elements:
-            if parent.text == i.get('name'):
-                nextChild = i
-            if nextChild is not None:
-            #     #print(nextChild.get('name'))
-            #     #print("---------------------")
-                sort_nesting_rec_parent_2(found_elements, json_list, nextChild)
+                if json_parent:
+                    json_parent['children'].append(json_child)
+                    json_list.remove(json_child)
 
-    return
+        if parent is not None:
+            print('\n' + xml_elements.get('name') + ' has parent : ' + parent.text)
+            json_child = find_json_element(json_list, xml_elements.get('name'))
+            if json_child:
+                json_parent = find_json_element(json_list, parent.text)
+                if json_parent:
+                    json_parent['children'].append(json_child)
+                    json_list.remove(json_child)    
+
 
 def create_json(found_elements, json_list):
-    
     # Loop through each found element from the SDF
     for elements in found_elements:
         
@@ -326,14 +211,8 @@ def print_json(found_elements, json_list):
     # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
 
-    # Take existing data and sort into nested structure
-    for element in found_elements:
-        if element.get('name'):
-            sort_nesting_rec_child(found_elements, json_list, element)
-
-    for element in found_elements:
-        if element.get('name'):       
-            sort_nesting_rec_parent_2(found_elements, json_list, element)
+    # Nests the children found in created Json structure
+    nest(found_elements, json_list)
 
     json.dump(json_list, file, indent=4)
     file.close()
@@ -365,7 +244,6 @@ def find_properties(devtype, ftype):
     return toret
 
 def main():
-
     # Will store all found elements
     found_elements = []
 

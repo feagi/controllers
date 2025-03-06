@@ -85,19 +85,6 @@
                 ]
             },
             {
-                "custom_name": "ultrasonic",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "sensor",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
                 "custom_name": "head_attach",
                 "type": "output",
                 "feagi device type": "servo",
@@ -113,27 +100,42 @@
                         "custom_name": "head",
                         "type": "body",
                         "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "head_attach2",
-                "type": "output",
-                "feagi device type": "servo",
-                "properties": {
-                    "max_value": -0.2,
-                    "min_value": 1.6,
-                    "max_power": 10,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "head2",
-                        "type": "body",
-                        "description": "",
-                        "children": []
+                        "children": [
+                            {
+                                "custom_name": "head_attach2",
+                                "type": "output",
+                                "feagi device type": "servo",
+                                "properties": {
+                                    "max_value": -0.2,
+                                    "min_value": 1.6,
+                                    "max_power": 10,
+                                    "default_value": 0
+                                },
+                                "description": "",
+                                "children": [
+                                    {
+                                        "custom_name": "head2",
+                                        "type": "body",
+                                        "description": "",
+                                        "children": [
+                                            {
+                                                "custom_name": "ultrasonic",
+                                                "type": "body",
+                                                "description": "",
+                                                "children": [
+                                                    {
+                                                        "custom_name": "sensor",
+                                                        "type": "body",
+                                                        "description": "",
+                                                        "children": []
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             },
@@ -146,59 +148,61 @@
                         "custom_name": "rod_one",
                         "type": "body",
                         "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "board",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "second_rod",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "IR_right",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "right_IR",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "IR_left",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "left_IR",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "IR_middle",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "middle_IR",
-                        "type": "body",
-                        "description": "",
-                        "children": []
+                        "children": [
+                            {
+                                "custom_name": "board",
+                                "type": "body",
+                                "description": "",
+                                "children": [
+                                    {
+                                        "custom_name": "second_rod",
+                                        "type": "body",
+                                        "description": "",
+                                        "children": [
+                                            {
+                                                "custom_name": "IR_right",
+                                                "type": "body",
+                                                "description": "",
+                                                "children": [
+                                                    {
+                                                        "custom_name": "right_IR",
+                                                        "type": "body",
+                                                        "description": "",
+                                                        "children": []
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "custom_name": "IR_left",
+                                                "type": "body",
+                                                "description": "",
+                                                "children": [
+                                                    {
+                                                        "custom_name": "left_IR",
+                                                        "type": "body",
+                                                        "description": "",
+                                                        "children": []
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "custom_name": "IR_middle",
+                                                "type": "body",
+                                                "description": "",
+                                                "children": [
+                                                    {
+                                                        "custom_name": "middle_IR",
+                                                        "type": "body",
+                                                        "description": "",
+                                                        "children": []
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
