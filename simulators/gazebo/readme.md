@@ -48,4 +48,4 @@ This allows you to obtain directly from the python, cpp, or protobuf. As right n
 2) Run `gz sim -r free_world.sdf` (Mac has a different command, but you need to add '-r')
 3) Open a new terminal and navigate to `controllers/simulators/gazebo/models/smart_car`
 4) Paste your newly generated capabilities into capabilities.json
-5) Run `python3 controller.py --ip YOUR_IP_HERE` (use the IP address where you're running FEAGI)
+5) Run `python3 controller.py --ip FEAGI_IP_ADDRESS
