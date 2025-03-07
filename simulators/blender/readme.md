@@ -69,3 +69,46 @@ The goal is to enable FEAGI to move any object in Blender, such as arms, eyes, e
 See an example of the ideal result:
 
 ![motion_detect.gif](_static/motion_detect.gif)
+
+
+
+Here’s a complete table comparing **Blender** and **Gazebo** terminology for a **robot arm simulation**, covering all possible features.
+
+| **Feature**         | **Blender Term** | **Gazebo Term** |
+|---------------------|----------------|----------------|
+| **General Structure** |  |  |
+| Model of the Robot | Mesh (Object) | SDF/URDF Model |
+| Hierarchical Structure | Parent-Child Relationship | Link-Tree Hierarchy |
+| Movement Units | Bones (in Armature) | Links (Rigid Bodies) |
+| Pivot/Joint Position | Bone Head/Tail | Joint Anchor/Axis |
+| **Joints & Motion** |  |  |
+| Joint (Movable Connection) | Bone with Constraints | Joint (Revolute, Prismatic, etc.) |
+| Joint Rotation | Bone Rotation | Joint Angle (Position) |
+| Joint Translation | Bone Scale (Rarely Used) | Prismatic Joint |
+| Joint Limits | IK Constraints/Transform Constraints | Joint Limits (Lower/Upper Bound) |
+| Inverse Kinematics (IK) | IK Solver (Bone Constraint) | ROS MoveIt! (IK Solver) |
+| **Physics & Simulation** |  |  |
+| Physics Engine | Bullet (Blender Physics) | ODE, Bullet, Simbody, DART |
+| Rigid Body Dynamics | Rigid Body Simulation | Link with Inertia |
+| Collision Detection | Collision Meshes | Collision Elements |
+| Mass Properties | Rigid Body Mass Settings | Link Mass & Inertia |
+| Gravity | Scene Gravity | Gazebo World Gravity |
+| **Sensors & Perception** |  |  |
+| Cameras | Camera Object | Camera Sensor |
+| LIDAR | Point Cloud Render Hacks | LIDAR Sensor Plugin |
+| Force/Torque Sensor | Physics Constraints & Drivers | Force/Torque Sensor |
+| Contact Sensor | Rigid Body Collisions | Contact Sensor Plugin |
+| **Control & Actuation** |  |  |
+| Actuator Control | Drivers & Animation Keyframes | Joint Controllers (PID) |
+| Motor Torque | Rigid Body Forces | Effort Control |
+| Joint Velocity | Animation Curves | Velocity Controllers |
+| ROS Integration | Python Scripting (Limited) | ROS Topics & Services |
+| Path Planning | Animation Paths & Constraints | MoveIt! Path Planning |
+| **Rendering & Visualization** |  |  |
+| Texturing & Materials | Shader Nodes / Principled BSDF | Gazebo Materials (SDF) |
+| Lighting | Point, Spot, Area, Sun | Light Source Plugin |
+| Environment | World Settings | Gazebo World (SDF) |
+| **Programming & Automation** |  |  |
+| Python Scripting | Blender API (bpy) | Gazebo Plugins (C++/Python) |
+| Animation Control | Graph Editor & NLA | ROS & Gazebo Controllers |
+| Custom Plugins | Custom Operators & Add-ons | Gazebo Plugins & ROS Nodes |
