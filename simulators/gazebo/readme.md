@@ -42,3 +42,10 @@ https://gazebosim.org/api/transport/14/installation.html
 
 This allows you to obtain directly from the python, cpp, or protobuf. As right now, it's not an easy way to set up and build the gazebo without having a cmake to be built.
 
+
+# How to test your new capabilities using smart car
+1) cd to controllers/simulators/gazebo/models/smart_car
+2) Run `gz sim -r free_world.sdf` (Mac has a different command, but you need to add '-r')
+3) Open a new terminal and navigate to `controllers/simulators/gazebo/models/smart_car`
+4) Paste your newly generated capabilities into capabilities.json
+5) Run `python3 controller.py --ip YOUR_IP_HERE` (use the IP address where you're running FEAGI)
