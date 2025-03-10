@@ -204,7 +204,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                 }
 
 
-    with open("test.json", "w") as json_file:
+    with open("capabilities.json", "w") as json_file:
         json.dump(data, json_file, indent=4)
 
 
