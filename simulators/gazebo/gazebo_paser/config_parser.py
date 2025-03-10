@@ -169,8 +169,8 @@ def create_json(found_elements, json_list):
             # insert data into parameters/properties
             # TYPES ARE: gyro, servo, proximity, camera
             if feagi_dev_type == 'servo':
-                min = find_element_by_tag(elements, 'upper')
-                max = find_element_by_tag(elements, 'lower')
+                min = find_element_by_tag(elements, 'lower')
+                max = find_element_by_tag(elements, 'upper')
                 if min is not None:
                     props["min_value"] = float(min.text)
                 if max is not None:
