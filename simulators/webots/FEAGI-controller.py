@@ -211,79 +211,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
 
 
 
-all_FEAGI_inputs = []
 
-#add types of devices to each category
-#Gyros
-gyros = []
-for device in robot_sensors:
-        if "Gyro" == type(device).__name__:
-            gyros.append(device)
-
-#Sort list by getName value
-gyros = sorted(gyros, key=lambda device: device.getName())
-all_FEAGI_inputs.append(gyros)
-
-#Position Sensors
-positionSensors = []
-for device in robot_sensors:
-        if "PositionSensor" == type(device).__name__:
-            positionSensors.append(device)
-
-#Sort list by getName value
-positionSensors = sorted(positionSensors, key=lambda device: device.getName())
-all_FEAGI_inputs.append(positionSensors)
-
-
-#Distance Sensors
-distanceSensors = []
-for device in robot_sensors:
-        if "DistanceSensor" == type(device).__name__:
-            distanceSensors.append(device)
-
-#Sort list by getName value
-distanceSensors = sorted(distanceSensors, key=lambda device: device.getName())
-all_FEAGI_inputs.append(distanceSensors)
-
-
-#Cameras
-cameras = []
-for device in robot_sensors:
-        if "Camera" == type(device).__name__:
-            cameras.append(device)
-
-#Sort list by getName value
-cameras = sorted(cameras, key=lambda device: device.getName())
-all_FEAGI_inputs.append(cameras)
-
-
-#Lidars
-lidars = []
-for device in robot_sensors:
-        if "Lidar" == type(device).__name__:
-            lidars.append(device)
-
-#Sort list by getName value
-lidars = sorted(lidars, key=lambda device: device.getName())
-all_FEAGI_inputs.append(lidars)
-
-
-
-# Get outputs that FEAGI can use in capabilities.json
-all_FEAGI_outputs = []
-
-motors = []
-for device in robot_actuators:
-        if "Motor" == type(device).__name__:
-            motors.append(device)
-
-#Sort list by getName value
-motors = sorted(motors, key=lambda device: device.getName())
-all_FEAGI_outputs.append(motors)
-
-
-
-make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs)
 
 
 if __name__ == "__main__":
@@ -334,6 +262,82 @@ if __name__ == "__main__":
             robot_sensors.append(device)
         else:
             robot_actuators.append(device)
+
+
+    all_FEAGI_inputs = []
+
+    #add types of devices to each category
+    #Gyros
+    gyros = []
+    for device in robot_sensors:
+            if "Gyro" == type(device).__name__:
+                gyros.append(device)
+
+    #Sort list by getName value
+    gyros = sorted(gyros, key=lambda device: device.getName())
+    all_FEAGI_inputs.append(gyros)
+
+    #Position Sensors
+    positionSensors = []
+    for device in robot_sensors:
+            if "PositionSensor" == type(device).__name__:
+                positionSensors.append(device)
+
+    #Sort list by getName value
+    positionSensors = sorted(positionSensors, key=lambda device: device.getName())
+    all_FEAGI_inputs.append(positionSensors)
+
+
+    #Distance Sensors
+    distanceSensors = []
+    for device in robot_sensors:
+            if "DistanceSensor" == type(device).__name__:
+                distanceSensors.append(device)
+
+    #Sort list by getName value
+    distanceSensors = sorted(distanceSensors, key=lambda device: device.getName())
+    all_FEAGI_inputs.append(distanceSensors)
+
+
+    #Cameras
+    cameras = []
+    for device in robot_sensors:
+            if "Camera" == type(device).__name__:
+                cameras.append(device)
+
+    #Sort list by getName value
+    cameras = sorted(cameras, key=lambda device: device.getName())
+    all_FEAGI_inputs.append(cameras)
+
+
+    #Lidars
+    lidars = []
+    for device in robot_sensors:
+            if "Lidar" == type(device).__name__:
+                lidars.append(device)
+
+    #Sort list by getName value
+    lidars = sorted(lidars, key=lambda device: device.getName())
+    all_FEAGI_inputs.append(lidars)
+
+
+
+    # Get outputs that FEAGI can use in capabilities.json
+    all_FEAGI_outputs = []
+
+    motors = []
+    for device in robot_actuators:
+            if "Motor" == type(device).__name__:
+                motors.append(device)
+
+    #Sort list by getName value
+    motors = sorted(motors, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(motors)
+
+
+
+    make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs)
+
 
 
 
