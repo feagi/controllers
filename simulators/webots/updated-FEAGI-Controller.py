@@ -149,11 +149,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                         "X offset percentage": 1,
                         "Y offset percentage": 1
                     },
-<<<<<<< HEAD
                     "feagi_index": num,
-=======
-                    "feagi_index": 0,
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
                     "index": "00",
                     "mirror": False,
                     "modulation_control": {
@@ -176,11 +172,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                 data["capabilities"]["input"][type][str(num)] = {
                     "custom_name": device.getName(),
                     "disabled": False,
-<<<<<<< HEAD
                     "feagi_index": num,
-=======
-                    "feagi_index": 0,
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
                     "max_value": [0, 0, 0],
                     "min_value": [0, 0, 0]
                 }
@@ -196,11 +188,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                 data["capabilities"]["input"][type][str(num)] = {
                     "custom_name": device.getName(),
                     "disabled": False,
-<<<<<<< HEAD
                     "feagi_index": num,
-=======
-                    "feagi_index": 0,
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
                     "max_value": 0,
                     "min_value": 0
                 }
@@ -216,11 +204,7 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                 data["capabilities"]["input"][type][str(num)] = {
                     "custom_name": device.getName(),
                     "disabled": False,
-<<<<<<< HEAD
                     "feagi_index": num,
-=======
-                    "feagi_index": 0,
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
                     "max_value": 0,
                     "min_value": 0
                 }
@@ -236,16 +220,11 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
                 data["capabilities"]["output"][type][str(num)] = {
                     "custom_name": device.getName(),
                     "disabled": False,
-<<<<<<< HEAD
                     "feagi_index": num,
-=======
-                    "feagi_index": 0,
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
                     "max_power": 0,
                     "rolling_window_len": 0
                 }
 
-<<<<<<< HEAD
     # for outputType in all_FEAGI_outputs:
     #     if outputType == brakes:
     #         type = "motor"
@@ -261,8 +240,6 @@ def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
     #                 "rolling_window_len": 0
     #             }
 
-=======
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
     with open("capabilities.json", "w") as json_file:
         json.dump(data, json_file, indent=4)
@@ -324,7 +301,6 @@ if __name__ == "__main__":
             robot_actuators.append(device)
 
 
-<<<<<<< HEAD
 
 
 
@@ -366,11 +342,6 @@ if __name__ == "__main__":
 
 
 
-=======
-    all_FEAGI_inputs = []
-
-    #add types of devices to each category
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
     #Gyros
     gyros = []
     for device in robot_sensors:
@@ -381,7 +352,6 @@ if __name__ == "__main__":
     gyros = sorted(gyros, key=lambda device: device.getName())
     all_FEAGI_inputs.append(gyros)
 
-<<<<<<< HEAD
 
 
     #Pressure Sensors
@@ -394,17 +364,6 @@ if __name__ == "__main__":
     pressureSensors = sorted(pressureSensors, key=lambda device: device.getName())
     all_FEAGI_inputs.append(pressureSensors)
 
-=======
-    #Position Sensors
-    positionSensors = []
-    for device in robot_sensors:
-            if "PositionSensor" == type(device).__name__:
-                positionSensors.append(device)
-
-    #Sort list by getName value
-    positionSensors = sorted(positionSensors, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(positionSensors)
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
 
     #Distance Sensors
@@ -418,7 +377,6 @@ if __name__ == "__main__":
     all_FEAGI_inputs.append(distanceSensors)
 
 
-<<<<<<< HEAD
 
     #Position Sensors
     positionSensors = []
@@ -430,17 +388,6 @@ if __name__ == "__main__":
     positionSensors = sorted(positionSensors, key=lambda device: device.getName())
     all_FEAGI_inputs.append(positionSensors)
 
-=======
-    #Cameras
-    cameras = []
-    for device in robot_sensors:
-            if "Camera" == type(device).__name__:
-                cameras.append(device)
-
-    #Sort list by getName value
-    cameras = sorted(cameras, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(cameras)
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
 
     #Lidars
@@ -454,7 +401,6 @@ if __name__ == "__main__":
     all_FEAGI_inputs.append(lidars)
 
 
-<<<<<<< HEAD
     #Compass
     Compasses = []
     for device in robot_sensors:
@@ -476,12 +422,6 @@ if __name__ == "__main__":
 
 
     #All types of motors now
-=======
-
-    # Get outputs that FEAGI can use in capabilities.json
-    all_FEAGI_outputs = []
-
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
     motors = []
     for device in robot_actuators:
             if "Motor" == type(device).__name__:
@@ -493,7 +433,6 @@ if __name__ == "__main__":
 
 
 
-<<<<<<< HEAD
     #All LEDS
     leds = []
     for device in robot_actuators:
@@ -604,14 +543,11 @@ if __name__ == "__main__":
 
 
 
-=======
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
     make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs)
 
 
 
 
-<<<<<<< HEAD
 
 
 
@@ -624,8 +560,6 @@ if __name__ == "__main__":
 
 
 
-=======
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
     # Main Loop
     while True:
         # The controller will grab the data from FEAGI in real-time
@@ -641,11 +575,7 @@ if __name__ == "__main__":
         for num, gyro in enumerate(gyros):
 
             gyro_data = {str(num): get_sensor_data(gyro)}
-<<<<<<< HEAD
             #print(gyro_data)
-=======
-            print(gyro_data)
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
             message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
             
@@ -658,11 +588,7 @@ if __name__ == "__main__":
         for num, positionSensor in enumerate(positionSensors):
 
             positionSensor_data = {str(num): get_sensor_data(positionSensor)}
-<<<<<<< HEAD
             #print(positionSensor_data)
-=======
-            print(positionSensor_data)
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
             message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi, current_data=positionSensor_data, symmetric=True, measure_enable=True)
 
@@ -675,11 +601,7 @@ if __name__ == "__main__":
         for num, distanceSensor in enumerate(distanceSensors):
 
             distanceSensor_data = {str(num): get_sensor_data(distanceSensor)}
-<<<<<<< HEAD
             #print(distanceSensor_data)
-=======
-            print(distanceSensor_data)
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
 
             message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi, current_data=distanceSensor_data, symmetric=True, measure_enable=True)
 
