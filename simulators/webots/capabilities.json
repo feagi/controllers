@@ -3,7 +3,7 @@
         "input": {
             "camera": {
                 "0": {
-                    "custom_name": "camera",
+                    "custom_name": "Astra rgb",
                     "disabled": false,
                     "eccentricity_control": {
                         "X offset percentage": 1,
@@ -51,7 +51,6 @@
                         0
                     ]
                 }
-<<<<<<< HEAD
             },
             "proximity": {
                 "0": {
@@ -175,8 +174,6 @@
                     "max_value": 0,
                     "min_value": 0
                 }
-=======
->>>>>>> 5df7ecf99486ac564534a2ca6eca5a76bf411861
             }
         },
         "output": {
