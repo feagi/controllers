@@ -65,28 +65,60 @@ def action(obtained_data, capabilities):
     obtained_data: dictionary.
     capabilities: dictionary.
     """
-    recieve_motor_data = actuators.get_motor_data(obtained_data)
-    #recieve_servo_data = actuators.get_servo_data(obtained_data)
-    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+
+    recieve_motor_data = None
+    recieve_servo_data = None
+    recieve_servo_position_data = None
+
+    try:
+        recieve_motor_data = actuators.get_motor_data(obtained_data)
+    except Exception as e:
+        #print("No Motor Data")
+        pass
+
+
+    try:
+         recieve_servo_data = actuators.get_servo_data(obtained_data)
+    except Exception as e:
+        #print("No Servo Data")
+        pass
+
+
+    try:
+        recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+    except Exception as e:
+        #print("No Servo Position Data")
+        pass
+
+    if recieve_motor_data:
+        print(recieve_motor_data)
+
+        for outputType in all_FEAGI_outputs:
+            if outputType == motors:
+                for num,motor in enumerate(motors):
+                    motor.setVelocity(recieve_motor_data[num])
+
+    if recieve_servo_data:
+        print(recieve_servo_data)
+
+        for outputType in all_FEAGI_outputs:
+            if outputType == motors:
+                for num,motor in enumerate(motors):
+                    motor.setVelocity(recieve_motor_data[num])
 
     if recieve_servo_position_data:
-        #actuators.setPosition(obtained_data)
+        print(recieve_servo_position_data)
         for outputType in all_FEAGI_outputs:
             if outputType == motors:
                 for num,motor in enumerate(motors):
                     positionSensor = motor.getPositionSensor()
-
                     current_position = get_sensor_data(positionSensor)
-
                     motor.setPosition(float('inf'))
-                    motor.setVelocity(recieve_motor_data[num])
-
                     if abs(current_position - recieve_servo_position_data[num]) < 0.05:
-                         motor.setVelocity(0.0)
+                        motor.setVelocity(0.0)
 
 
-
-        pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
+    pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
 
 
 #returns the data of given sensor
@@ -567,6 +599,7 @@ if __name__ == "__main__":
         if message_from_feagi: # Verify if the feagi data is not empty
             # Translate from feagi data to human readable data
             obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
+            #print(obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
 
 
