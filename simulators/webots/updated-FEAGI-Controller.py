@@ -31,6 +31,13 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
+# Get inputs that FEAGI can use in capabilities.json
+all_FEAGI_inputs = []
+
+# Get outputs that FEAGI can use in capabilities.json
+all_FEAGI_outputs = []
+
+
 # create the Robot instance.
 robot = Robot()
 
@@ -58,12 +65,27 @@ def action(obtained_data, capabilities):
     obtained_data: dictionary.
     capabilities: dictionary.
     """
-    #recieve_motor_data = actuators.get_motor_data(obtained_data)
+    recieve_motor_data = actuators.get_motor_data(obtained_data)
     #recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
     if recieve_servo_position_data:
         #actuators.setPosition(obtained_data)
+        for outputType in all_FEAGI_outputs:
+            if outputType == motors:
+                for num,motor in enumerate(motors):
+                    positionSensor = motor.getPositionSensor()
+
+                    current_position = get_sensor_data(position_sensor)
+
+                    motor.setPosition(float('inf'))
+                    motor.setVelocity(recieve_motor_data[num])
+
+                    if abs(current_position - recieve_servo_position_data[num]) < 0.05:
+                         motor.setVelocity(0.0)
+
+
+
         pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
 
 
@@ -279,19 +301,22 @@ if __name__ == "__main__":
             robot_actuators.append(device)
 
 
-    all_FEAGI_inputs = []
-
-    #accelerometers
-    accelerometer = []
-    for device in robot_sensors:
-            if "Accelerometer" == type(device).__name__:
-                accelerometer.append(device)
-
-    #Sort list by getName value
-    accelerometer = sorted(accelerometer, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(accelerometer)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     #accelerometers
     accelerometer = []
@@ -329,7 +354,6 @@ if __name__ == "__main__":
 
 
 
-
     #Pressure Sensors
     pressureSensors = []
     for device in robot_sensors:
@@ -354,7 +378,6 @@ if __name__ == "__main__":
 
 
 
-
     #Position Sensors
     positionSensors = []
     for device in robot_sensors:
@@ -364,11 +387,6 @@ if __name__ == "__main__":
     #Sort list by getName value
     positionSensors = sorted(positionSensors, key=lambda device: device.getName())
     all_FEAGI_inputs.append(positionSensors)
-
-
-
-
-
 
 
 
@@ -398,8 +416,10 @@ if __name__ == "__main__":
 
 
 
-    # Get outputs that FEAGI can use in capabilities.json
-    all_FEAGI_outputs = []
+
+
+
+
 
     #All types of motors now
     motors = []
@@ -411,17 +431,6 @@ if __name__ == "__main__":
     motors = sorted(motors, key=lambda device: device.getName())
     all_FEAGI_outputs.append(motors)
 
-    #All LEDS
-    leds = []
-    for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
-
-    #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
-
-
 
 
     #All LEDS
@@ -435,104 +444,65 @@ if __name__ == "__main__":
     all_FEAGI_outputs.append(leds)
 
 
-
-    #All LEDS
-    leds = []
+    #Brakes
+    brakes = []
     for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
+            if "Brake" == type(device).__name__:
+                brakes.append(device)
 
     #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
+    brakes = sorted(brakes, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(brakes)
 
 
 
-    #All LEDS
-    leds = []
+    #Connectors
+    connectors = []
     for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
+            if "Connector" == type(device).__name__:
+                connectors.append(device)
 
     #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
+    connectors = sorted(connectors, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(connectors)
 
 
 
 
-
-    #All LEDS
-    leds = []
+    #Displays
+    displays = []
     for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
+            if "Display" == type(device).__name__:
+                displays.append(device)
 
     #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
+    displays = sorted(displays, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(displays)
 
 
 
 
-
-    #All LEDS
-    leds = []
+    #Emitters
+    emitters = []
     for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
+            if "Emitter" == type(device).__name__:
+                emitters.append(device)
 
     #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
+    emitters = sorted(emitters, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(emitters)
 
 
 
-
-
-    #All LEDS
-    leds = []
+    #Pens
+    pens = []
     for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
+            if "Pen" == type(device).__name__:
+                pens.append(device)
 
     #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
-
-
-
-
-
-
-
-    #All LEDS
-    leds = []
-    for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
-
-    #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
-
-
-
-
-
-
-    #All LEDS
-    leds = []
-    for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
-
-    #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(leds)
-
-
-
+    pens = sorted(pens, key=lambda device: device.getName())
+    all_FEAGI_outputs.append(pens)
 
 
 
@@ -548,8 +518,6 @@ if __name__ == "__main__":
 
 
 
-
-
     #Speakers
     speakers = []
     for device in robot_actuators:
@@ -559,9 +527,6 @@ if __name__ == "__main__":
     #Sort list by getName value
     speakers = sorted(speakers, key=lambda device: device.getName())
     all_FEAGI_outputs.append(speakers)
-
-
-
 
 
 
@@ -576,31 +541,21 @@ if __name__ == "__main__":
     all_FEAGI_outputs.append(tracks)
 
 
-    #Others that dont fit in
-    miscs = []
-    for device in robot_actuators:
-            if "Brake" == type(device).__name__:
-                miscs.append(device)
-            if "Connector" == type(device).__name__:
-                miscs.append(device)
-            if "Display" == type(device).__name__:
-                miscs.append(device)
-            if "Emitter" == type(device).__name__:
-                miscs.append(device)
-            if "Pen" == type(device).__name__:
-                miscs.append(device)
-
-
-
-
-    #Sort list by getName value
-    miscs = sorted(miscs, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(miscs)
-
-
 
 
     make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
