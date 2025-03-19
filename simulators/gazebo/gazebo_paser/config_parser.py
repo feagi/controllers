@@ -125,6 +125,7 @@ def nest(found_elements, json_list):
 
 
 def create_json(found_elements, json_list):
+    index_number = 0
     # Loop through each found element from the SDF
     for elements in found_elements:
         
@@ -165,7 +166,7 @@ def create_json(found_elements, json_list):
         if feagi_dev_type is not None:
             # retrieve all properties necessary for sensor / actuator
             props = find_properties(feagi_dev_type, type)
-
+            props["feagi_index"] = index_number
             # insert data into parameters/properties
             # TYPES ARE: gyro, servo, proximity, camera
             if feagi_dev_type == 'servo':
@@ -190,12 +191,13 @@ def create_json(found_elements, json_list):
                     toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
             else:
                 pass
-
+            
             # add in extra lines to dict
             temp = list(toadd.items())
             temp.insert(2, ('feagi device type', feagi_dev_type ))
             temp.insert(3, ('properties', props ))
-            toadd = dict(temp)              
+            toadd = dict(temp)
+            index_number += 1              
 
         # add to json list that will be sent to file
         json_list.append(toadd)
