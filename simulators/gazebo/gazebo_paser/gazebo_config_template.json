@@ -13,10 +13,8 @@
         "type",
         "description",
         "optional",
-        "feagi_index",
     	"threshold_default",
         "custom_name",
-        "index",
         "mirror"
     ],
     "allow_list": [

@@ -12,6 +12,7 @@
                     "max_value": 1.79769e+308,
                     "min_value": -1.79769e+308,
                     "max_power": 10,
+                    "feagi_index": 0,
                     "default_value": 0
                 },
                 "description": "",
@@ -32,6 +33,7 @@
                     "max_value": 1.79769e+308,
                     "min_value": -1.79769e+308,
                     "max_power": 10,
+                    "feagi_index": 0,
                     "default_value": 0
                 },
                 "description": "",
@@ -52,6 +54,7 @@
                     "max_value": 1.79769e+308,
                     "min_value": -1.79769e+308,
                     "max_power": 10,
+                    "feagi_index": 0,
                     "default_value": 0
                 },
                 "description": "",
@@ -72,6 +75,7 @@
                     "max_value": 1.79769e+308,
                     "min_value": -1.79769e+308,
                     "max_power": 10,
+                    "feagi_index": 0,
                     "default_value": 0
                 },
                 "description": "",
@@ -92,6 +96,7 @@
                     "max_value": 3.1,
                     "min_value": 0.1,
                     "max_power": 10,
+                    "feagi_index": 0,
                     "default_value": 0
                 },
                 "description": "",
@@ -109,6 +114,7 @@
                                     "max_value": 1.6,
                                     "min_value": -0.2,
                                     "max_power": 10,
+                                    "feagi_index": 0,
                                     "default_value": 0
                                 },
                                 "description": "",
@@ -222,7 +228,8 @@
                 0.0,
                 0.0,
                 0.0
-            ]
+            ],
+            "feagi_index": 0
         },
         "description": "",
         "children": []
@@ -233,16 +240,18 @@
         "feagi device type": "proximity",
         "properties": {
             "max_value": 4.0,
-            "min_value": 0.12
+            "min_value": 0.12,
+            "feagi_index": 0
         },
         "description": "",
         "children": []
     },
     {
-        "custom_name": "rgbd_camera",
+        "custom_name": "rgbd_camera_Camera0",
         "type": "input",
         "feagi device type": "camera",
         "properties": {
+            "index": "00",
             "eccentricity_control": {
                 "X offset percentage": 1,
                 "Y offset percentage": 1
@@ -250,16 +259,18 @@
             "modulation_control": {
                 "X offset percentage": 99,
                 "Y offset percentage": 99
-            }
+            },
+            "feagi_index": 0
         },
         "description": "",
         "children": []
     },
     {
-        "custom_name": "rgbd_camera",
+        "custom_name": "rgbd_camera_IR0",
         "type": "input",
         "feagi device type": "camera",
         "properties": {
+            "index": "00",
             "eccentricity_control": {
                 "X offset percentage": 1,
                 "Y offset percentage": 1
@@ -267,16 +278,18 @@
             "modulation_control": {
                 "X offset percentage": 99,
                 "Y offset percentage": 99
-            }
+            },
+            "feagi_index": 0
         },
         "description": "",
         "children": []
     },
     {
-        "custom_name": "rgbd_camera",
+        "custom_name": "rgbd_camera_IR2",
         "type": "input",
         "feagi device type": "camera",
         "properties": {
+            "index": "00",
             "eccentricity_control": {
                 "X offset percentage": 1,
                 "Y offset percentage": 1
@@ -284,16 +297,18 @@
             "modulation_control": {
                 "X offset percentage": 99,
                 "Y offset percentage": 99
-            }
+            },
+            "feagi_index": 0
         },
         "description": "",
         "children": []
     },
     {
-        "custom_name": "rgbd_camera",
+        "custom_name": "rgbd_camera_IR1",
         "type": "input",
         "feagi device type": "camera",
         "properties": {
+            "index": "00",
             "eccentricity_control": {
                 "X offset percentage": 1,
                 "Y offset percentage": 1
@@ -301,7 +316,8 @@
             "modulation_control": {
                 "X offset percentage": 99,
                 "Y offset percentage": 99
-            }
+            },
+            "feagi_index": 0
         },
         "description": "",
         "children": []
