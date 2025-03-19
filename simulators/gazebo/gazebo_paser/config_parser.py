@@ -186,9 +186,8 @@ def create_json(found_elements, json_list):
                     props["max_value"] = float(max.text)
             elif feagi_dev_type == 'camera':
                 camera_name = find_element_by_tag(elements, 'topic')
-                # print(camera_name)
-                toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
-                pass
+                if camera_name is not None:
+                    toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
             else:
                 pass
 
