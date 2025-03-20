@@ -4,6 +4,7 @@
 	},
 	"sensor": {
 		"rgbd_camera": "camera",
+		"camera": "camera",
 		"imu": "gyro",
 		"gpu_lidar": "proximity",
 		"battery_name": "battery"
