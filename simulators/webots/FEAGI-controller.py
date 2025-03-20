@@ -90,26 +90,30 @@ def action(obtained_data, capabilities):
         #print("No Servo Position Data")
         pass
 
+
+    
     if recieve_motor_data:
         print(recieve_motor_data)
 
         for outputType in all_FEAGI_outputs:
-            if outputType == motors:
-                for num,motor in enumerate(motors):
-                    motor.setVelocity(recieve_motor_data[num])
+            if outputType == 'motors':
+                for num, motor in enumerate(outputType):
+                    if num in recieve_motor_data:
+                        motor.setVelocity(recieve_motor_data[num])
 
     if recieve_servo_data:
         print(recieve_servo_data)
 
         for outputType in all_FEAGI_outputs:
-            if outputType == motors:
-                for num,motor in enumerate(motors):
-                    motor.setVelocity(recieve_motor_data[num])
+            if outputType == 'motors':
+                for num, motor in enumerate(outputType):
+                    if num in recieve_motor_data:
+                        motor.setVelocity(recieve_motor_data[num])
 
     if recieve_servo_position_data:
         print(recieve_servo_position_data)
         for outputType in all_FEAGI_outputs:
-            if outputType == motors:
+            if outputType == 'motors':
                 for num,motor in enumerate(motors):
                     positionSensor = motor.getPositionSensor()
                     current_position = get_sensor_data(positionSensor)
@@ -145,6 +149,78 @@ def get_sensor_data(sensor):
     elif type(sensor).__name__ == "Receiver":
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
+        
+
+
+
+#move the motors to make the robot spin
+def pioneer2_wheel_movements():
+    #gets the motors
+    left_wheel = robot.getDevice("left wheel motor")
+    right_wheel = robot.getDevice("right wheel motor")
+
+    print("Pre-move sensors")
+    print_all_ds()
+    print()
+            
+    #sets velocities opposite eachother, moves and then stops
+    left_wheel.setVelocity(-3)
+    right_wheel.setVelocity(3)
+    robot.step(10 * timestep)
+    left_wheel.setVelocity(0)
+    right_wheel.setVelocity(0)
+
+    print("Post-move sensors")
+    print_all_ds()
+    print("\n")
+    
+    #3 seconds
+    robot.step(3000)
+
+def pr2_move_arm(arm, positions):
+    """
+    Move the PR2 arm to a specified position.
+    :param arm: "left" or "right"
+    :param positions: Dict with joint angles {joint_name: angle}
+    """
+    """
+    Here is an example of how to call this function:
+    move_arm("right", {
+        "shoulder_pan": 0.0,
+        "shoulder_lift": 0.5,
+        "upper_arm_roll": 0.0,
+        "elbow_lift": -0.5,
+        "wrist_roll": 0.0
+    })
+    """
+    # Get PR2 motors for the right arm
+    right_arm_motors = {
+        "shoulder_pan": robot.getDevice("r_shoulder_pan_joint"),
+        "shoulder_lift": robot.getDevice("r_shoulder_lift_joint"),
+        "upper_arm_roll": robot.getDevice("r_upper_arm_roll_joint"),
+        "elbow_lift": robot.getDevice("r_elbow_flex_joint"),
+        "wrist_roll": robot.getDevice("r_wrist_roll_joint")
+    }
+    # Get PR2 motors for the left arm
+    left_arm_motors = {
+        "shoulder_pan": robot.getDevice("l_shoulder_pan_joint"),
+        "shoulder_lift": robot.getDevice("l_shoulder_lift_joint"),
+        "upper_arm_roll": robot.getDevice("l_upper_arm_roll_joint"),
+        "elbow_lift": robot.getDevice("l_elbow_flex_joint"),
+        "wrist_roll": robot.getDevice("l_wrist_roll_joint")
+    }
+    if arm == "right":
+        motors = right_arm_motors
+    elif arm == "left":
+        motors = left_arm_motors
+    else:
+        print("Invalid arm name. Use 'left' or 'right'.")
+        return
+    for joint, angle in positions.items():
+        if joint in motors:
+            motors[joint].setPosition(angle)
+        else:
+            print(f"Invalid joint name: {joint}")
 
 
 def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
@@ -599,7 +675,7 @@ if __name__ == "__main__":
         if message_from_feagi: # Verify if the feagi data is not empty
             # Translate from feagi data to human readable data
             obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
-            #print(obtained_signals)
+            print("obtained_signals",obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
 
 
@@ -608,7 +684,7 @@ if __name__ == "__main__":
         for num, gyro in enumerate(gyros):
 
             gyro_data = {str(num): get_sensor_data(gyro)}
-            print(gyro_data)
+            #print(gyro_data)
 
             message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
             
