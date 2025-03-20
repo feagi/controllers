@@ -1,7 +1,7 @@
 import json
 import sys
 import os
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 
 # CMD LINE USAGE :
 # 1 - python config_parser.py <target.sdf> 
@@ -20,14 +20,28 @@ import xml.etree.ElementTree as ET
 # Output on fail : None
 def sdf_to_xml(fp):
     try:
-        tree = ET.parse(fp)
+        with open(fp, 'r') as f:
+            sdf_content = f.read()
+
+        if 'xmlns:gz' not in sdf_content:
+            sdf_content = sdf_content.replace(
+                '<sdf',
+                '<sdf xmlns:gz="http://gazebosim.org/schema"',
+                1
+            )
+
+        root = ET.fromstring(sdf_content)
+        tree = ET.ElementTree(root)
         return tree
-    except ET.ParseError as e:
+
+    except ET.XMLSyntaxError as e:
         print(f"Couldn't parse SDF file\n{e}")
         return None
     except FileNotFoundError:
-        print(f"File couldn't be found : {fp}")
+        print(f"File couldn't be found: {fp}")
         return None
+
+
 
 # Description : used to strip the XML tree of any unnecessary elements
 # INPUT : tree element (expected to be the root)
