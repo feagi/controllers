@@ -13,7 +13,6 @@ from lxml import etree as ET
 #
 #   * Both <gazebo_config.json> and <feagi_config.json> or the default files must be in the current directory to work properly *
 
-
 # Description : used to parse the SDF to an XML structure which can be iterated through
 # INPUT : file path (String)
 # Output on success : XML tree
@@ -41,8 +40,6 @@ def sdf_to_xml(fp):
         print(f"File couldn't be found: {fp}")
         return None
 
-
-
 # Description : used to strip the XML tree of any unnecessary elements
 # INPUT : tree element (expected to be the root)
 # Output on success : XML tree
@@ -57,14 +54,18 @@ def strip_tree (element, found_elements):
                 found_elements.append(element)
         
         strip_tree(child, found_elements)        
- 
-def find_element_by_tag(element, tag):
+
+# Description : used to recursively search the XML Tree structure for specefic elements by the element tag
+# INPUT : the current element being searched for a match to the search tag
+# Output on success : a refrence to the xml element with a tag matching 'search_tag'
+# Output on fail : None
+def find_element_by_tag(element, search_tag):
     # Check if current element matches
-    if element.tag == tag:
+    if element.tag == search_tag:
         return element
     # Recursively check child elements
     for child in element:
-        result = find_element_by_tag(child, tag)
+        result = find_element_by_tag(child, search_tag)
         if result is not None:
             return result
     return None     
@@ -97,6 +98,10 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
     root = tree.getroot()
     strip_tree(root, found_elements)
 
+# Description : Find match for specific element in list of JSON elements
+# INPUT : List of JSON elements, name of JSON element to find
+# Output on success : JSON element
+# Output on fail : None
 def find_json_element(json_list, json_name):
     for json_elements in json_list:
         if json_elements['custom_name'] == json_name:
@@ -107,7 +112,10 @@ def find_json_element(json_list, json_name):
             return result
     return None
 
-
+# Description : Changes existing JSON structure to account for parent child nesting
+# INPUT : list of found elements, existing json list
+# Output on success : Final nested JSON file
+# Output on fail : None
 def nest(found_elements, json_list):
     for xml_elements in found_elements:
         # Find tags for current element
@@ -129,7 +137,6 @@ def nest(found_elements, json_list):
                     json_list.remove(json_child)
 
         if parent is not None:
-            print('\n' + xml_elements.get('name') + ' has parent : ' + parent.text)
             json_child = find_json_element(json_list, xml_elements.get('name'))
             if json_child:
                 json_parent = find_json_element(json_list, parent.text)
@@ -137,7 +144,10 @@ def nest(found_elements, json_list):
                     json_parent['children'].append(json_child)
                     json_list.remove(json_child)    
 
-
+# Description : Creates json items and adds to list without nesting
+# INPUT : list of found elements, existing json list
+# Output on success : Final nested JSON file
+# Output on fail : None
 def create_json(found_elements, json_list):
     index_number = 0
     # Loop through each found element from the SDF
@@ -148,27 +158,18 @@ def create_json(found_elements, json_list):
             # custom_name = elements.get('name')
             type = 'input'
             feagi_dev_type = g_config['sensor'][elements.get('type')]
-            #properties = {}
-            # description = ""
-            # children = []
 
         elif elements.get('type') in g_config['actuator']: # actuator
         # Create Vars for Actuator element 
             # custom_name = elements.get('name')
             type = 'output'
             feagi_dev_type = g_config['actuator'][elements.get('type')]
-            #properties = {}
-            # description = ""
-            # children = []
 
         else: # link / body
         # Create Vars for links / bodys
             # custom_name = elements.get('name')
             type = 'body'
             feagi_dev_type = None
-            #properties = {}
-            # description = ""
-            # children = []
 
         # setting up general structure
         toadd = {'custom_name': elements.get('name'),
@@ -211,30 +212,11 @@ def create_json(found_elements, json_list):
             temp.insert(2, ('feagi device type', feagi_dev_type ))
             temp.insert(3, ('properties', props ))
             toadd = dict(temp)
-            index_number += 1              
+            index_number += 1
 
         # add to json list that will be sent to file
         json_list.append(toadd)
 
-    return
-
-# Description : Take in list of elements found from SDF and print into a json file
-# INPUT : list of found elements
-# Output on success : JSON file
-# Output on fail : None
-def print_json(found_elements, json_list):
-    
-    file = open("model_config_tree.json", "w")
-
-    # Creates un-nested json structure with all data from file
-    create_json(found_elements, json_list)
-
-    # Nests the children found in created Json structure
-    nest(found_elements, json_list)
-
-    json.dump(json_list, file, indent=4)
-    file.close()
-    
     return
 
 # Description : Strip data down to found paramaters from ignore list
@@ -278,12 +260,21 @@ def main():
     
     json_list = []
 
-    print_json(found_elements, json_list)
-             
+    file = open("model_config_tree.json", "w")
+
+    # Creates un-nested json structure with all data from file
+    create_json(found_elements, json_list)
+
+    # Nests the children found in created Json structure
+    nest(found_elements, json_list)
+
+    json.dump(json_list, file, indent=4)
+    file.close()
+                 
     return
 
 if __name__ =="__main__":
     main()
 
-
+ 
 

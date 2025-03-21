@@ -48,3 +48,20 @@ The Gazebo config template JSON is largely similar to this design:
 The Gazebo config template will be high-level and should support both input and output, handling multiple types of sensor and actuator data.  
 
 Once the Gazebo parser reads the Gazebo config template, it will process the Gazebo model, create a tree (i.e., a dictionary), and pass it to a new file called `model_config_tree.json`. The FEAGI configurator will then use this file to generate the necessary files for the Gazebo controller. None of the files should be hardcoded, and the parser should work with all types of SDF files.
+
+# Setting up the Gazebo Parser
+    create a new python virtual environment by running `python3 -m venv C:\path\to\new\virtual\environment`
+    enter the virtual environment by running `source venv/bin/activate`
+    install all required dependencies by running `python3 -m pip install -r requirements.txt`
+    
+    $_{Our parser only requires the lxml module to run, virtual environments are optional}$
+
+    CMD LINE USAGE :
+    1 - python config_parser.py <target.sdf> 
+
+       * Uses default gazebo config : 'gazebo_config_template.json'*
+       * Uses default feagi config : 'feagi_config_template.json'*
+
+    2 - python config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json> 
+
+    the parser automatically outputs to 'model_config_tree.json' this can then be loaded into the feagi configurator
