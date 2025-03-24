@@ -46,13 +46,13 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 #all possible types of sensors           
-all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
+webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
             "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
             "Receiver", "TouchSensor"]
 
-#arrays to store the robots sensors and actuators
-robot_sensors = []
-robot_actuators = []
+sensors = {"gyro" : [], "pressure" : [], "servo_position" : [], "proximity" : [], "accelerometer" : [], "camera" : []}
+
+actuators = {"motor" : [], "servo" : [], "LED" : []}
 
 num_devices = robot.getNumberOfDevices()
 
@@ -250,7 +250,94 @@ def get_sensor_data(sensor):
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
         
+def sort_devices():
+    devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
 
+    for dev in devices:
+        device_type = type(dev).__name__
+        if device_type in webots_sensor_types:
+            dev.enable(timestep)
+
+            if device_type in ("Accelerometer", "InertialUnit"):
+                sensors["accelerometer"].append(dev)
+
+            elif device_type == "Camera":
+                sensors["camera"].append(dev)
+
+            # elif device_type == "Compass":
+            #     sensors["compass"].append(dev)
+
+            elif device_type == "DistanceSensor":
+                sensors["proximity"].append(dev)
+
+            # elif device_type == "GPS":
+            #     sensors["GPS"].append(dev)
+
+            elif device_type == "Gyro":
+                sensors["gyro"].append(dev)
+
+            # elif device_type == "Lidar":
+            #     sensors["lidar"].append(dev)
+
+            # elif device_type == "LightSensor":
+            #     sensors["light_sensor"].append(dev)
+
+            elif device_type == "PositionSensor":
+                sensors["servo_position"].append(dev)
+
+            # elif device_type == "Radar":
+            #     sensors["radar"].append(dev)
+
+            # elif device_type == "RangeFinder":
+            #     sensors["range_finder"].append(dev)
+
+            # elif device_type == "Receiver":
+            #     sensors["receiver"].append(dev)
+
+            elif device_type == "TouchSensor":
+                 sensors["pressure"].append(dev)
+
+        #if the device is a webots actuator
+        else:
+            # if device_name == "Brake":
+            #     actuators["brake"].append(dev)
+
+            # elif device_name == "Connector":
+            #     actuators["connector"].append(dev)
+
+            # elif device_name == "Display":
+            #     actuators["display"].append(dev)
+
+            # elif device_name == "Emitter":
+            #     actuators["emitter"].append(dev)
+
+            if device_name == "LED":
+                actuators["LED"].append(dev)
+
+            if device_name == "Motor":
+                if (dev.getMinPosition == 0 and dev.getMaxPosition == 0):
+                    actuators["motor"].append(dev)
+                else:
+                    actuators["servo"].append(dev)
+
+            # elif device_name == "Muscle":
+            #     actuators["muscle"].append(dev)
+
+            # elif device_name == "Pen":
+            #     actuators["pen"].append(dev)
+
+            # elif device_name == "Propeller":
+            #     actuators["propeller"].append(dev)
+
+            # elif device_name == "Speaker":
+            #     actuators["speaker"].append(dev)
+
+            # elif device_name == "Track":
+            #     actuators["track"].append(dev)
+             
+    for device_list in sensors.values():
+         list.sort(key=lambda device: device.getName())
+         
 
 
 #move the motors to make the robot spin
@@ -363,290 +450,8 @@ if __name__ == "__main__":
                      args=(default_capabilities,feagi_settings, camera_data), daemon=True).start()
 
 
-    #put devices into correct arrays and enable sensors
-    for i in range(num_devices):
-        device = robot.getDeviceByIndex(i)
-        device_name = device.getName()
-                
-        #append to the correct list
-        if type(device).__name__ in all_sensors:
-            device.enable(timestep)
-            robot_sensors.append(device)
-        else:
-            robot_actuators.append(device)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    #accelerometers
-    accelerometer = []
-    for device in robot_sensors:
-            if "Accelerometer" == type(device).__name__:
-                accelerometer.append(device)
-
-    #Sort list by getName value
-    accelerometer = sorted(accelerometer, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("accelerometer",accelerometer))
-
-
-
-    #Cameras
-    camera = []
-    for device in robot_sensors:
-            if "Camera" == type(device).__name__:
-                camera.append(device)
-
-    #Sort list by getName value
-    camera = sorted(camera, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("camera",camera))
-
-
-
-    #Gyros
-    gyro = []
-    for device in robot_sensors:
-            if "Gyro" == type(device).__name__:
-                gyro.append(device)
-
-    #Sort list by getName value
-    gyro = sorted(gyro, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("gyro",gyro))
-
-
-
-    #Pressure Sensors
-    pressure = []
-    for device in robot_sensors:
-            if "TouchSensor" == type(device).__name__:
-                pressure.append(device)
-
-    #Sort list by getName value
-    pressure = sorted(pressure, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("pressure",pressure))
-
-
-
-    #Distance Sensors
-    proximity = []
-    for device in robot_sensors:
-            if "DistanceSensor" == type(device).__name__:
-                proximity.append(device)
-
-    #Sort list by getName value
-    proximity = sorted(proximity, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("proximity",proximity))
-
-
-
-    #Position Sensors
-    servo_position = []
-    for device in robot_sensors:
-            if "PositionSensor" == type(device).__name__:
-                servo_position.append(device)
-
-    #Sort list by getName value
-    servo_position = sorted(servo_position, key=lambda device: device.getName())
-    all_FEAGI_inputs.append(("servo_position",servo_position))
-
-
-
-    # #Lidars
-    # lidars = []
-    # for device in robot_sensors:
-    #         if "Lidar" == type(device).__name__:
-    #             lidars.append(device)
-
-    # #Sort list by getName value
-    # lidars = sorted(lidars, key=lambda device: device.getName())
-    # all_FEAGI_inputs.append(("lidars",lidars))
-
-
-    # #Compass
-    # Compasses = []
-    # for device in robot_sensors:
-    #         if "Compass" == type(device).__name__:
-    #             Compasses.append(device)
-
-    # #Sort list by getName value
-    # Compasses = sorted(Compasses, key=lambda device: device.getName())
-    # all_FEAGI_inputs.append(("Compasses",Compasses))
-
-
-
-
-
-
-
-
-
-
-    ##ADD - IF MOTOR HAS POSITION SENSOR, ITS A SERVO
-    #All types of motors AND doesnt have position sensor
-    motors = []
-    for device in robot_actuators:
-            if "Motor" == type(device).__name__:
-                pass
-                if device.getPositionSensor() == 0:
-                    motors.append(device)
-
-    #Sort list by getName value
-    motors = sorted(motors, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("motors",motors))
-
-    
-
-    #All motors with position sensors act as servos
-    servos = []
-    for device in robot_actuators:
-            if "Motor" == type(device).__name__:
-                if device.getPositionSensor():
-                    servos.append(device)
-
-    #Sort list by getName value
-    servos = sorted(servos, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("servos",servos))
-
-
-
-    #All LEDS
-    leds = []
-    for device in robot_actuators:
-            if "LED" == type(device).__name__:
-                leds.append(device)
-
-    #Sort list by getName value
-    leds = sorted(leds, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("leds",leds))
-
-
-    #Brakes
-    brakes = []
-    for device in robot_actuators:
-            if "Brake" == type(device).__name__:
-                brakes.append(device)
-
-    #Sort list by getName value
-    brakes = sorted(brakes, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("brakes",brakes))
-
-
-
-    #Connectors
-    connectors = []
-    for device in robot_actuators:
-            if "Connector" == type(device).__name__:
-                connectors.append(device)
-
-    #Sort list by getName value
-    connectors = sorted(connectors, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("connectors",connectors))
-
-
-
-
-    #Displays
-    displays = []
-    for device in robot_actuators:
-            if "Display" == type(device).__name__:
-                displays.append(device)
-
-    #Sort list by getName value
-    displays = sorted(displays, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("displays",displays))
-
-
-
-
-    #Emitters
-    emitters = []
-    for device in robot_actuators:
-            if "Emitter" == type(device).__name__:
-                emitters.append(device)
-
-    #Sort list by getName value
-    emitters = sorted(emitters, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("emitters",emitters))
-
-
-
-    #Pens
-    pens = []
-    for device in robot_actuators:
-            if "Pen" == type(device).__name__:
-                pens.append(device)
-
-    #Sort list by getName value
-    pens = sorted(pens, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("pens",pens))
-
-
-
-    #Propeller
-    propellers = []
-    for device in robot_actuators:
-            if "Propeller" == type(device).__name__:
-                propellers.append(device)
-
-    #Sort list by getName value
-    propellers = sorted(propellers, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("propellers",propellers))
-
-
-
-    #Speakers
-    speakers = []
-    for device in robot_actuators:
-            if "Speaker" == type(device).__name__:
-                speakers.append(device)
-
-    #Sort list by getName value
-    speakers = sorted(speakers, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("speakers",speakers))
-
-
-
-    #Track
-    tracks = []
-    for device in robot_actuators:
-            if "Track" == type(device).__name__:
-                tracks.append(device)
-
-    #Sort list by getName value
-    tracks = sorted(tracks, key=lambda device: device.getName())
-    all_FEAGI_outputs.append(("tracks",tracks))
-
-
-
-
+    sort_devices()
     make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
