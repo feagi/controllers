@@ -67,7 +67,7 @@ def action(obtained_data, capabilities):
     capabilities: dictionary.
     """
 
-    #print(f"ACTION METHOD-----{obtained_data}")
+    print(f"ACTION METHOD-----{obtained_data}")
     #print(all_FEAGI_outputs)
 
     #print(f"obtained_data - {obtained_data}")
@@ -111,7 +111,7 @@ def action(obtained_data, capabilities):
                             webot_motor.setVelocity(value)
 
 
-        #SERVO MOVEMENT
+        #SERVO Power
         if feagi_output_type == "servo":
             #print(f"feagi_motor_list: - {obtained_data["motor"]}")
             #feagi_motor_list = {0: 1.0, 1: 0.85, 2: 1.0, 3: 1.0}
@@ -140,8 +140,38 @@ def action(obtained_data, capabilities):
 
                         if num == servo_number:
                             #velocity control mode
-                            webot_servo.setPosition(float("inf"))
                             webot_servo.setVelocity(value)
+            
+        #SERVO Position
+        if feagi_output_type == "servo_position":
+            #print(f"feagi_motor_list: - {obtained_data["motor"]}")
+            #feagi_motor_list = {0: 1.0, 1: 0.85, 2: 1.0, 3: 1.0}
+
+            feagi_servo_position_list = obtained_data["servo_position"]
+
+            for servo_position_number in feagi_servo_position_list:
+                #print(f"motor: - {motor_number}")
+                #motor = 2
+
+                value = feagi_servo_position_list[servo_position_number]
+                #print(f"value - {value}")
+                #value = 2.0
+
+                for device in all_FEAGI_outputs:
+                    #print(f"device - {device}")
+                    #device = ('motors', [<controller.motor.Motor object at 0x0000021536F1B7A0>, <controller.motor.Motor object at 0x0000021535EF2EA0>])
+
+                    servo_position_list = device[1]
+                    #print(f"motor_list - {motor_list}")
+                    # motor_list = [<controller.motor.Motor object at 0x000002960AB10740>, <controller.motor.Motor object at 0x000002966B4A8050>]
+
+                    for num, webot_servo_position in enumerate(servo_position_list):
+                        #print(f"webot_motor - {webot_motor.getName()}")
+                        #webot_motor = right wheel motor
+
+                        if num == servo_position_number:
+                            #velocity control mode
+                            webot_servo_position.setPosition(value)
 
 
 
@@ -291,139 +321,6 @@ def pr2_move_arm(arm, positions):
             motors[joint].setPosition(angle)
         else:
             print(f"Invalid joint name: {joint}")
-
-
-# def make_capabilities_JSON(all_FEAGI_inputs, all_FEAGI_outputs):
-#     data = {
-#         "capabilities": {
-#             "input": {},
-#             "output": {}
-#         }
-#     }
-
-
-#     for inputType in all_FEAGI_inputs:
-
-
-#         if inputType == cameras:
-
-#             # # Find lidars and add lidars to cameras
-#             # for secondType in all_FEAGI_inputs:
-#             #     if secondType == lidars:
-#             #         inputType += secondType
-
-#             # # Sort the list again
-#             # inputType = sorted(inputType, key=lambda device: device.getName())
-
-#             type = "camera"
-
-#             data["capabilities"]["input"][type] = {}
-
-#             for num, device in enumerate(inputType):
-#                 data["capabilities"]["input"][type][str(num)] = {
-#                     "custom_name": device.getName(),
-#                     "disabled": False,
-#                     "eccentricity_control": {
-#                         "X offset percentage": 1,
-#                         "Y offset percentage": 1
-#                     },
-#                     "feagi_index": num,
-#                     "index": "00",
-#                     "mirror": False,
-#                     "modulation_control": {
-                        
-#                         "X offset percentage": 99,
-#                         "Y offset percentage": 99
-#                     },
-#                     "threshold_default": 50
-#                 }
-
-
-
-#     for inputType in all_FEAGI_inputs:
-#         if inputType == gyros:
-#             type = "gyro"
-
-#             data["capabilities"]["input"][type] = {}
-
-#             for num, device in enumerate(inputType):
-#                 data["capabilities"]["input"][type][str(num)] = {
-#                     "custom_name": device.getName(),
-#                     "disabled": False,
-#                     "feagi_index": num,
-#                     "max_value": [0, 0, 0],
-#                     "min_value": [0, 0, 0]
-#                 }
-
-
-#     for inputType in all_FEAGI_inputs:
-#         if inputType == distanceSensors:
-#             type = "proximity"
-
-#             data["capabilities"]["input"][type] = {}
-
-#             for num, device in enumerate(inputType):
-#                 data["capabilities"]["input"][type][str(num)] = {
-#                     "custom_name": device.getName(),
-#                     "disabled": False,
-#                     "feagi_index": num,
-#                     "max_value": 0,
-#                     "min_value": 0
-#                 }
-
-
-#     for inputType in all_FEAGI_inputs:
-#         if inputType == positionSensors:
-#             type = "servo_position"
-
-#             data["capabilities"]["input"][type] = {}
-
-#             for num, device in enumerate(inputType):
-#                 data["capabilities"]["input"][type][str(num)] = {
-#                     "custom_name": device.getName(),
-#                     "disabled": False,
-#                     "feagi_index": num,
-#                     "max_value": 0,
-#                     "min_value": 0
-#                 }
-
-
-#     for outputType in all_FEAGI_outputs:
-#         if outputType == motors:
-#             type = "motor"
-
-#             data["capabilities"]["output"][type] = {}
-
-#             for num, device in enumerate(outputType):
-#                 data["capabilities"]["output"][type][str(num)] = {
-#                     "custom_name": device.getName(),
-#                     "disabled": False,
-#                     "feagi_index": num,
-#                     "max_power": 0,
-#                     "rolling_window_len": 0
-#                 }
-
-#     # for outputType in all_FEAGI_outputs:
-#     #     if outputType == brakes:
-#     #         type = "motor"
-
-#     #         data["capabilities"]["output"][type] = {}
-
-#     #         for num, device in enumerate(outputType):
-#     #             data["capabilities"]["output"][type][str(num)] = {
-#     #                 "custom_name": device.getName(),
-#     #                 "disabled": False,
-#     #                 "feagi_index": num,
-#     #                 "max_power": 0,
-#     #                 "rolling_window_len": 0
-#     #             }
-
-
-#     with open("capabilities.json", "w") as json_file:
-#         json.dump(data, json_file, indent=4)
-
-#     print("New JSON Created")
-
 
 
 
@@ -603,6 +500,7 @@ if __name__ == "__main__":
     motors = []
     for device in robot_actuators:
             if "Motor" == type(device).__name__:
+                pass
                 if device.getPositionSensor() == 0:
                     motors.append(device)
 
@@ -762,8 +660,6 @@ if __name__ == "__main__":
             print("obtained_signals",obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
 
-
-            pioneer2_wheel_movements
 
         # Send Gyro Sensor data to FEAGI
         for num, gyro_sensor in enumerate(gyro):
