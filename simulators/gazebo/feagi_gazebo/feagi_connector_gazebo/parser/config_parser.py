@@ -1,7 +1,7 @@
 import json
 import sys
-import os
 from lxml import etree as ET
+
 
 # CMD LINE USAGE :
 # 1 - python config_parser.py <target.sdf> 
@@ -40,11 +40,12 @@ def sdf_to_xml(fp):
         print(f"File couldn't be found: {fp}")
         return None
 
+
 # Description : used to strip the XML tree of any unnecessary elements
 # INPUT : tree element (expected to be the root)
 # Output on success : XML tree
 # Output on fail : None
-def strip_tree (element, found_elements): 
+def strip_tree(element, found_elements):
     for child in element:
         #print(element.tag)
         if element.tag in g_config['allow_list'] and element not in found_elements:
@@ -52,10 +53,12 @@ def strip_tree (element, found_elements):
             #     found_elements.append(element)
             if element.get('name'):
                 found_elements.append(element)
-        
-        strip_tree(child, found_elements)        
 
-# Description : used to recursively search the XML Tree structure for specefic elements by the element tag
+        strip_tree(child, found_elements)
+
+    # Description : used to recursively search the XML Tree structure for specefic elements by the element tag
+
+
 # INPUT : the current element being searched for a match to the search tag
 # Output on success : a refrence to the xml element with a tag matching 'search_tag'
 # Output on fail : None
@@ -68,7 +71,8 @@ def find_element_by_tag(element, search_tag):
         result = find_element_by_tag(child, search_tag)
         if result is not None:
             return result
-    return None     
+    return None
+
 
 # Description : used to load all 3 necessary files (feagi template config, gazebo template config, and the target sdf file) 
 # INPUT : gazebo config file path, feagi config file path, target sdf file path, array to store found elements in
@@ -98,6 +102,7 @@ def open_files(gazebo_config_template, feagi_config_template, target_sdf, found_
     root = tree.getroot()
     strip_tree(root, found_elements)
 
+
 # Description : Find match for specific element in list of JSON elements
 # INPUT : List of JSON elements, name of JSON element to find
 # Output on success : JSON element
@@ -111,6 +116,7 @@ def find_json_element(json_list, json_name):
         if result is not None:
             return result
     return None
+
 
 # Description : Changes existing JSON structure to account for parent child nesting
 # INPUT : list of found elements, existing json list
@@ -127,7 +133,7 @@ def nest(found_elements, json_list):
 
             # Find child Json element
             json_child = find_json_element(json_list, child.text)
-            
+
             if json_child:
                 # Finds parent Json element
                 json_parent = find_json_element(json_list, xml_elements.get('name'))
@@ -142,9 +148,11 @@ def nest(found_elements, json_list):
                 json_parent = find_json_element(json_list, parent.text)
                 if json_parent:
                     json_parent['children'].append(json_child)
-                    json_list.remove(json_child)    
+                    json_list.remove(json_child)
 
-# Description : Creates json items and adds to list without nesting
+                # Description : Creates json items and adds to list without nesting
+
+
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
 # Output on fail : None
@@ -152,31 +160,31 @@ def create_json(found_elements, json_list):
     index_number = 0
     # Loop through each found element from the SDF
     for elements in found_elements:
-        
+
         # Create Vars for Sensor element
-        if elements.get('type') in g_config['sensor']: # sensor
+        if elements.get('type') in g_config['sensor']:  # sensor
             # custom_name = elements.get('name')
             type = 'input'
             feagi_dev_type = g_config['sensor'][elements.get('type')]
 
-        elif elements.get('type') in g_config['actuator']: # actuator
-        # Create Vars for Actuator element 
+        elif elements.get('type') in g_config['actuator']:  # actuator
+            # Create Vars for Actuator element
             # custom_name = elements.get('name')
             type = 'output'
             feagi_dev_type = g_config['actuator'][elements.get('type')]
 
-        else: # link / body
-        # Create Vars for links / bodys
+        else:  # link / body
+            # Create Vars for links / bodys
             # custom_name = elements.get('name')
             type = 'body'
             feagi_dev_type = None
 
         # setting up general structure
         toadd = {'custom_name': elements.get('name'),
-                'type': type,
-                'description': "",
-                'children': []}
-        
+                 'type': type,
+                 'description': "",
+                 'children': []}
+
         # handle device type and parameters/properties if sensor or actuator
         if feagi_dev_type is not None:
             # retrieve all properties necessary for sensor / actuator
@@ -206,11 +214,11 @@ def create_json(found_elements, json_list):
                     toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
             else:
                 pass
-            
+
             # add in extra lines to dict
             temp = list(toadd.items())
-            temp.insert(2, ('feagi device type', feagi_dev_type ))
-            temp.insert(3, ('properties', props ))
+            temp.insert(2, ('feagi device type', feagi_dev_type))
+            temp.insert(3, ('properties', props))
             toadd = dict(temp)
             index_number += 1
 
@@ -218,6 +226,7 @@ def create_json(found_elements, json_list):
         json_list.append(toadd)
 
     return
+
 
 # Description : Strip data down to found paramaters from ignore list
 # INPUT : Device type and xml element type
@@ -243,21 +252,15 @@ def find_properties(devtype, ftype):
     toret = dict(properties_list)
     return toret
 
-def main():
-    # Will store all found elements
+
+def save_xml_string_to_file(xml_string, file_path="output.xml"):
+    with open(file_path, "w") as file:
+        file.write(xml_string)
+
+
+def xml_file_to_config(xml_file):
     found_elements = []
-
-    num_args = len(sys.argv) - 1
-
-    if num_args == 1:
-        print(sys.argv[1] + '\n')
-        open_files('gazebo_config_template.json', 'feagi_config_template.json', sys.argv[1], found_elements)
-    elif num_args == 3:
-        open_files(sys.argv[2], sys.argv[3], sys.argv[1], found_elements)
-    else :
-        print("Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
-        return
-    
+    open_files('gazebo_config_template.json', 'feagi_config_template.json', xml_file, found_elements)
     json_list = []
 
     file = open("model_config_tree.json", "w")
@@ -270,11 +273,46 @@ def main():
 
     json.dump(json_list, file, indent=4)
     file.close()
-                 
+
+
+def raw_xml_string_to_config(string_xml_file):
+    save_xml_string_to_file(string_xml_file)
+    xml_file_to_config('output.xml')
+
+
+def main():
+    # Will store all found elements
+    found_elements = []
+
+    num_args = len(sys.argv) - 1
+
+    if num_args == 1:
+        print(sys.argv[1] + '\n')
+        open_files('gazebo_config_template.json', 'feagi_config_template.json', sys.argv[1], found_elements)
+    elif num_args == 3:
+        open_files(sys.argv[2], sys.argv[3], sys.argv[1], found_elements)
+    else:
+        print(
+            "Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
+        return
+
+    json_list = []
+
+    file = open("model_config_tree.json", "w")
+
+    # Creates un-nested json structure with all data from file
+    create_json(found_elements, json_list)
+
+    # Nests the children found in created Json structure
+    nest(found_elements, json_list)
+
+    json.dump(json_list, file, indent=4)
+    file.close()
+
     return
 
-if __name__ =="__main__":
+
+if __name__ == "__main__":
     main()
-
- 
-
+    # xml_file_to_config("smart_car.sdf") # worked
+    # raw_xml_string_to_config()
