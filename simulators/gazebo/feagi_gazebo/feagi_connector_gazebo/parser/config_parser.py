@@ -253,7 +253,7 @@ def find_properties(devtype, ftype):
     return toret
 
 
-def save_xml_string_to_file(xml_string, file_path="output.xml"):
+def save_xml_string_to_file(xml_string, file_path="output.sdf"):
     with open(file_path, "w") as file:
         file.write(xml_string)
 
@@ -277,7 +277,7 @@ def xml_file_to_config(xml_file):
 
 def raw_xml_string_to_config(string_xml_file):
     save_xml_string_to_file(string_xml_file)
-    xml_file_to_config('output.xml')
+    xml_file_to_config('output.sdf')
 
 
 def main():
