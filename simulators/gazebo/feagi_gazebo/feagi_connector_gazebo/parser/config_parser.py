@@ -310,9 +310,3 @@ def main():
     file.close()
 
     return
-
-
-if __name__ == "__main__":
-    main()
-    # xml_file_to_config("smart_car.sdf") # worked
-    # raw_xml_string_to_config()
