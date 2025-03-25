@@ -56,7 +56,7 @@ robot_actuators = {"motor": [], "servo": [], "LED": []}
 num_devices = robot.getNumberOfDevices()
 
 
-def action(obtained_data, capabilities):
+def action(obtained_data):
     """
     This is where you can make the robot do something based on FEAGI data. The variable
     obtained_data contains the data from FEAGI. The variable capabilities comes from
@@ -362,7 +362,7 @@ if __name__ == "__main__":
             # Translate from feagi data to human readable data
             obtained_signals = pns.obtain_opu_data(message_from_feagi)  # This is getting data from FEAGI
             # print("obtained_signals", obtained_signals)
-            action(obtained_signals, capabilities)  # THis is for actuator#
+            action(obtained_signals)  # THis is for actuator#
 
         # send sensor data to feagi
         data = {}
