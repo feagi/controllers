@@ -449,7 +449,9 @@ if __name__ == "__main__":
 
 
     sort_devices()
-    make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
+    # make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
+    make_capabilities(robot_sensors, robot_actuators)
+
 
 
     # Main Loop
