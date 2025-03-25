@@ -50,9 +50,9 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
             "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
             "Receiver", "TouchSensor"]
 
-sensors = {"gyro" : [], "pressure" : [], "servo_position" : [], "proximity" : [], "accelerometer" : [], "camera" : []}
+robot_sensors = {"gyro" : [], "pressure" : [], "servo_position" : [], "proximity" : [], "accelerometer" : [], "camera" : []}
 
-actuators = {"motor" : [], "servo" : [], "LED" : []}
+robot_actuators = {"motor" : [], "servo" : [], "LED" : []}
 
 num_devices = robot.getNumberOfDevices()
 
@@ -259,86 +259,86 @@ def sort_devices():
             dev.enable(timestep)
 
             if device_type in ("Accelerometer", "InertialUnit"):
-                sensors["accelerometer"].append(dev)
+                robot_sensors["accelerometer"].append(dev)
 
             elif device_type == "Camera":
-                sensors["camera"].append(dev)
+                robot_sensors["camera"].append(dev)
 
             # elif device_type == "Compass":
-            #     sensors["compass"].append(dev)
+            #     robot_sensors["compass"].append(dev)
 
             elif device_type == "DistanceSensor":
-                sensors["proximity"].append(dev)
+                robot_sensors["proximity"].append(dev)
 
             # elif device_type == "GPS":
-            #     sensors["GPS"].append(dev)
+            #     robot_sensors["GPS"].append(dev)
 
             elif device_type == "Gyro":
-                sensors["gyro"].append(dev)
+                robot_sensors["gyro"].append(dev)
 
             # elif device_type == "Lidar":
-            #     sensors["lidar"].append(dev)
+            #     robot_sensors["lidar"].append(dev)
 
             # elif device_type == "LightSensor":
-            #     sensors["light_sensor"].append(dev)
+            #     robot_sensors["light_sensor"].append(dev)
 
             elif device_type == "PositionSensor":
-                sensors["servo_position"].append(dev)
+                robot_sensors["servo_position"].append(dev)
 
             # elif device_type == "Radar":
-            #     sensors["radar"].append(dev)
+            #     robot_sensors["radar"].append(dev)
 
             # elif device_type == "RangeFinder":
-            #     sensors["range_finder"].append(dev)
+            #     robot_sensors["range_finder"].append(dev)
 
             # elif device_type == "Receiver":
-            #     sensors["receiver"].append(dev)
+            #     robot_sensors["receiver"].append(dev)
 
             elif device_type == "TouchSensor":
-                 sensors["pressure"].append(dev)
+                robot_sensors["pressure"].append(dev)
 
         #if the device is a webots actuator
         else:
             # if device_name == "Brake":
-            #     actuators["brake"].append(dev)
+            #     robot_actuators["brake"].append(dev)
 
             # elif device_name == "Connector":
-            #     actuators["connector"].append(dev)
+            #     robot_actuators["connector"].append(dev)
 
             # elif device_name == "Display":
-            #     actuators["display"].append(dev)
+            #     robot_actuators["display"].append(dev)
 
             # elif device_name == "Emitter":
-            #     actuators["emitter"].append(dev)
+            #     robot_actuators["emitter"].append(dev)
 
             if device_type == "LED":
-                actuators["LED"].append(dev)
+                robot_actuators["LED"].append(dev)
 
             if device_type == "Motor":
                 if (dev.getMinPosition == 0 and dev.getMaxPosition == 0):
-                    actuators["motor"].append(dev)
+                    robot_actuators["motor"].append(dev)
                 else:
-                    actuators["servo"].append(dev)
+                    robot_actuators["servo"].append(dev)
 
             # elif device_name == "Muscle":
-            #     actuators["muscle"].append(dev)
+            #     robot_actuators["muscle"].append(dev)
 
             # elif device_name == "Pen":
-            #     actuators["pen"].append(dev)
+            #     robot_actuators["pen"].append(dev)
 
             # elif device_name == "Propeller":
-            #     actuators["propeller"].append(dev)
+            #     robot_actuators["propeller"].append(dev)
 
             # elif device_name == "Speaker":
-            #     actuators["speaker"].append(dev)
+            #     robot_actuators["speaker"].append(dev)
 
             # elif device_name == "Track":
-            #     actuators["track"].append(dev)
+            #     robot_actuators["track"].append(dev)
              
-    for device_type, device_list in sensors.items():
+    for device_type, device_list in robot_sensors.items():
          device_list.sort(key=lambda device: device.getName())
 
-    for device_type, device_list in actuators.items():
+    for device_type, device_list in robot_actuators.items():
          device_list.sort(key=lambda device: device.getName())
 
 #move the motors to make the robot spin
@@ -462,8 +462,15 @@ if __name__ == "__main__":
             print("obtained_signals",obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
 
+        #send sensor data to feagi
+        # for device_type, device_list in robot_sensors.items():
+        #     for num, dev in enumerate(device_list):
+        #         data = {str(num): get_sensor_data(dev)}
+        #         message_to_feagi = sensors.create_data_for_feagi(device_type, capabilities, message_to_feagi, current_data = data, symmetric= True, measure_enable = True)
+        #         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
 
         # Send Gyro Sensor data to FEAGI
+        gyro = robot_sensors.get("gyro")
         for num, gyro_sensor in enumerate(gyro):
 
             gyro_data = {str(num): get_sensor_data(gyro_sensor)}
@@ -477,6 +484,7 @@ if __name__ == "__main__":
 
 
         # Send Motor Position Sensor data to FEAGI
+        servo_position = robot_sensors.get("servo_position")
         for num, positionSensor in enumerate(servo_position):
 
             positionSensor_data = {str(num): get_sensor_data(positionSensor)}
@@ -490,6 +498,7 @@ if __name__ == "__main__":
 
 
         # Send Proximity Sensor data to FEAGI
+        proximity = robot_sensors.get("proximity")
         for num, distanceSensor in enumerate(proximity):
 
             distanceSensor_data = {str(num): get_sensor_data(distanceSensor)}
