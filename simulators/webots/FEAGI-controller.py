@@ -311,10 +311,10 @@ def sort_devices():
             # elif device_name == "Emitter":
             #     actuators["emitter"].append(dev)
 
-            if device_name == "LED":
+            if device_type == "LED":
                 actuators["LED"].append(dev)
 
-            if device_name == "Motor":
+            if device_type == "Motor":
                 if (dev.getMinPosition == 0 and dev.getMaxPosition == 0):
                     actuators["motor"].append(dev)
                 else:
@@ -335,10 +335,8 @@ def sort_devices():
             # elif device_name == "Track":
             #     actuators["track"].append(dev)
              
-    for device_list in sensors.values():
-         list.sort(key=lambda device: device.getName())
-         
-
+    for device_type, device_list in sensors.items():
+         device_list.sort(key=lambda device: device.getName())
 
 #move the motors to make the robot spin
 def pioneer2_wheel_movements():
@@ -347,7 +345,7 @@ def pioneer2_wheel_movements():
     right_wheel = robot.getDevice("right wheel motor")
 
     print("Pre-move sensors")
-    print_all_ds()
+    #print_all_ds()
     print()
             
     #sets velocities opposite eachother, moves and then stops
@@ -358,7 +356,7 @@ def pioneer2_wheel_movements():
     right_wheel.setVelocity(0)
 
     print("Post-move sensors")
-    print_all_ds()
+    #print_all_ds()
     print("\n")
     
     #3 seconds
@@ -410,9 +408,6 @@ def pr2_move_arm(arm, positions):
             print(f"Invalid joint name: {joint}")
 
 
-
-
-
 if __name__ == "__main__":
 
     # Generate runtime dictionary
@@ -454,7 +449,6 @@ if __name__ == "__main__":
     make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
 
 
-
     # Main Loop
     while True:
         # The controller will grab the data from FEAGI in real-time
@@ -464,6 +458,7 @@ if __name__ == "__main__":
             obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
             print("obtained_signals",obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
+
 
 
         # Send Gyro Sensor data to FEAGI
