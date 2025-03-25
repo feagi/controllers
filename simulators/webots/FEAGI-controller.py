@@ -228,24 +228,32 @@ def action(obtained_data, capabilities):
 #returns the data of given sensor
 def get_sensor_data(sensor):
     if type(sensor).__name__ == "TouchSensor":
-        if sensor.getType() in ("WB_TOUCH_SENSOR_BUMPER", "WB_TOUCH_SENSOR_FORCE"):
+        if sensor.getType() in (0, 1): #bumper and force touch sensors
             return sensor.getValue()
-        else:
+        else: #force-3d touch sensor
             return sensor.getValues()
+        
     elif type(sensor).__name__ in ("DistanceSensor", "LightSensor", "PositionSensor"):
         return sensor.getValue()
+    
     elif type(sensor).__name__ in ("Accelerometer", "Compass", "GPS", "Gyro"):
         return sensor.getValues()
+    
     elif type(sensor).__name__ == "Camera":
         return sensor.getImageArray()
+    
     elif type(sensor).__name__ == "InertialUnit":
         return sensor.getRollPitchYaw()
+    
     elif type(sensor).__name__ == "Lidar":
         return sensor.getRangeImageArray()
+    
     elif type(sensor).__name__ == "Radar":
         return sensor.getTargets()
+    
     elif type(sensor).__name__ == "RangeFinder":
         return sensor.getRangeImageArray()
+    
     elif type(sensor).__name__ == "Receiver":
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
@@ -449,6 +457,7 @@ if __name__ == "__main__":
 
 
     sort_devices()
+    robot.step(timestep) #ensures that all sensors have had time to make a measurement, avoids null pointers
     # make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
     make_capabilities(robot_sensors, robot_actuators)
 
@@ -465,51 +474,51 @@ if __name__ == "__main__":
             action(obtained_signals, capabilities) # THis is for actuator#
 
         #send sensor data to feagi
-        # for device_type, device_list in robot_sensors.items():
-        #     for num, dev in enumerate(device_list):
-        #         data = {str(num): get_sensor_data(dev)}
-        #         message_to_feagi = sensors.create_data_for_feagi(device_type, capabilities, message_to_feagi, current_data = data, symmetric= True, measure_enable = True)
-        #         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+        for device_type, device_list in robot_sensors.items():
+            for num, dev in enumerate(device_list):
+                data = {str(num): get_sensor_data(dev)}
+                message_to_feagi = sensors.create_data_for_feagi(device_type, capabilities, message_to_feagi, current_data = data, symmetric= True, measure_enable = True)
+                pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
 
-        # Send Gyro Sensor data to FEAGI
-        gyro = robot_sensors.get("gyro")
-        for num, gyro_sensor in enumerate(gyro):
+        # # Send Gyro Sensor data to FEAGI
+        # gyro = robot_sensors.get("gyro")
+        # for num, gyro_sensor in enumerate(gyro):
 
-            gyro_data = {str(num): get_sensor_data(gyro_sensor)}
-            #print(gyro_data)
+        #     gyro_data = {str(num): get_sensor_data(gyro_sensor)}
+        #     #print(gyro_data)
 
-            message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
+        #     message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
             
-            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-            #message_to_feagi.clear()
+        #     pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+        #     #message_to_feagi.clear()
 
 
 
-        # Send Motor Position Sensor data to FEAGI
-        servo_position = robot_sensors.get("servo_position")
-        for num, positionSensor in enumerate(servo_position):
+        # # Send Motor Position Sensor data to FEAGI
+        # servo_position = robot_sensors.get("servo_position")
+        # for num, positionSensor in enumerate(servo_position):
 
-            positionSensor_data = {str(num): get_sensor_data(positionSensor)}
-            #print(positionSensor_data)
+        #     positionSensor_data = {str(num): get_sensor_data(positionSensor)}
+        #     #print(positionSensor_data)
 
-            message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi, current_data=positionSensor_data, symmetric=True, measure_enable=True)
+        #     message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi, current_data=positionSensor_data, symmetric=True, measure_enable=True)
 
-            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-            #message_to_feagi.clear()
+        #     pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+        #     #message_to_feagi.clear()
 
 
 
-        # Send Proximity Sensor data to FEAGI
-        proximity = robot_sensors.get("proximity")
-        for num, distanceSensor in enumerate(proximity):
+        # # Send Proximity Sensor data to FEAGI
+        # proximity = robot_sensors.get("proximity")
+        # for num, distanceSensor in enumerate(proximity):
 
-            distanceSensor_data = {str(num): get_sensor_data(distanceSensor)}
-            #print(distanceSensor_data)
+        #     distanceSensor_data = {str(num): get_sensor_data(distanceSensor)}
+        #     #print(distanceSensor_data)
 
-            message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi, current_data=distanceSensor_data, symmetric=True, measure_enable=True)
+        #     message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi, current_data=distanceSensor_data, symmetric=True, measure_enable=True)
 
-            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-            #message_to_feagi.clear()
+        #     pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+        #     #message_to_feagi.clear()
 
         message_to_feagi.clear()
 
