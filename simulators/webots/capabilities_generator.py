@@ -48,8 +48,8 @@ def make_capabilities(sensors, actuators):
                         "custom_name": device.getName(),
                         "disabled": False,
                         "feagi_index": num,
-                        "max_value": 0,
-                        "min_value": 0
+                        "max_value": device.getMotor().getMaxPosition(),
+                        "min_value": device.getMotor().getMinPosition()
                     }
 
             elif device_type == "proximity":
