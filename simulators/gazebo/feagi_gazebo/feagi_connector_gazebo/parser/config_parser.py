@@ -254,6 +254,8 @@ def find_properties(devtype, ftype):
 
 
 def save_xml_string_to_file(xml_string, file_path="output.sdf"):
+    if isinstance(xml_string, bytes):
+        xml_string = xml_string.decode("utf-8") # change from bytes to string so it can save in sdf
     with open(file_path, "w") as file:
         file.write(xml_string)
 
