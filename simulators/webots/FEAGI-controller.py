@@ -338,6 +338,9 @@ def sort_devices():
     for device_type, device_list in sensors.items():
          device_list.sort(key=lambda device: device.getName())
 
+    for device_type, device_list in actuators.items():
+         device_list.sort(key=lambda device: device.getName())
+
 #move the motors to make the robot spin
 def pioneer2_wheel_movements():
     #gets the motors
@@ -458,7 +461,6 @@ if __name__ == "__main__":
             obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
             print("obtained_signals",obtained_signals)
             action(obtained_signals, capabilities) # THis is for actuator#
-
 
 
         # Send Gyro Sensor data to FEAGI
