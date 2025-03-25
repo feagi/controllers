@@ -279,12 +279,13 @@ def xml_file_to_config(xml_file):
 
     json.dump(json_list, file, indent=4)
     file.close()
+    return json_list
 
 
 def raw_xml_string_to_config(string_xml_file):
     save_xml_string_to_file(string_xml_file)
-    xml_file_to_config('output.sdf')
-
+    final_tree_model_config = xml_file_to_config('output.sdf')
+    return final_tree_model_config
 
 def main():
     # Will store all found elements
