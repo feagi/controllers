@@ -37,7 +37,6 @@ camera_data = {"vision": []}  # This will be heavily relies for vision
 
 # Get outputs that FEAGI can use in capabilities.json
 #all_FEAGI_outputs = []
-all_FEAGI_outputs = []
 
 # create the Robot instance.
 robot = Robot()
@@ -99,32 +98,6 @@ def action(obtained_data):
 
                             robot_motor.setPosition(feagi_motor_data)
 
-
-    for feagi_output_type in obtained_data:
-        # MOTOR MOVEMENT
-        if feagi_output_type == "motor":
-            # print(f"feagi_motor_list: - {obtained_data["motor"]}")
-            # feagi_motor_list = {0: 1.0, 1: 0.85, 2: 1.0, 3: 1.0}
-            feagi_motor_list = obtained_data["motor"]
-
-            for motor_number in feagi_motor_list:
-                value = feagi_motor_list[motor_number]
-                for device in all_FEAGI_outputs:
-                    # print(f"device - {device}")
-                    # device = ('motors', [<controller.motor.Motor object at 0x0000021536F1B7A0>, <controller.motor.Motor object at 0x0000021535EF2EA0>])
-
-                    motor_list = device[1]
-                    # print(f"motor_list - {motor_list}")
-                    # motor_list = [<controller.motor.Motor object at 0x000002960AB10740>, <controller.motor.Motor object at 0x000002966B4A8050>]
-
-                    for num, webot_motor in enumerate(motor_list):
-
-                        if num == motor_number:
-                            # velocity control mode
-                            webot_motor.setPosition(float("inf"))
-                            webot_motor.setVelocity(value)
-
-        # SERVO Power
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
                 #loop through robot motors to find the number motor commanded
@@ -159,21 +132,6 @@ def action(obtained_data):
     #         # print(f"feagi_motor_list: - {obtained_data["motor"]}")
     #         # feagi_motor_list = {0: 1.0, 1: 0.85, 2: 1.0, 3: 1.0}
     #         feagi_motor_list = obtained_data["motor"]
-            feagi_servo_list = obtained_data["servo"]
-
-            for servo_number in feagi_servo_list:
-                value = feagi_servo_list[servo_number]
-
-                for device in all_FEAGI_outputs:
-                    servo_list = device[1]
-                    for num, webot_servo in enumerate(servo_list):
-                        if num == servo_number:
-                            # velocity control mode
-                            webot_servo.setPosition(value)
-
-        # SERVO Position
-        if feagi_output_type == "servo_position":
-            feagi_servo_position_list = obtained_data["servo_position"]
 
     #         for motor_number in feagi_motor_list:
     #             value = feagi_motor_list[motor_number]
@@ -217,15 +175,6 @@ def action(obtained_data):
     #                 for num, webot_servo_position in enumerate(servo_position_list):
     #                     if num == servo_position_number:
     #                         webot_servo_position.setPosition(value)
-
-# returns the data of given sensor
-            for servo_position_number in feagi_servo_position_list:
-                value = feagi_servo_position_list[servo_position_number]
-                for device in all_FEAGI_outputs:
-                    servo_position_list = device[1]
-                    for num, webot_servo_position in enumerate(servo_position_list):
-                        if num == servo_position_number:
-                            webot_servo_position.setPosition(value)
 
 # returns the data of given sensor
 def get_sensor_data(sensor):
@@ -482,6 +431,7 @@ if __name__ == "__main__":
                     data[device_type] = {}
                 for num, dev in enumerate(device_list):
                     data[device_type][str(num)] = get_sensor_data(dev)
+
 
         for sensor_name in data:
             message_to_feagi = sensors.create_data_for_feagi(sensor_name, capabilities, message_to_feagi,
