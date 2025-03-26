@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 import json
+import math
 import threading
 from time import sleep
 from controller import Robot
@@ -92,11 +93,12 @@ def action(obtained_data):
                 for num, robot_motor in enumerate(robot_actuators["servo"]):
                     if num is feagi_motor_num:
 
-                        if capabilities["output"]["servo"][str(num)]["max_value"] > feagi_motor_data \
-                        and capabilities["output"]["servo"][str(num)]["min_value"] < feagi_motor_data:
+                        max_value = capabilities["output"]["servo"][str(num)]["max_value"]
+                        min_value = capabilities["output"]["servo"][str(num)]["min_value"]
 
+                        inc_amount = calculate_increment(min_value, max_value)
 
-                            robot_motor.setPosition(feagi_motor_data)
+                        robot_motor.setPosition(robot_motor.getPositionSensor().getValue() + feagi_motor_data)
 
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
@@ -275,7 +277,7 @@ def sort_devices():
                 robot_actuators["LED"].append(dev)
 
             if device_type == "Motor":
-                if (dev.getMinPosition == 0 and dev.getMaxPosition == 0):
+                if (dev.getMinPosition() == 0 and dev.getMaxPosition() == 0):
                     robot_actuators["motor"].append(dev)
                 else:
                     robot_actuators["servo"].append(dev)
@@ -434,8 +436,13 @@ if __name__ == "__main__":
 
 
         for sensor_name in data:
-            message_to_feagi = sensors.create_data_for_feagi(sensor_name, capabilities, message_to_feagi,
-                                                         current_data=data[sensor_name], symmetric=True, measure_enable=True)
+            message_to_feagi = sensors.create_data_for_feagi(
+                                    sensor_name,
+                                    capabilities,
+                                    message_to_feagi,
+                                    current_data=data[sensor_name], 
+                                    symmetric=True, 
+                                    measure_enable=True)
 
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         message_to_feagi.clear()
