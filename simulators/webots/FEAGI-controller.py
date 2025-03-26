@@ -69,32 +69,56 @@ def action(obtained_data):
 
 
     #print(f"robot_actuators - {robot_actuators}")
-    print(obtained_data)
+
+    def calculate_increment(min_value, max_value):
+        range_value = abs(max_value - min_value)
+        target_steps = 30  # Aim for about 30 steps
+        magnitude = int(math.log10(range_value))
+        increment = pow(10, magnitude) / 10
+        if range_value / increment > target_steps * 2:
+            increment *= 5
+        elif range_value / increment > target_steps:
+            increment *= 2
+        elif range_value / increment < target_steps / 2:
+            increment /= 2
+        return increment
 
 
     for feagi_output_type, commands in obtained_data.items():
+
         if feagi_output_type == "servo_position":
             for feagi_motor_num, feagi_motor_data in commands.items():
                 #loop through robot motors to find the number motor commanded
-                for num, motor in enumerate(robot_actuators["servo"]):
+                for num, robot_motor in enumerate(robot_actuators["servo"]):
                     if num is feagi_motor_num:
-                        motor.setVelocity(2)
-                        motor.setPosition(feagi_motor_data)
+
+                        if capabilities["output"]["servo"][str(num)]["max_value"] > feagi_motor_data \
+                        and capabilities["output"]["servo"][str(num)]["min_value"] < feagi_motor_data:
+
+
+                            robot_motor.setPosition(feagi_motor_data)
 
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
                 #loop through robot motors to find the number motor commanded
-                for num, motor in enumerate(robot_actuators["servo"]):
+                for num, robot_motor in enumerate(robot_actuators["servo"]):
                     if num is feagi_motor_num:
-                        motor.setVelocity(feagi_motor_data)
+
+                        if capabilities["output"]["servo"][str(num)]["max_power"] > feagi_motor_data:
+                            
+                            robot_motor.setVelocity(feagi_motor_data)
 
         if feagi_output_type == "motor":
             for feagi_motor_num, feagi_motor_data in commands.items():
                 #loop through robot motors to find the number motor commanded
-                for num, motor in enumerate(robot_actuators["motor"]):
+                for num, robot_motor in enumerate(robot_actuators["motor"]):
                     if num is feagi_motor_num:
-                        motor.setPosition(float("inf"))
-                        motor.setVelocity(2)
+
+                        if capabilities["output"]["motor"][str(num)]["max_power"] > feagi_motor_data:
+
+                            #put into velocity mode
+                            robot_motor.setPosition(float("inf"))
+                            robot_motor.setVelocity(2)
                         
 
 
