@@ -80,21 +80,20 @@ def action(obtained_data):
                 #loop through robot motors to find the number motor commanded
                 for num, robot_motor in enumerate(robot_actuators["servo"]):
                     if num is feagi_motor_num:
-
+                        
+                        ##### Temporary redundant capability check
                         max_value = capabilities["output"]["servo"][str(num)]["max_value"]
                         min_value = capabilities["output"]["servo"][str(num)]["min_value"]
 
                         
-                        #inc_amount = calculate_increment(min_value, max_value)
-                        target_position = robot_motor.getPositionSensor().getValue() + feagi_motor_data
+                        if feagi_motor_data < min_value:
+                            feagi_motor_data = min_value
 
-                        if target_position < min_value:
-                            target_position = min_value
+                        if feagi_motor_data > max_value:
+                            feagi_motor_data = max_value
+                        #####
 
-                        if target_position > max_value:
-                            target_position = max_value
-
-                        robot_motor.setPosition(target_position)
+                        robot_motor.setPosition(feagi_motor_data)
 
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
@@ -102,7 +101,12 @@ def action(obtained_data):
                 for num, robot_motor in enumerate(robot_actuators["servo"]):
                     if num is feagi_motor_num:
 
-                        if capabilities["output"]["servo"][str(num)]["max_power"] > feagi_motor_data:
+                        ##### Temporary redundant capability check
+                        max_power = capabilities["output"]["servo"][str(num)]["max_power"]
+
+                        if feagi_motor_data > max_power:
+                            feagi_motor_data = max_power
+                        #####
                             
                             robot_motor.setVelocity(feagi_motor_data)
 
@@ -112,14 +116,14 @@ def action(obtained_data):
                 for num, robot_motor in enumerate(robot_actuators["motor"]):
                     if num is feagi_motor_num:
 
-
+                        ##### Temporary redundant capability check
                         max_power = capabilities["output"]["motor"][str(num)]["max_power"]
 
                         if feagi_motor_data > max_power:
                             feagi_motor_data = max_power
+                        #####
 
-                        #put into velocity mode
-                        robot_motor.setPosition(float("inf"))
+                        
                         robot_motor.setVelocity(feagi_motor_data)
                         
 
@@ -278,6 +282,10 @@ def sort_devices():
 
             if device_type == "Motor":
                 if (dev.getMinPosition() == 0 and dev.getMaxPosition() == 0):
+
+                    #put into velocity mode
+                    dev.setPosition(float("inf"))
+
                     robot_actuators["motor"].append(dev)
                 else:
                     robot_actuators["servo"].append(dev)
@@ -305,18 +313,7 @@ def sort_devices():
 
 
 
-def calculate_increment(min_value, max_value):
-    range_value = abs(max_value - min_value)
-    target_steps = 30  # Aim for about 30 steps
-    magnitude = int(math.log10(range_value))
-    increment = pow(10, magnitude) / 10
-    if range_value / increment > target_steps * 2:
-        increment *= 5
-    elif range_value / increment > target_steps:
-        increment *= 2
-    elif range_value / increment < target_steps / 2:
-        increment /= 2
-    return increment
+
 
 
 
