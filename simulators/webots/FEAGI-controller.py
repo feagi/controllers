@@ -120,7 +120,7 @@ def action(obtained_data):
 
                         #put into velocity mode
                         robot_motor.setPosition(float("inf"))
-                        robot_motor.setVelocity(2)
+                        robot_motor.setVelocity(feagi_motor_data)
                         
 
 
