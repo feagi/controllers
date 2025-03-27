@@ -88,9 +88,13 @@ def action(obtained_data):
                         #inc_amount = calculate_increment(min_value, max_value)
                         target_position = robot_motor.getPositionSensor().getValue() + feagi_motor_data
 
-                        if target_position > min_value and target_position < max_value:
+                        if target_position < min_value:
+                            target_position = min_value
 
-                            robot_motor.setPosition(target_position)
+                        if target_position > max_value:
+                            target_position = max_value
+
+                        robot_motor.setPosition(target_position)
 
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
@@ -108,11 +112,15 @@ def action(obtained_data):
                 for num, robot_motor in enumerate(robot_actuators["motor"]):
                     if num is feagi_motor_num:
 
-                        if capabilities["output"]["motor"][str(num)]["max_power"] > feagi_motor_data:
 
-                            #put into velocity mode
-                            robot_motor.setPosition(float("inf"))
-                            robot_motor.setVelocity(2)
+                        max_power = capabilities["output"]["motor"][str(num)]["max_power"]
+
+                        if feagi_motor_data > max_power:
+                            feagi_motor_data = max_power
+
+                        #put into velocity mode
+                        robot_motor.setPosition(float("inf"))
+                        robot_motor.setVelocity(2)
                         
 
 
@@ -295,6 +303,8 @@ def sort_devices():
     for device_type, device_list in robot_actuators.items():
         device_list.sort(key=lambda device: device.getName())
 
+
+
 def calculate_increment(min_value, max_value):
     range_value = abs(max_value - min_value)
     target_steps = 30  # Aim for about 30 steps
@@ -307,6 +317,8 @@ def calculate_increment(min_value, max_value):
     elif range_value / increment < target_steps / 2:
         increment /= 2
     return increment
+
+
 
 
 # move the motors to make the robot spin
