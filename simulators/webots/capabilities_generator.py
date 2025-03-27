@@ -1,4 +1,19 @@
 import json
+import math
+
+def calculate_increment(min_value, max_value):
+    range_value = abs(max_value - min_value)
+    target_steps = 30  # Aim for about 30 steps
+    magnitude = int(math.log10(range_value))
+    increment = pow(10, magnitude) / 10
+    if range_value / increment > target_steps * 2:
+        increment *= 5
+    elif range_value / increment > target_steps:
+        increment *= 2
+    elif range_value / increment < target_steps / 2:
+        increment /= 2
+    return increment
+
 
 def make_capabilities(sensors, actuators):
     data = {
@@ -105,10 +120,16 @@ def make_capabilities(sensors, actuators):
                         "default_value": 0,
                         "disabled": False,
                         "feagi_index": num,
-                        "max_power": 0,
-                        "max_value": device.getMaxPosition(),
-                        "min_value": device.getMinPosition()
                     }
+
+                    max = device.getMaxPosition()
+                    min = device.getMinPosition()
+
+                    data["capabilities"]["output"][device_type][str(num)].update({
+                        "max_power": calculate_increment(min,max),
+                        "max_value": max,
+                        "min_value": min,
+                    })
 
     with open("capabilities.json", "w") as json_file:
         json.dump(data, json_file, indent=4)
