@@ -71,18 +71,6 @@ def action(obtained_data):
 
     #print(f"robot_actuators - {robot_actuators}")
 
-    def calculate_increment(min_value, max_value):
-        range_value = abs(max_value - min_value)
-        target_steps = 30  # Aim for about 30 steps
-        magnitude = int(math.log10(range_value))
-        increment = pow(10, magnitude) / 10
-        if range_value / increment > target_steps * 2:
-            increment *= 5
-        elif range_value / increment > target_steps:
-            increment *= 2
-        elif range_value / increment < target_steps / 2:
-            increment /= 2
-        return increment
 
 
     for feagi_output_type, commands in obtained_data.items():
@@ -96,9 +84,13 @@ def action(obtained_data):
                         max_value = capabilities["output"]["servo"][str(num)]["max_value"]
                         min_value = capabilities["output"]["servo"][str(num)]["min_value"]
 
-                        inc_amount = calculate_increment(min_value, max_value)
+                        
+                        #inc_amount = calculate_increment(min_value, max_value)
+                        target_position = robot_motor.getPositionSensor().getValue() + feagi_motor_data
 
-                        robot_motor.setPosition(robot_motor.getPositionSensor().getValue() + feagi_motor_data)
+                        if target_position > min_value and target_position < max_value:
+
+                            robot_motor.setPosition(target_position)
 
         if feagi_output_type == "servo":
             for feagi_motor_num, feagi_motor_data in commands.items():
@@ -302,6 +294,19 @@ def sort_devices():
 
     for device_type, device_list in robot_actuators.items():
         device_list.sort(key=lambda device: device.getName())
+
+def calculate_increment(min_value, max_value):
+    range_value = abs(max_value - min_value)
+    target_steps = 30  # Aim for about 30 steps
+    magnitude = int(math.log10(range_value))
+    increment = pow(10, magnitude) / 10
+    if range_value / increment > target_steps * 2:
+        increment *= 5
+    elif range_value / increment > target_steps:
+        increment *= 2
+    elif range_value / increment < target_steps / 2:
+        increment /= 2
+    return increment
 
 
 # move the motors to make the robot spin
