@@ -1,0 +1,44 @@
+{
+	"capabilities": {
+		"input": {
+			"camera": {
+				"0": {
+					"custom_name": "camera",
+					"disabled": false,
+					"eccentricity_control": {
+						"X offset percentage": 1,
+						"Y offset percentage": 1
+					},
+					"feagi_index": 0,
+					"index": "00",
+					"mirror": false,
+					"modulation_control": {
+						"X offset percentage": 99,
+						"Y offset percentage": 99
+					},
+					"threshold_default": 50
+				}
+			},
+			"gyro": {
+				"0": {
+					"custom_name": "gyro",
+					"disabled": false,
+					"feagi_index": 0,
+					"max_value": [
+						0,
+						0,
+						0
+					],
+					"min_value": [
+						0,
+						0,
+						0
+					]
+				}
+			}
+		},
+		"output": {
+
+		}
+	}
+}
