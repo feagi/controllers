@@ -72,115 +72,30 @@ def action(obtained_data):
     #print(f"robot_actuators - {robot_actuators}")
 
 
+    recieve_motor_data = actuators.get_motor_data(obtained_data)
+    recieve_servo_data = actuators.get_servo_data(obtained_data)
+    recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
-    for feagi_output_type, commands in obtained_data.items():
+    # print(f"recieve_motor_data- {recieve_motor_data}")
+    # print(f"recieve_servo_data- {recieve_servo_data}")
+    # print(f"recieve_servo_position_data- {recieve_servo_position_data}")
 
-        if feagi_output_type == "servo_position":
-            for feagi_motor_num, feagi_motor_data in commands.items():
-                #loop through robot motors to find the number motor commanded
-                for num, robot_motor in enumerate(robot_actuators["servo"]):
-                    if num is feagi_motor_num:
-                        
-                        ##### Temporary redundant capability check
-                        max_value = capabilities["output"]["servo"][str(num)]["max_value"]
-                        min_value = capabilities["output"]["servo"][str(num)]["min_value"]
 
-                        
-                        if feagi_motor_data < min_value:
-                            feagi_motor_data = min_value
+    if recieve_servo_position_data:
+        for device_num in recieve_servo_position_data:
+            robot_actuators["servo"][device_num].setPosition(recieve_servo_position_data[device_num])
 
-                        if feagi_motor_data > max_value:
-                            feagi_motor_data = max_value
-                        #####
+    if recieve_servo_data:
+        for device_num in recieve_servo_data:  # example output: {0: 100, 2: 100}
+            robot_actuators["servo"][device_num].setPosition(recieve_servo_data[device_num])
 
-                        robot_motor.setPosition(feagi_motor_data)
-
-        if feagi_output_type == "servo":
-            for feagi_motor_num, feagi_motor_data in commands.items():
-                #loop through robot motors to find the number motor commanded
-                for num, robot_motor in enumerate(robot_actuators["servo"]):
-                    if num is feagi_motor_num:
-
-                        ##### Temporary redundant capability check
-                        max_power = capabilities["output"]["servo"][str(num)]["max_power"]
-
-                        if feagi_motor_data > max_power:
-                            feagi_motor_data = max_power
-                        #####
-                            
-                            robot_motor.setVelocity(feagi_motor_data)
-
-        if feagi_output_type == "motor":
-            for feagi_motor_num, feagi_motor_data in commands.items():
-                #loop through robot motors to find the number motor commanded
-                for num, robot_motor in enumerate(robot_actuators["motor"]):
-                    if num is feagi_motor_num:
-
-                        ##### Temporary redundant capability check
-                        max_power = capabilities["output"]["motor"][str(num)]["max_power"]
-
-                        if feagi_motor_data > max_power:
-                            feagi_motor_data = max_power
-                        #####
-
-                        
-                        robot_motor.setVelocity(feagi_motor_data)
-                        
+    if recieve_motor_data:
+        for device_num in recieve_motor_data:
+            robot_actuators["motor"][device_num].setVelocity(recieve_motor_data[device_num])
 
 
 
 
-
-
-    # for feagi_output_type in obtained_data:
-    #     # MOTOR MOVEMENT
-    #     if feagi_output_type == "motor":
-    #         # print(f"feagi_motor_list: - {obtained_data["motor"]}")
-    #         # feagi_motor_list = {0: 1.0, 1: 0.85, 2: 1.0, 3: 1.0}
-    #         feagi_motor_list = obtained_data["motor"]
-
-    #         for motor_number in feagi_motor_list:
-    #             value = feagi_motor_list[motor_number]
-    #             for device in all_FEAGI_outputs:
-    #                 # print(f"device - {device}")
-    #                 # device = ('motors', [<controller.motor.Motor object at 0x0000021536F1B7A0>, <controller.motor.Motor object at 0x0000021535EF2EA0>])
-
-    #                 motor_list = device[1]
-    #                 # print(f"motor_list - {motor_list}")
-    #                 # motor_list = [<controller.motor.Motor object at 0x000002960AB10740>, <controller.motor.Motor object at 0x000002966B4A8050>]
-
-    #                 for num, webot_motor in enumerate(motor_list):
-
-    #                     if num == motor_number:
-    #                         # velocity control mode
-    #                         webot_motor.setPosition(float("inf"))
-    #                         webot_motor.setVelocity(value)
-
-    #     # SERVO Power
-    #     if feagi_output_type == "servo":
-    #         feagi_servo_list = obtained_data["servo"]
-
-    #         for servo_number in feagi_servo_list:
-    #             value = feagi_servo_list[servo_number]
-
-    #             for device in all_FEAGI_outputs:
-    #                 servo_list = device[1]
-    #                 for num, webot_servo in enumerate(servo_list):
-    #                     if num == servo_number:
-    #                         # velocity control mode
-    #                         webot_servo.setPosition(value)
-
-    #     # SERVO Position
-    #     if feagi_output_type == "servo_position":
-    #         feagi_servo_position_list = obtained_data["servo_position"]
-
-    #         for servo_position_number in feagi_servo_position_list:
-    #             value = feagi_servo_position_list[servo_position_number]
-    #             for device in all_FEAGI_outputs:
-    #                 servo_position_list = device[1]
-    #                 for num, webot_servo_position in enumerate(servo_position_list):
-    #                     if num == servo_position_number:
-    #                         webot_servo_position.setPosition(value)
 
 # returns the data of given sensor
 def get_sensor_data(sensor):
