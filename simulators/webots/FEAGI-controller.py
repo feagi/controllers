@@ -33,12 +33,6 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
-# Get inputs that FEAGI can use in capabilities.json
-#all_FEAGI_inputs = []
-
-# Get outputs that FEAGI can use in capabilities.json
-#all_FEAGI_outputs = []
-
 # create the Robot instance.
 robot = Robot()
 
@@ -50,10 +44,13 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
                        "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
                        "Receiver", "TouchSensor"]
 
+# All data inputs read from the webot robot
 robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": []}
 
+# All outputs read from webot robot
 robot_actuators = {"motor": [], "servo": [], "LED": []}
 
+# Total number of devices on webot robot
 num_devices = robot.getNumberOfDevices()
 
 
@@ -68,33 +65,25 @@ def action(obtained_data):
     capabilities: dictionary.
     """
 
-
-    #print(f"robot_actuators - {robot_actuators}")
-
-
+    # Splits obtained_data into motor types
     recieve_motor_data = actuators.get_motor_data(obtained_data)
     recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
-    # print(f"recieve_motor_data- {recieve_motor_data}")
-    # print(f"recieve_servo_data- {recieve_servo_data}")
-    # print(f"recieve_servo_position_data- {recieve_servo_position_data}")
-
-
+    #Will fully move the servo to the recieved position
     if recieve_servo_position_data:
         for device_num in recieve_servo_position_data:
             robot_actuators["servo"][device_num].setPosition(recieve_servo_position_data[device_num])
 
+    #Will increment the servo by recieved amount
     if recieve_servo_data:
         for device_num in recieve_servo_data:  # example output: {0: 100, 2: 100}
             robot_actuators["servo"][device_num].setPosition(recieve_servo_data[device_num])
 
+    #Will set motor velocity by recieved amount
     if recieve_motor_data:
         for device_num in recieve_motor_data:
             robot_actuators["motor"][device_num].setVelocity(recieve_motor_data[device_num])
-
-
-
 
 
 # returns the data of given sensor

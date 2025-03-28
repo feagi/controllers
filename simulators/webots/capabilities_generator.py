@@ -103,7 +103,15 @@ def make_capabilities(sensors, actuators):
         if len(device_list) > 0:
             data["capabilities"]["output"][device_type] = {}
 
-            if device_type == "motor":
+            if device_type == "led":
+                for num, device in enumerate(device_list):
+                    data["capabilities"]["output"][device_type][str(num)] = {
+                        "custom_name": device.getName(),
+                        "disabled": False,
+                        "feagi_index": num,
+                    }
+
+            elif device_type == "motor":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["output"][device_type][str(num)] = {
                         "custom_name": device.getName(),
