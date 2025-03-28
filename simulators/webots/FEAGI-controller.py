@@ -101,7 +101,7 @@ def action(obtained_data):
 def get_sensor_data(sensor):
     if type(sensor).__name__ == "TouchSensor":
         if sensor.getType() in (0, 1):  # bumper and force touch sensors
-            return sensor.getValue()
+            return [sensor.getValue(), 0, 0] # getValue only returns info about the x direction
         else:  # force-3d touch sensor
             return sensor.getValues()
 
