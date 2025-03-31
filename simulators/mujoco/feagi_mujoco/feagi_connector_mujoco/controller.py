@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Copyright 2016-present Neuraville Inc. All Rights Reserved.
+Copyright 2016-2025 Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 """
-
+import json
 import os
 import sys
 import time
@@ -111,7 +111,7 @@ def check_the_flag():
 
     sys.argv = [sys.argv[0]] + cleaned_args
 
-    return model, xml_info
+    return model, xml_info, files
 
 
 def start(path):
@@ -124,7 +124,7 @@ def main(path):
                     "feagi_network": None}
 
     # Step 3: Load the MuJoCo model
-    model, xml_actuators_type = check_the_flag()
+    model, xml_actuators_type, files = check_the_flag()
     previous_frame_data = {}
     rgb = {}
     rgb['camera'] = {}
@@ -151,6 +151,8 @@ def main(path):
     capabilities = mj_lib.generate_capabilities_based_of_xml(sensor_information,
                                                              actuator_information,
                                                              capabilities)
+    print(mj_lib.mujoco_tree_config(files,actuator_information, sensor_information))
+
 
     # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
@@ -169,6 +171,10 @@ def main(path):
             force_list[str(x)] = [0, 0, 0]
 
     sensor_slice_size = mj_lib.read_all_sensors_to_identify_type(model)
+    mujoco_list = []
+    mujoco_list = mj_lib.mujoco_config_parser('output', actuator_information,mujoco_list)
+    mujoco_list = mj_lib.mujoco_config_parser('input', sensor_information, mujoco_list)
+    # print(mujoco_list)
 
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_resetDataKeyframe(model, data, 4)

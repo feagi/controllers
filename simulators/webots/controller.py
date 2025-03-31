@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Copyright 2016-2025 Neuraville Inc. All Rights Reserved.
+Copyright 2016-present Neuraville Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ limitations under the License.
 
 import threading
 from time import sleep
+from controller import Robot
 from feagi_connector import sensors
 from feagi_connector import actuators
 from feagi_connector import retina as retina
@@ -29,6 +30,22 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
+# create the Robot instance.
+robot = Robot()
+
+# get the time step of the current world.
+timestep = int(robot.getBasicTimeStep())
+
+#all possible types of sensors           
+all_sensors = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "GPS", "Gyro", 
+            "InertialUnit", "Lidar", "LightSensor", "PositionSensor", "Radar", "RangeFinder",
+            "Receiver", "TouchSensor"]
+
+#arrays to store the robots sensors and actuators
+robot_sensors = []
+robot_actuators = []
+
+num_devices = robot.getNumberOfDevices()
 
 def action(obtained_data, capabilities):
     """
@@ -40,22 +57,45 @@ def action(obtained_data, capabilities):
     obtained_data: dictionary.
     capabilities: dictionary.
     """
-    recieve_motor_data = actuators.get_motor_data(obtained_data)
-    recieve_servo_data = actuators.get_servo_data(obtained_data)
+    #recieve_motor_data = actuators.get_motor_data(obtained_data)
+    #recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
     if recieve_servo_position_data:
+        #actuators.setPosition(obtained_data)
         pass # output like {0:0.50, 1:0.20, 2:0.30} # example but the data comes from your capabilities' servo range
 
-    if recieve_servo_data:
-        pass  # example output: {0: 0.245, 2: 1.0}
 
-    if recieve_motor_data: # example output: {0: 0.245, 2: 1.0}
-        pass
+#returns the data of given sensor
+def get_sensor_data(sensor):
+    if type(sensor).__name__ == "TouchSensor":
+        if sensor.getType() in ("WB_TOUCH_SENSOR_BUMPER", "WB_TOUCH_SENSOR_FORCE"):
+            return sensor.getValue()
+        else:
+            return sensor.getValues()
+    elif type(sensor).__name__ in ("DistanceSensor", "LightSensor", "PositionSensor"):
+        return sensor.getValue()
+    elif type(sensor).__name__ in ("Accelerometer", "Compass", "GPS", "Gyro"):
+        return sensor.getValues()
+    elif type(sensor).__name__ == "Camera":
+        return sensor.getImageArray()
+    elif type(sensor).__name__ == "InertialUnit":
+        return sensor.getRollPitchYaw()
+    elif type(sensor).__name__ == "Lidar":
+        return sensor.getRangeImageArray()
+    elif type(sensor).__name__ == "Radar":
+        return sensor.getTargets()
+    elif type(sensor).__name__ == "RangeFinder":
+        return sensor.getRangeImageArray()
+    elif type(sensor).__name__ == "Receiver":
+        if sensor.getQueueLength() != 0:
+            return sensor.getBytes()
+    
 
 
 
 if __name__ == "__main__":
+
     # Generate runtime dictionary
     runtime_data = {"vision": [], "stimulation_period": None, "feagi_state": None,
                     "feagi_network": None}
@@ -86,29 +126,37 @@ if __name__ == "__main__":
     # the rest of controller runtime.
     default_capabilities = pns.create_runtime_default_list(default_capabilities, capabilities)
 
-    # This is for processing the data and updating in real-time based on the user's activity in BV,
-    # such as cortical size, blink, reload genome, and other backend tasks.
-    if "camera" in capabilities['input']:
-        threading.Thread(target=retina.vision_progress,
-                         args=(default_capabilities, feagi_settings, camera_data['vision'],),
-                         daemon=True).start()
+    
+    threading.Thread(target=retina.vision_progress,
+                     args=(default_capabilities,feagi_settings, camera_data), daemon=True).start()
 
+
+    #put devices into correct arrays and enable sensors
+    for i in range(num_devices):
+        device = robot.getDeviceByIndex(i)
+        device_name = device.getName()
+                
+        #append to the correct list
+        if type(device).__name__ in all_sensors:
+            device.enable(timestep)
+            robot_sensors.append(device)
+        else:
+            robot_actuators.append(device)
+    
     while True:
         # The controller will grab the data from FEAGI in real-time
         message_from_feagi = pns.message_from_feagi
         if message_from_feagi: # Verify if the feagi data is not empty
             # Translate from feagi data to human readable data
-            obtained_signals = pns.obtain_opu_data(message_from_feagi)
-            action(obtained_signals, capabilities)
-
-        # Example to send data to FEAGI. This is basically reading the joint. R
-        message_to_feagi = sensors.create_data_for_feagi('servo_position', capabilities, message_to_feagi,
-                                                         current_data=joint_read, symmetric=True)
-        # Sends to feagi data
-        pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-
-        # Clear data that is created by controller such as sensors
-        message_to_feagi.clear()
-
+            obtained_signals = pns.obtain_opu_data(message_from_feagi) # This is getting data from FEAGI
+            action(obtained_signals, capabilities) # THis is for actuator
+            gyro_data = {'0': robot_sensors[17].getValues()} # An example. Hardcoded. We should do this better way
+            message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, current_data=gyro_data, symmetric=True, measure_enable=True)
+            
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            message_to_feagi.clear()
+            
+    
         # cool down everytime
         sleep(feagi_settings['feagi_burst_speed'])
+        robot.step(timestep)
