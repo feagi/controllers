@@ -144,6 +144,42 @@ def nest(found_elements, json_list):
                     json_parent['children'].append(json_child)
                     json_list.remove(json_child)    
 
+# Description : Locates any topic definitions in the sdf file
+# INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings
+# Output on success : updates "topic_definitions" to contain mappings from
+#                             "joint_name" : "topic_name"
+# Output on fail : "topic_definitions" is left empty
+def find_topics(fp, topic_definitions):
+    try:
+        with open(fp, 'r') as f:
+            sdf_content = f.read()
+
+        # Ensure the namespace is defined
+        if 'xmlns:gz' not in sdf_content:
+            sdf_content = sdf_content.replace(
+                '<sdf',
+                '<sdf xmlns:gz="http://gazebosim.org/schema"',
+                1
+            )
+
+        # Parse XML
+        root = ET.fromstring(sdf_content)
+        
+        # Find all <plugin> elements
+        for plugin in root.findall(".//plugin"):
+
+            topic_element = plugin.find("topic")
+            joint_element = plugin.find("joint_name")
+
+            if topic_element is not None and topic_element.text:
+                if joint_element is not None and joint_element.text:
+                    topic_definitions[joint_element.text.strip()] = topic_element.text.strip()
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    
+
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
@@ -152,7 +188,6 @@ def create_json(found_elements, json_list):
     index_number = 0
     # Loop through each found element from the SDF
     for elements in found_elements:
-        
         # Create Vars for Sensor element
         if elements.get('type') in g_config['sensor']: # sensor
             # custom_name = elements.get('name')
@@ -247,12 +282,16 @@ def main():
     # Will store all found elements
     found_elements = []
 
+    # Stores mappings from joint names -> topics
+    topic_definitions = {}
+
     num_args = len(sys.argv) - 1
 
     if num_args == 1:
-        print(sys.argv[1] + '\n')
+        print('Parsing : ' + sys.argv[1])
         open_files('gazebo_config_template.json', 'feagi_config_template.json', sys.argv[1], found_elements)
     elif num_args == 3:
+        print('Parsing : ' + sys.argv[1])
         open_files(sys.argv[2], sys.argv[3], sys.argv[1], found_elements)
     else :
         print("Incorrect command usage, please use either :\npython config_parser.py <target.sdf> <gazebo_config.json> <feagi_config.json>\npython config_parser.py <target.sdf>")
@@ -261,6 +300,11 @@ def main():
     json_list = []
 
     file = open("model_config_tree.json", "w")
+
+    # Finds all topic definitions, necessary for correct naming
+    find_topics(sys.argv[1], topic_definitions)
+    print("Definitions found : ", topic_definitions)
+
 
     # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
