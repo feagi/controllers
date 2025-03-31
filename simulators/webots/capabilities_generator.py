@@ -15,7 +15,7 @@ def calculate_increment(min_value, max_value):
     return increment
 
 
-def make_capabilities(sensors, actuators):
+def make_capabilities(sensors, actuators, robot):
     data = {
         "capabilities": {
             "input": {},
@@ -73,6 +73,18 @@ def make_capabilities(sensors, actuators):
                         "max_value": 0,
                         "min_value": 0
                     }
+                    name = device.getName()
+                    if "_sensor" in name:
+                        name = name.replace("_sensor", "")
+                    actuator_device = robot.getDevice(name)
+                    max = actuator_device.getMaxPosition()
+                    min = actuator_device.getMinPosition()
+                    if max != 0.0 and min != 0.0:
+                        data["capabilities"]["input"][device_type][str(num)].update({
+                            "max_power": calculate_increment(min,max),
+                            "max_value": max,
+                            "min_value": min,
+                        })
 
             elif device_type == "proximity":
                 for num, device in enumerate(device_list):
