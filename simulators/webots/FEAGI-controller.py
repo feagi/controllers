@@ -110,7 +110,11 @@ def get_sensor_data(sensor):
         return sensor.getRangeImageArray()
 
     elif type(sensor).__name__ == "Radar":
-        return sensor.getTargets()
+        data = sensor.getTargets()
+        if data:
+            return data[0].distance
+        else:
+            return data
 
     elif type(sensor).__name__ == "RangeFinder":
         return sensor.getRangeImageArray()
@@ -134,8 +138,10 @@ def sort_devices():
             # elif device_type == "Camera":
             #     robot_sensors["camera"].append(dev)
 
-            # elif device_type == "Compass":
-            #     robot_sensors["compass"].append(dev)
+            elif device_type == "Compass":
+                if "compass" not in robot_sensors:
+                    robot_sensors['compass'] = []
+                robot_sensors["compass"].append(dev)
 
             elif device_type == "DistanceSensor":
                 robot_sensors["proximity"].append(dev)
@@ -155,8 +161,8 @@ def sort_devices():
             elif device_type == "PositionSensor":
                 robot_sensors["servo_position"].append(dev)
 
-            # elif device_type == "Radar":
-            #     robot_sensors["radar"].append(dev)
+            elif device_type == "Radar":
+                robot_sensors["proximity"].append(dev)
 
             # elif device_type == "RangeFinder":
             #     robot_sensors["range_finder"].append(dev)
@@ -214,83 +220,6 @@ def sort_devices():
 
     for device_type, device_list in robot_actuators.items():
         device_list.sort(key=lambda device: device.getName())
-
-
-
-
-
-
-
-
-# move the motors to make the robot spin
-def pioneer2_wheel_movements():
-    # gets the motors
-    left_wheel = robot.getDevice("left wheel motor")
-    right_wheel = robot.getDevice("right wheel motor")
-
-    print("Pre-move sensors")
-    # print_all_ds()
-    print()
-
-    # sets velocities opposite eachother, moves and then stops
-    left_wheel.setVelocity(-3)
-    right_wheel.setVelocity(3)
-    robot.step(10 * timestep)
-    left_wheel.setVelocity(0)
-    right_wheel.setVelocity(0)
-
-    print("Post-move sensors")
-    # print_all_ds()
-    print("\n")
-
-    # 3 seconds
-    robot.step(3000)
-
-
-def pr2_move_arm(arm, positions):
-    """
-    Move the PR2 arm to a specified position.
-    :param arm: "left" or "right"
-    :param positions: Dict with joint angles {joint_name: angle}
-    """
-    """
-    Here is an example of how to call this function:
-    move_arm("right", {
-        "shoulder_pan": 0.0,
-        "shoulder_lift": 0.5,
-        "upper_arm_roll": 0.0,
-        "elbow_lift": -0.5,
-        "wrist_roll": 0.0
-    })
-    """
-    # Get PR2 motors for the right arm
-    right_arm_motors = {
-        "shoulder_pan": robot.getDevice("r_shoulder_pan_joint"),
-        "shoulder_lift": robot.getDevice("r_shoulder_lift_joint"),
-        "upper_arm_roll": robot.getDevice("r_upper_arm_roll_joint"),
-        "elbow_lift": robot.getDevice("r_elbow_flex_joint"),
-        "wrist_roll": robot.getDevice("r_wrist_roll_joint")
-    }
-    # Get PR2 motors for the left arm
-    left_arm_motors = {
-        "shoulder_pan": robot.getDevice("l_shoulder_pan_joint"),
-        "shoulder_lift": robot.getDevice("l_shoulder_lift_joint"),
-        "upper_arm_roll": robot.getDevice("l_upper_arm_roll_joint"),
-        "elbow_lift": robot.getDevice("l_elbow_flex_joint"),
-        "wrist_roll": robot.getDevice("l_wrist_roll_joint")
-    }
-    if arm == "right":
-        motors = right_arm_motors
-    elif arm == "left":
-        motors = left_arm_motors
-    else:
-        print("Invalid arm name. Use 'left' or 'right'.")
-        return
-    for joint, angle in positions.items():
-        if joint in motors:
-            motors[joint].setPosition(angle)
-        else:
-            print(f"Invalid joint name: {joint}")
 
 
 if __name__ == "__main__":
