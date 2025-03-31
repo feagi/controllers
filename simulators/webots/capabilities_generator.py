@@ -36,7 +36,15 @@ def make_capabilities(sensors, actuators):
                         "max_value": [0, 0, 0],
                         "min_value": [0, 0, 0]
                     }
-
+            elif device_type == "compass":
+                for num, device in enumerate(device_list):
+                    data["capabilities"]["input"][device_type][str(num)] = {
+                        "custom_name": device.getName(),
+                        "disabled": False,
+                        "feagi_index": num,
+                        "max_value": [1, 1, 1],
+                        "min_value": [-1, -1, -1]
+                    }
             elif device_type == "gyro":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["input"][device_type][str(num)] = {
@@ -46,7 +54,6 @@ def make_capabilities(sensors, actuators):
                         "max_value": [0, 0, 0],
                         "min_value": [0, 0, 0]
                     }
-
             elif device_type == "pressure":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["input"][device_type][str(num)] = {
