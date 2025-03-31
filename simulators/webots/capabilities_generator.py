@@ -95,6 +95,15 @@ def make_capabilities(sensors, actuators, robot):
                         "max_value": 0,
                         "min_value": 0
                     }
+            elif device_type == "lidar":
+                for num, device in enumerate(device_list):
+                    data["capabilities"]["input"][device_type][str(num)] = {
+                        "custom_name": device.getName(),
+                        "disabled": False,
+                        "feagi_index": 0,
+                        "max_value": 0,
+                        "min_value": 0
+                    }
 
             elif device_type == "camera":
                 for num, device in enumerate(device_list):
