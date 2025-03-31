@@ -19,6 +19,7 @@ limitations under the License.
 
 import json
 import math
+import traceback
 import threading
 from time import sleep
 from controller import Robot
@@ -45,7 +46,7 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
                        "Receiver", "TouchSensor"]
 
 # All data inputs read from the webot robot
-robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": []}
+robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": [], "lidar": []}
 
 # All outputs read from webot robot
 robot_actuators = {"motor": [], "servo": [], "LED": []}
@@ -124,6 +125,27 @@ def get_sensor_data(sensor):
             return sensor.getBytes()
 
 
+def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_data):
+    result = {'ilidar': {}}
+    total_array = []
+    counter = 0
+    length_based_off_cortical = int(len(full_lidar_data) / cortical_size)
+    for x in range(len(full_lidar_data)): # grab
+        if full_lidar_data[x] == float('inf'):
+            full_lidar_data[x] = max_data
+        if full_lidar_data[x] == float('-inf'):
+            full_lidar_data[x] = min_data
+        total_array.append(1 / full_lidar_data[x])
+        if len(total_array) == length_based_off_cortical:
+            name = (counter, 0, 0)
+            counter += 1
+            try:
+                result['ilidar'][name] = sum(total_array) // len(total_array)
+                total_array.clear()
+            except:
+                traceback.print_exc()
+    return result
+
 def sort_devices():
     devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
 
@@ -152,8 +174,8 @@ def sort_devices():
             elif device_type == "Gyro":
                 robot_sensors["gyro"].append(dev)
 
-            # elif device_type == "Lidar":
-            #     robot_sensors["lidar"].append(dev)
+            elif device_type == "Lidar":
+                robot_sensors["lidar"].append(dev)
 
             # elif device_type == "LightSensor":
             #     robot_sensors["light_sensor"].append(dev)
@@ -260,7 +282,7 @@ if __name__ == "__main__":
     sort_devices()
     robot.step(timestep)  # ensures that all sensors have had time to make a measurement, avoids null pointers
     # make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
-    make_capabilities(robot_sensors, robot_actuators)
+    make_capabilities(robot_sensors, robot_actuators, robot)
 
     # Main Loop
     while True:
@@ -283,13 +305,23 @@ if __name__ == "__main__":
 
 
         for sensor_name in data:
-            message_to_feagi = sensors.create_data_for_feagi(
-                                    sensor_name,
-                                    capabilities,
-                                    message_to_feagi,
-                                    current_data=data[sensor_name], 
-                                    symmetric=True, 
-                                    measure_enable=True)
+            if sensor_name == "lidar":
+                for index in data[sensor_name]:
+                    max_range = robot_sensors[sensor_name][int(index)].getMaxRange()
+                    min_range = robot_sensors[sensor_name][int(index)].getMinRange()
+                    new_data = convert_lidar_to_feagi_data(data[sensor_name][index][0], len(data[sensor_name][index][0]), max_range, min_range)
+                    message_to_feagi = sensors.add_generic_input_to_feagi_data(
+                        new_data,
+                        message_to_feagi)
+            else:
+                message_to_feagi = sensors.create_data_for_feagi(
+                                        sensor_name,
+                                        capabilities,
+                                        message_to_feagi,
+                                        current_data=data[sensor_name],
+                                        symmetric=True,
+                                        measure_enable=True)
+
 
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         message_to_feagi.clear()
