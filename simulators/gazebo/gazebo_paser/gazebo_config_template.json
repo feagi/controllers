@@ -9,6 +9,9 @@
 		"gpu_lidar": "proximity",
 		"battery_name": "battery"
     },
+	"plugin_output": {
+		"gz::sim::systems::DiffDrive": "motor"
+	},
 	"ignore_list": [
         "disabled",
         "type",
@@ -21,6 +24,7 @@
     "allow_list": [
 		"link",
 		"joint",
-		"sensor"
+		"sensor",
+		"plugin"
     ]
 }

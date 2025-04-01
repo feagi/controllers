@@ -113,7 +113,7 @@
         ]
     },
     {
-        "custom_name": "camera_camera",
+        "custom_name": "camera",
         "type": "input",
         "feagi device type": "camera",
         "properties": {
@@ -127,6 +127,18 @@
                 "Y offset percentage": 99
             },
             "feagi_index": 0
+        },
+        "description": "",
+        "children": []
+    },
+    {
+        "custom_name": "cmd_vel",
+        "type": "output",
+        "feagi device type": "motor",
+        "properties": {
+            "max_power": 0,
+            "rolling_window_len": 2,
+            "feagi_index": 6
         },
         "description": "",
         "children": []

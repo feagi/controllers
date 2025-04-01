@@ -167,13 +167,18 @@ def find_topics(fp, topic_definitions):
         
         # Find all <plugin> elements
         for plugin in root.findall(".//plugin"):
-
+            #print(plugin.get('name'))
             topic_element = plugin.find("topic")
+            # if topic_element is not None:
+            #     print(plugin.get('name'))
+            #     print(topic_element.text)
             joint_element = plugin.find("joint_name")
 
             if topic_element is not None and topic_element.text:
                 if joint_element is not None and joint_element.text:
                     topic_definitions[joint_element.text.strip()] = topic_element.text.strip()
+                else:
+                    topic_definitions[plugin.get('name')] = topic_element.text
 
     except Exception as e:
         print(f"Error: {e}")
@@ -188,69 +193,94 @@ def create_json(found_elements, json_list):
     index_number = 0
     # Loop through each found element from the SDF
     for elements in found_elements:
+
+        # Check to see if element is plugin, and if plugin is in gazebo mapping list
+        if elements.tag == 'plugin' and elements.get('name') not in g_config['plugin_output']:
+            found_elements.remove
+        else:
         # Create Vars for Sensor element
-        if elements.get('type') in g_config['sensor']: # sensor
-            # custom_name = elements.get('name')
-            type = 'input'
-            feagi_dev_type = g_config['sensor'][elements.get('type')]
+            if elements.get('type') in g_config['sensor']: # sensor
+                # custom_name = elements.get('name')
+                type = 'input'
+                feagi_dev_type = g_config['sensor'][elements.get('type')]
 
-        elif elements.get('type') in g_config['actuator']: # actuator
-        # Create Vars for Actuator element 
-            # custom_name = elements.get('name')
-            type = 'output'
-            feagi_dev_type = g_config['actuator'][elements.get('type')]
+            elif elements.get('type') in g_config['actuator']: # actuator
+            # Create Vars for Actuator element 
+                # custom_name = elements.get('name')
+                type = 'output'
+                feagi_dev_type = g_config['actuator'][elements.get('type')]
 
-        else: # link / body
-        # Create Vars for links / bodys
-            # custom_name = elements.get('name')
-            type = 'body'
-            feagi_dev_type = None
+            elif elements.get('name') in g_config['plugin_output']:
+                type = 'output'
+                feagi_dev_type = g_config['plugin_output'][elements.get('name')]
 
-        # setting up general structure
-        toadd = {'custom_name': elements.get('name'),
-                'type': type,
-                'description': "",
-                'children': []}
-        
-        # handle device type and parameters/properties if sensor or actuator
-        if feagi_dev_type is not None:
-            # retrieve all properties necessary for sensor / actuator
-            props = find_properties(feagi_dev_type, type)
-            props["feagi_index"] = index_number
-            # insert data into parameters/properties
-            # TYPES ARE: gyro, servo, proximity, camera
-            if feagi_dev_type == 'servo':
-                min = find_element_by_tag(elements, 'lower')
-                max = find_element_by_tag(elements, 'upper')
-                if min is not None:
-                    props["min_value"] = float(min.text)
-                if max is not None:
-                    props["max_value"] = float(max.text)
-            elif feagi_dev_type == 'gyro':
-                pass
-            elif feagi_dev_type == 'proximity':
-                min = find_element_by_tag(elements, 'min')
-                max = find_element_by_tag(elements, 'max')
-                if min is not None:
-                    props["min_value"] = float(min.text)
-                if max is not None:
-                    props["max_value"] = float(max.text)
-            elif feagi_dev_type == 'camera':
-                camera_name = find_element_by_tag(elements, 'topic')
-                if camera_name is not None:
-                    toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
+            else: # link / body
+            # Create Vars for links / bodys
+                # custom_name = elements.get('name')
+                type = 'body'
+                feagi_dev_type = None
+
+            # setting up general structure
+            # to see if current element is plugin
+            if elements.tag == 'plugin':
+                parsed_name = elements.get('name').replace("gz::sim::systems::", "")
+                topic_name = find_element_by_tag(elements, 'topic')
+                if topic_name is not None:
+                    toadd = {'custom_name': topic_name.text,
+                            'type': type,
+                            'description': "",
+                            'children': []}
+                else:
+                    toadd = {'custom_name': parsed_name,
+                            'type': type,
+                            'description': "",
+                            'children': []}
             else:
-                pass
+                toadd = {'custom_name': elements.get('name'),
+                        'type': type,
+                        'description': "",
+                        'children': []}
             
-            # add in extra lines to dict
-            temp = list(toadd.items())
-            temp.insert(2, ('feagi device type', feagi_dev_type ))
-            temp.insert(3, ('properties', props ))
-            toadd = dict(temp)
-            index_number += 1
+            # handle device type and parameters/properties if sensor or actuator
+            if feagi_dev_type is not None:
+                # retrieve all properties necessary for sensor / actuator
+                props = find_properties(feagi_dev_type, type)
+                props["feagi_index"] = index_number
+                # insert data into parameters/properties
+                # TYPES ARE: gyro, servo, proximity, camera
+                if feagi_dev_type == 'servo':
+                    min = find_element_by_tag(elements, 'lower')
+                    max = find_element_by_tag(elements, 'upper')
+                    if min is not None:
+                        props["min_value"] = float(min.text)
+                    if max is not None:
+                        props["max_value"] = float(max.text)
+                elif feagi_dev_type == 'gyro':
+                    pass
+                elif feagi_dev_type == 'proximity':
+                    min = find_element_by_tag(elements, 'min')
+                    max = find_element_by_tag(elements, 'max')
+                    if min is not None:
+                        props["min_value"] = float(min.text)
+                    if max is not None:
+                        props["max_value"] = float(max.text)
+                elif feagi_dev_type == 'camera':
+                    camera_name = find_element_by_tag(elements, 'topic')
+                    if camera_name is not None:
+                        # toadd["custom_name"] = elements.get('name') + "_" + camera_name.text
+                        toadd["custom_name"] = camera_name.text
+                else:
+                    pass
+                
+                # add in extra lines to dict
+                temp = list(toadd.items())
+                temp.insert(2, ('feagi device type', feagi_dev_type ))
+                temp.insert(3, ('properties', props ))
+                toadd = dict(temp)
+                index_number += 1
 
-        # add to json list that will be sent to file
-        json_list.append(toadd)
+            # add to json list that will be sent to file
+            json_list.append(toadd)
 
     return
 

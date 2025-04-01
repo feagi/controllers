@@ -27,7 +27,7 @@
 					"label": "rolling_window_len",
 					"description": "How many windows are needed to slow the motor to a stop.",
 					"type": "integer",
-					"default": 0
+					"default": 2
 				},
 				{
 					"label": "feagi_index",
