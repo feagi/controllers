@@ -1,143 +1,66 @@
 [
     {
-        "custom_name": "chassis",
+        "custom_name": "base_link",
         "type": "body",
         "description": "",
         "children": [
             {
-                "custom_name": "M2",
-                "type": "output",
-                "feagi device type": "motor",
-                "properties": {
-                    "max_value": 1.79769e+308,
-                    "min_value": -1.79769e+308,
-                    "max_power": 999999999,
-                    "feagi_index": 6,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "rear_left_wheel",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "M3",
-                "type": "output",
-                "feagi device type": "motor",
-                "properties": {
-                    "max_value": 1.79769e+308,
-                    "min_value": -1.79769e+308,
-                    "max_power": 999999999,
-                    "feagi_index": 7,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "rear_right_wheel",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "M0",
-                "type": "output",
-                "feagi device type": "motor",
-                "properties": {
-                    "max_value": 1.79769e+308,
-                    "min_value": -1.79769e+308,
-                    "max_power": 999999999,
-                    "feagi_index": 8,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "front_left_wheel",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "M1",
-                "type": "output",
-                "feagi device type": "motor",
-                "properties": {
-                    "max_value": 1.79769e+308,
-                    "min_value": -1.79769e+308,
-                    "max_power": 999999999,
-                    "feagi_index": 9,
-                    "default_value": 0
-                },
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "front_right_wheel",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "S0",
+                "custom_name": "Center Pivot",
                 "type": "output",
                 "feagi device type": "servo",
                 "properties": {
-                    "max_value": 3.1,
-                    "min_value": 0.1,
-                    "max_power": 0.15,
-                    "feagi_index": 10,
+                    "max_value": 0.5236,
+                    "min_value": -0.5236,
+                    "max_power": 0.05236,
+                    "feagi_index": 1,
                     "default_value": 0
                 },
                 "description": "",
                 "children": [
                     {
-                        "custom_name": "head",
+                        "custom_name": "Rear_Rocker_Link",
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "custom_name": "S1",
+                                "custom_name": "left_rear_wheel",
                                 "type": "output",
-                                "feagi device type": "servo",
+                                "feagi device type": "motor",
                                 "properties": {
-                                    "max_value": 1.6,
-                                    "min_value": -0.2,
-                                    "max_power": 0.09,
-                                    "feagi_index": 11,
+                                    "max_value": 1e+16,
+                                    "min_value": -1e+16,
+                                    "max_power": 999999999,
+                                    "feagi_index": 3,
                                     "default_value": 0
                                 },
                                 "description": "",
                                 "children": [
                                     {
-                                        "custom_name": "head2",
+                                        "custom_name": "left_rear_wheel_link",
                                         "type": "body",
                                         "description": "",
-                                        "children": [
-                                            {
-                                                "custom_name": "ultrasonic",
-                                                "type": "body",
-                                                "description": "",
-                                                "children": [
-                                                    {
-                                                        "custom_name": "sensor",
-                                                        "type": "body",
-                                                        "description": "",
-                                                        "children": []
-                                                    }
-                                                ]
-                                            }
-                                        ]
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "custom_name": "right_rear_wheel",
+                                "type": "output",
+                                "feagi device type": "motor",
+                                "properties": {
+                                    "max_value": 1e+16,
+                                    "min_value": -1e+16,
+                                    "max_power": 999999999,
+                                    "feagi_index": 5,
+                                    "default_value": 0
+                                },
+                                "description": "",
+                                "children": [
+                                    {
+                                        "custom_name": "right_rear_wheel_link",
+                                        "type": "body",
+                                        "description": "",
+                                        "children": []
                                     }
                                 ]
                             }
@@ -146,178 +69,76 @@
                 ]
             },
             {
-                "custom_name": "rod1",
-                "type": "body",
+                "custom_name": "left_front_wheel",
+                "type": "output",
+                "feagi device type": "motor",
+                "properties": {
+                    "max_value": 1e+16,
+                    "min_value": -1e+16,
+                    "max_power": 999999999,
+                    "feagi_index": 2,
+                    "default_value": 0
+                },
                 "description": "",
                 "children": [
                     {
-                        "custom_name": "rod_one",
+                        "custom_name": "left_front_wheel_link",
                         "type": "body",
                         "description": "",
-                        "children": [
-                            {
-                                "custom_name": "board",
-                                "type": "body",
-                                "description": "",
-                                "children": [
-                                    {
-                                        "custom_name": "second_rod",
-                                        "type": "body",
-                                        "description": "",
-                                        "children": [
-                                            {
-                                                "custom_name": "IR_right",
-                                                "type": "body",
-                                                "description": "",
-                                                "children": [
-                                                    {
-                                                        "custom_name": "right_IR",
-                                                        "type": "body",
-                                                        "description": "",
-                                                        "children": []
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                "custom_name": "IR_left",
-                                                "type": "body",
-                                                "description": "",
-                                                "children": [
-                                                    {
-                                                        "custom_name": "left_IR",
-                                                        "type": "body",
-                                                        "description": "",
-                                                        "children": []
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                "custom_name": "IR_middle",
-                                                "type": "body",
-                                                "description": "",
-                                                "children": [
-                                                    {
-                                                        "custom_name": "middle_IR",
-                                                        "type": "body",
-                                                        "description": "",
-                                                        "children": []
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "right_front_wheel",
+                "type": "output",
+                "feagi device type": "motor",
+                "properties": {
+                    "max_value": 1e+16,
+                    "min_value": -1e+16,
+                    "max_power": 999999999,
+                    "feagi_index": 4,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "right_front_wheel_link",
+                        "type": "body",
+                        "description": "",
+                        "children": []
                     }
                 ]
             }
         ]
     },
     {
-        "custom_name": "imu",
+        "custom_name": "camera",
         "type": "input",
-        "feagi device type": "gyro",
+        "feagi device type": "camera",
         "properties": {
-            "min_value": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "max_value": [
-                0.0,
-                0.0,
-                0.0
-            ],
+            "index": "00",
+            "eccentricity_control": {
+                "X offset percentage": 1,
+                "Y offset percentage": 1
+            },
+            "modulation_control": {
+                "X offset percentage": 99,
+                "Y offset percentage": 99
+            },
             "feagi_index": 0
         },
         "description": "",
         "children": []
     },
     {
-        "custom_name": "gpu_lidar",
-        "type": "input",
-        "feagi device type": "lidar",
+        "custom_name": "cmd_vel",
+        "type": "output",
+        "feagi device type": "motor",
         "properties": {
-            "max_value": 4.0,
-            "min_value": 0.12,
-            "feagi_index": 1
-        },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "Camera0",
-        "type": "input",
-        "feagi device type": "camera",
-        "properties": {
-            "index": "00",
-            "eccentricity_control": {
-                "X offset percentage": 1,
-                "Y offset percentage": 1
-            },
-            "modulation_control": {
-                "X offset percentage": 99,
-                "Y offset percentage": 99
-            },
-            "feagi_index": 2
-        },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "IR0",
-        "type": "input",
-        "feagi device type": "camera",
-        "properties": {
-            "index": "00",
-            "eccentricity_control": {
-                "X offset percentage": 1,
-                "Y offset percentage": 1
-            },
-            "modulation_control": {
-                "X offset percentage": 99,
-                "Y offset percentage": 99
-            },
-            "feagi_index": 3
-        },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "IR2",
-        "type": "input",
-        "feagi device type": "camera",
-        "properties": {
-            "index": "00",
-            "eccentricity_control": {
-                "X offset percentage": 1,
-                "Y offset percentage": 1
-            },
-            "modulation_control": {
-                "X offset percentage": 99,
-                "Y offset percentage": 99
-            },
-            "feagi_index": 4
-        },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "IR1",
-        "type": "input",
-        "feagi device type": "camera",
-        "properties": {
-            "index": "00",
-            "eccentricity_control": {
-                "X offset percentage": 1,
-                "Y offset percentage": 1
-            },
-            "modulation_control": {
-                "X offset percentage": 99,
-                "Y offset percentage": 99
-            },
-            "feagi_index": 5
+            "max_power": 0,
+            "rolling_window_len": 2,
+            "feagi_index": 6
         },
         "description": "",
         "children": []

@@ -12,6 +12,9 @@
 	"plugin_output": {
 		"gz::sim::systems::DiffDrive": "motor"
 	},
+	"plugin_input": {
+
+	},
 	"ignore_list": [
         "disabled",
         "type",

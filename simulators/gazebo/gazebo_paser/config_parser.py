@@ -224,6 +224,10 @@ def create_json(found_elements, json_list):
                 type = 'output'
                 feagi_dev_type = g_config['plugin_output'][elements.get('name')]
 
+            elif elements.get('name') in g_config['plugin_input']:
+                type = 'input'
+                feagi_dev_type = g_config['plugin_input'][elements.get('name')]
+
             else: # link / body
             # Create Vars for links / bodys
                 # custom_name = elements.get('name')
