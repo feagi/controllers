@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+import math
 from lxml import etree as ET
 
 # CMD LINE USAGE :
@@ -255,6 +256,21 @@ def create_json(found_elements, json_list):
                         props["min_value"] = float(min.text)
                     if max is not None:
                         props["max_value"] = float(max.text)
+                    # calculate max power
+                    range_value = abs(float(max.text) - float(min.text))
+                    target_steps = 30  # Aim for about 30 steps
+                    magnitude = int(math.log10(range_value))
+                    increment = pow(10, magnitude) / 10
+                    if range_value / increment > target_steps * 2:
+                        increment *= 5
+                    elif range_value / increment > target_steps:
+                        increment *= 2
+                    elif range_value / increment < target_steps / 2:
+                        increment /= 2
+                    props["max_power"] = increment
+                    if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
+                        feagi_dev_type = 'motor'
+
                 elif feagi_dev_type == 'gyro':
                     pass
                 elif feagi_dev_type == 'proximity':
