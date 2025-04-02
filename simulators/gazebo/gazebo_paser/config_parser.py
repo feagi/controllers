@@ -168,11 +168,8 @@ def find_topics(fp, topic_definitions):
         
         # Find all <plugin> elements
         for plugin in root.findall(".//plugin"):
-            #print(plugin.get('name'))
+
             topic_element = plugin.find("topic")
-            # if topic_element is not None:
-            #     print(plugin.get('name'))
-            #     print(topic_element.text)
             joint_element = plugin.find("joint_name")
 
             if topic_element is not None and topic_element.text:
@@ -185,6 +182,18 @@ def find_topics(fp, topic_definitions):
         print(f"Error: {e}")
         return []
     
+# Description : Renames elements in the json list to the topic names
+# INPUT : List of elements, current json list, list of topic names
+# Output on success : Updates the custom name of the json list elements to be the topic name
+# Output on fail : None
+def rename_elements(found_elements, json_list, topic_definitions):
+    for elements in found_elements:
+        element_to_rename = find_json_element(json_list, elements.get('name'))
+
+        if element_to_rename is not None:
+            if element_to_rename['custom_name'] in topic_definitions:
+                element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+    return
 
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
@@ -222,7 +231,7 @@ def create_json(found_elements, json_list):
                 feagi_dev_type = None
 
             # setting up general structure
-            # to see if current element is plugin
+            # Check to see if current element is plugin
             if elements.tag == 'plugin':
                 parsed_name = elements.get('name').replace("gz::sim::systems::", "")
                 topic_name = find_element_by_tag(elements, 'topic')
@@ -360,6 +369,8 @@ def main():
 
     # Nests the children found in created Json structure
     nest(found_elements, json_list)
+
+    rename_elements(found_elements, json_list, topic_definitions)
 
     json.dump(json_list, file, indent=4)
     file.close()

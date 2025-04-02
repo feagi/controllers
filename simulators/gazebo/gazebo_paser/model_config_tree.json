@@ -5,7 +5,7 @@
         "description": "",
         "children": [
             {
-                "custom_name": "rear_left_wheel_joint",
+                "custom_name": "M2",
                 "type": "output",
                 "feagi device type": "motor",
                 "properties": {
@@ -26,7 +26,7 @@
                 ]
             },
             {
-                "custom_name": "rear_right_wheel_joint",
+                "custom_name": "M3",
                 "type": "output",
                 "feagi device type": "motor",
                 "properties": {
@@ -47,7 +47,7 @@
                 ]
             },
             {
-                "custom_name": "front_left_wheel_joint",
+                "custom_name": "M0",
                 "type": "output",
                 "feagi device type": "motor",
                 "properties": {
@@ -68,7 +68,7 @@
                 ]
             },
             {
-                "custom_name": "front_right_wheel_joint",
+                "custom_name": "M1",
                 "type": "output",
                 "feagi device type": "motor",
                 "properties": {
@@ -89,7 +89,7 @@
                 ]
             },
             {
-                "custom_name": "head_attach",
+                "custom_name": "S0",
                 "type": "output",
                 "feagi device type": "servo",
                 "properties": {
@@ -107,7 +107,7 @@
                         "description": "",
                         "children": [
                             {
-                                "custom_name": "head_attach2",
+                                "custom_name": "S1",
                                 "type": "output",
                                 "feagi device type": "servo",
                                 "properties": {
