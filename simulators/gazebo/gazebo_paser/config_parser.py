@@ -285,7 +285,7 @@ def create_json(found_elements, json_list):
 
                 elif feagi_dev_type == 'gyro':
                     pass
-                elif feagi_dev_type == 'proximity':
+                elif feagi_dev_type == 'lidar':
                     min = find_element_by_tag(elements, 'min')
                     max = find_element_by_tag(elements, 'max')
                     if min is not None:

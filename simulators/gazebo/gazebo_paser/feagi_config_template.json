@@ -416,6 +416,41 @@
 				}
 			]
 		},
+		"lidar": {
+			"label": "Lidar sensor",
+			"description": "",
+			"parameters": [
+				{
+					"label": "custom_name",
+					"description": "User defined name for the device.",
+					"type": "string"
+				},
+				{
+					"label": "disabled",
+					"description": "Disables the device when true.",
+					"type": "boolean",
+					"default": false
+				},
+				{
+					"label": "max_value",
+					"description": "A maximum number to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "min_value",
+					"description": "A minimum number to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "feagi_index",
+					"description": "An index to place",
+					"type": "integer",
+					"default": 0
+				}
+			]
+		},
 		"accelerometer": {
 			"label": "Accelerometer Sensor",
 			"description": "",

@@ -6,7 +6,7 @@
 		"rgbd_camera": "camera",
 		"camera": "camera",
 		"imu": "gyro",
-		"gpu_lidar": "proximity",
+		"gpu_lidar": "lidar",
 		"battery_name": "battery"
     },
 	"plugin_output": {
