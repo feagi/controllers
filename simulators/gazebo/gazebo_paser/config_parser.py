@@ -202,6 +202,7 @@ def rename_elements(found_elements, json_list, topic_definitions):
 def create_json(found_elements, json_list):
     output_index_num = 0
     input_index_num = 0
+    index_mapping = {}
 
     # Loop through each found element from the SDF
     for elements in found_elements:
@@ -262,10 +263,16 @@ def create_json(found_elements, json_list):
                 # retrieve all properties necessary for sensor / actuator
                 props = find_properties(feagi_dev_type, type)
 
-                if type == 'input':
-                    props["feagi_index"] = input_index_num
+                if feagi_dev_type in index_mapping:
+                    print(feagi_dev_type + " found in index_mapping with value : " + str(index_mapping[feagi_dev_type]))
+                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
+                    index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
                 else:
-                    props["feagi_index"] = output_index_num
+                    print("First time encountering a : " + feagi_dev_type + " set to 0")
+                    index_mapping[feagi_dev_type] = 0
+                    props["feagi_index"] = 0
+
+
 
                 # insert data into parameters/properties
                 # TYPES ARE: gyro, servo, proximity, camera
