@@ -261,15 +261,6 @@ def create_json(found_elements, json_list):
                 # retrieve all properties necessary for sensor / actuator
                 props = find_properties(feagi_dev_type, type)
 
-                if feagi_dev_type in index_mapping:
-                    index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
-                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
-                else:
-                    index_mapping[feagi_dev_type] = 0
-                    props["feagi_index"] = 0
-
-
-
                 # insert data into parameters/properties
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
@@ -314,7 +305,14 @@ def create_json(found_elements, json_list):
                         toadd["custom_name"] = camera_name.text
                 else:
                     pass
-                
+
+                if feagi_dev_type in index_mapping:
+                    index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
+                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
+                else:
+                    index_mapping[feagi_dev_type] = 0
+                    props["feagi_index"] = 0
+                    
                 # add in extra lines to dict
                 temp = list(toadd.items())
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
