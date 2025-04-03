@@ -200,8 +200,6 @@ def rename_elements(found_elements, json_list, topic_definitions):
 # Output on success : Final nested JSON file
 # Output on fail : None
 def create_json(found_elements, json_list):
-    output_index_num = 0
-    input_index_num = 0
     index_mapping = {}
 
     # Loop through each found element from the SDF
@@ -324,11 +322,6 @@ def create_json(found_elements, json_list):
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
                 temp.insert(3, ('properties', props ))
                 toadd = dict(temp)
-
-                if type == 'input':
-                    input_index_num += 1
-                else:
-                    output_index_num += 1
 
             # add to json list that will be sent to file
             json_list.append(toadd)
