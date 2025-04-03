@@ -293,6 +293,7 @@ def create_json(found_elements, json_list):
                     props["max_power"] = increment
                     if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
                         feagi_dev_type = 'motor'
+                        props["rolling_window_len"] = 2
 
                 elif feagi_dev_type == 'gyro':
                     pass
