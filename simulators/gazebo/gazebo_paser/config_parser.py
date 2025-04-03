@@ -262,11 +262,9 @@ def create_json(found_elements, json_list):
                 props = find_properties(feagi_dev_type, type)
 
                 if feagi_dev_type in index_mapping:
-                    print(feagi_dev_type + " found in index_mapping with value : " + str(index_mapping[feagi_dev_type]))
-                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
                     index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
+                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
                 else:
-                    print("First time encountering a : " + feagi_dev_type + " set to 0")
                     index_mapping[feagi_dev_type] = 0
                     props["feagi_index"] = 0
 
