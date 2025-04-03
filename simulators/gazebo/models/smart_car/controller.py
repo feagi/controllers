@@ -90,7 +90,7 @@ def get_data_json(instance, sensor_name, initalize_data):
 
 
 def read_camera(raw_data_msg):
-    raw_data = copy.deepcopy(raw_data_msg['camera'])
+    raw_data = copy.deepcopy(raw_data_msg)
     msg = raw_data
     if len(msg) > 0:
         data = msg['data']
@@ -98,6 +98,9 @@ def read_camera(raw_data_msg):
         width = int(msg['height'])
         decoded_data = list(base64.b64decode(data))
         new_rgb = np.array(decoded_data, dtype=np.uint8)
+        if width * height * 4 == len(new_rgb):
+            bgr = new_rgb.reshape(width, height, 4)
+            return cv2.cvtColor(bgr, cv2.COLOR_RGBA2RGB)
         bgr = new_rgb.reshape(width, height, 3)
         return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     else:
@@ -212,8 +215,15 @@ if __name__ == '__main__':
     for instance in capabilities['input']:
         for index in capabilities['input'][instance]:
             print(capabilities['input'][instance][index]['custom_name'])
-            sensor_instance = initalize_sensor(capabilities['input'][instance][index]['custom_name'])
-            threading.Thread(target=get_data_json, args=(sensor_instance, capabilities['input'][instance][index]['custom_name'], [],), daemon=True).start()
+            if instance == "camera":
+                sensor_instance = initalize_sensor(capabilities['input'][instance][index]['custom_name'] + "/image")
+                threading.Thread(target=get_data_json, args=(sensor_instance, "/" + capabilities['input'][instance][index]['custom_name'] + "/image", [],), daemon=True).start()
+                sensor_instance = initalize_sensor(capabilities['input'][instance][index]['custom_name'])
+                threading.Thread(target=get_data_json, args=(sensor_instance, "/" + capabilities['input'][instance][index]['custom_name'], [],), daemon=True).start()
+                print("sensor_instance: ", sensor_instance)
+            else:
+                sensor_instance = initalize_sensor(capabilities['input'][instance][index]['custom_name'])
+                threading.Thread(target=get_data_json, args=(sensor_instance, capabilities['input'][instance][index]['custom_name'], [],), daemon=True).start()
         # print("instance: ", instance, " and custom name: ", capabilities['input'][instance])
         # threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
     threading.Thread(target=data_opu, args=(action, gazebo_actuator), daemon=True).start()
@@ -225,34 +235,36 @@ if __name__ == '__main__':
 
     print("Creating a new entity in Gazebo...")
     time.sleep(2)
-    create_entity()
+    # create_entity()
     while True:
         try:
-
-            print(raw_data_msg)
-
             # TEMPORARILY COMMENTED OUT
+            camera_index = 0
+            for sensor_data in raw_data_msg:
+                if 'pixelFormatType' in raw_data_msg[sensor_data]:
+                    camera_data['vision'][str(camera_index)] = read_camera(raw_data_msg[sensor_data])
+                    camera_index += 1
+            for data in camera_data['vision']:
+                if camera_data['vision']:
+                    raw_frame = copy.deepcopy(camera_data['vision'])
+                    # Post image into vision
+                    previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
+                        raw_frame,
+                        default_capabilities,
+                        previous_frame_data,
+                        rgb, capabilities)
+            # INSERT SENSORS INTO the FEAGI DATA SECTION BEGIN
+            message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
 
-            # if raw_data_msg['camera']:
-            #     raw_frame = read_camera(raw_data_msg)
-            #     # Post image into vision
-            #     previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
-            #         raw_frame,
-            #         default_capabilities,
-            #         previous_frame_data,
-            #         rgb, capabilities)
-            #     # INSERT SENSORS INTO the FEAGI DATA SECTION BEGIN
-            #     message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
-            #
             # # Add gyro data into feagi data
-            # data_from_gyro = raw_data_msg['gyro']
-            # if data_from_gyro:
-            #     gyro = {'0': [data_from_gyro['orientation']['x'],
-            #                   data_from_gyro['orientation']['y'],
-            #                   data_from_gyro['orientation']['z']]}
-            #     if gyro:
-            #         message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
-            #                                                          symmetric=True, measure_enable=True)
+            data_from_gyro = raw_data_msg['gyro']
+            if data_from_gyro:
+                gyro = {'0': [data_from_gyro['orientation']['x'],
+                              data_from_gyro['orientation']['y'],
+                              data_from_gyro['orientation']['z']]}
+                if gyro:
+                    message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
+                                                                     symmetric=True, measure_enable=True)
             # data_from_ultrasonic = raw_data_msg['ultrasonic']
             # if data_from_ultrasonic:
             #     if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
@@ -261,10 +273,10 @@ if __name__ == '__main__':
             #         data_from_ultrasonic['ranges'][0] = default_capabilities['input']['proximity']['0']['max_value']
             #     message_to_feagi = sensors.create_data_for_feagi('proximity', capabilities, message_to_feagi,
             #                                                      data_from_ultrasonic['ranges'][0], symmetric=True)
-            #
-            # # Sending data to FEAGI
-            # pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
-            # message_to_feagi.clear()
+
+            # Sending data to FEAGI
+            pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
+            message_to_feagi.clear()
             time.sleep(feagi_settings['feagi_burst_speed'])
 
         # Uncommented this out
