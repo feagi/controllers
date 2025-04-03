@@ -17,9 +17,11 @@ limitations under the License.
 ==============================================================================
 """
 
+import cv2
 import json
 import math
 import threading
+import numpy as np
 from time import sleep
 from controller import Robot
 from feagi_connector import sensors
@@ -46,6 +48,8 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
 
 # All data inputs read from the webot robot
 robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": []}
+
+testing_sensors = {"compass": []}
 
 # All outputs read from webot robot
 robot_actuators = {"motor": [], "servo": [], "LED": []}
@@ -86,7 +90,7 @@ def action(obtained_data):
             robot_actuators["motor"][device_num].setVelocity(recieve_motor_data[device_num])
 
 
-# returns the data of given sensor
+# Returns the data of given sensor
 def get_sensor_data(sensor):
     if type(sensor).__name__ == "TouchSensor":
         if sensor.getType() in (0, 1):  # bumper and force touch sensors
@@ -101,7 +105,30 @@ def get_sensor_data(sensor):
         return sensor.getValues()
 
     elif type(sensor).__name__ == "Camera":
-        return sensor.getImageArray()
+        # print(f"height ---- {sensor.getWidth()}")
+        # print(f"width ---- {sensor.getHeight()}")
+        # print(f"LENGTH ---- {len(sensor.getImage().tolist())}")
+    #           for (i = width / 3; i < 2 * width / 3; i++) {
+    #     for (j = height / 2; j < 3 * height / 4; j++) {
+    #       red += wb_camera_image_get_red(image, width, i, j);
+    #       blue += wb_camera_image_get_blue(image, width, i, j);
+    #       green += wb_camera_image_get_green(image, width, i, j);
+    #     }
+    #   }
+
+
+        image_string = sensor.getImage()
+        # image_width = sensor.getWidth()
+        # for x in sensor.getWidth():
+        #     for y in sensor.getHeight():
+        #         print(Camera.imageGetRed(image, image_width,))
+
+
+        # print(sensor.getImage())
+        uint8_array = np.frombuffer(image_string, dtype=np.uint8)
+
+
+        return uint8_array
 
     elif type(sensor).__name__ == "InertialUnit":
         return sensor.getRollPitchYaw()
@@ -119,7 +146,7 @@ def get_sensor_data(sensor):
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
 
-
+# Reads all devices on webots robot and sorts into its type list
 def sort_devices():
     devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
 
@@ -131,11 +158,11 @@ def sort_devices():
             if device_type in ("Accelerometer", "InertialUnit"):
                 robot_sensors["accelerometer"].append(dev)
 
-            # elif device_type == "Camera":
-            #     robot_sensors["camera"].append(dev)
+            elif device_type == "Camera":
+                robot_sensors["camera"].append(dev)
 
-            # elif device_type == "Compass":
-            #     robot_sensors["compass"].append(dev)
+            elif device_type == "Compass":
+                testing_sensors["compass"].append(dev)
 
             elif device_type == "DistanceSensor":
                 robot_sensors["proximity"].append(dev)
@@ -146,8 +173,14 @@ def sort_devices():
             elif device_type == "Gyro":
                 robot_sensors["gyro"].append(dev)
 
-            # elif device_type == "Lidar":
-            #     robot_sensors["lidar"].append(dev)
+            elif device_type == "Lidar":
+                dev.disable() #testiing
+                dev.enable(1000)
+                #robot_sensors["lidar"].append(dev)
+
+            elif device_type == "RangeFinder":
+                dev.disable() #testiing
+                dev.enable(1000)
 
             # elif device_type == "LightSensor":
             #     robot_sensors["light_sensor"].append(dev)
@@ -167,7 +200,7 @@ def sort_devices():
             elif device_type == "TouchSensor":
                 robot_sensors["pressure"].append(dev)
 
-        # if the device is a webots actuator
+        # Sorts robots actuators
         else:
             # if device_name == "Brake":
             #     robot_actuators["brake"].append(dev)
@@ -209,17 +242,13 @@ def sort_devices():
             # elif device_name == "Track":
             #     robot_actuators["track"].append(dev)
 
+
+    # Sorts lists by alphabetical order of its specific name
     for device_type, device_list in robot_sensors.items():
         device_list.sort(key=lambda device: device.getName())
 
     for device_type, device_list in robot_actuators.items():
         device_list.sort(key=lambda device: device.getName())
-
-
-
-
-
-
 
 
 # move the motors to make the robot spin
@@ -342,6 +371,25 @@ if __name__ == "__main__":
             obtained_signals = pns.obtain_opu_data(message_from_feagi)  # This is getting data from FEAGI
             # print("obtained_signals", obtained_signals)
             action(obtained_signals)  # THis is for actuator#
+
+
+
+        test_data = {}
+        for device_type, device_list in testing_sensors.items():
+            if testing_sensors[device_type]:
+                if device_type not in test_data:
+                    test_data[device_type] = {}
+                for num, dev in enumerate(device_list):
+                    test_data[device_type][str(num)] = get_sensor_data(dev)
+        
+        print(f"compass - {test_data}")
+
+
+
+
+
+
+
 
         # send sensor data to feagi
         data = {}
