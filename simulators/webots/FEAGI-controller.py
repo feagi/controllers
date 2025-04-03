@@ -118,7 +118,8 @@ def get_sensor_data(sensor):
 
 
         image_string = sensor.getImage()
-        # image_width = sensor.getWidth()
+        image_width = sensor.getWidth()
+        image_height = sensor.getHeight()
         # for x in sensor.getWidth():
         #     for y in sensor.getHeight():
         #         print(Camera.imageGetRed(image, image_width,))
@@ -126,7 +127,11 @@ def get_sensor_data(sensor):
 
         # print(sensor.getImage())
         uint8_array = np.frombuffer(image_string, dtype=np.uint8)
-
+        #put it in 4 channels but then delete alpha channel.
+        rgb_image = uint8_array.reshape((image_height, image_width, 4))[:, :, :3]
+        cv2.imshow("RGB Image", rgb_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
         return uint8_array
 
