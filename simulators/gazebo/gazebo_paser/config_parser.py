@@ -200,7 +200,9 @@ def rename_elements(found_elements, json_list, topic_definitions):
 # Output on success : Final nested JSON file
 # Output on fail : None
 def create_json(found_elements, json_list):
-    index_number = 0
+    output_index_num = 0
+    input_index_num = 0
+
     # Loop through each found element from the SDF
     for elements in found_elements:
 
@@ -259,7 +261,12 @@ def create_json(found_elements, json_list):
             if feagi_dev_type is not None:
                 # retrieve all properties necessary for sensor / actuator
                 props = find_properties(feagi_dev_type, type)
-                props["feagi_index"] = index_number
+
+                if type == 'input':
+                    props["feagi_index"] = input_index_num
+                else:
+                    props["feagi_index"] = output_index_num
+
                 # insert data into parameters/properties
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
@@ -309,7 +316,11 @@ def create_json(found_elements, json_list):
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
                 temp.insert(3, ('properties', props ))
                 toadd = dict(temp)
-                index_number += 1
+
+                if type == 'input':
+                    input_index_num += 1
+                else:
+                    output_index_num += 1
 
             # add to json list that will be sent to file
             json_list.append(toadd)
