@@ -21,7 +21,7 @@ rgb = dict()
 rgb['camera'] = dict()
 raw_data_msg = {}
 FEAGI.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
-gazebo_actuator = {'servo': {}, 'motor': {}}
+gazebo_actuator = {'servo': {}, 'motor': {}, 'motion_control': {}}
 
 
 def check_the_flag():
@@ -110,16 +110,18 @@ def read_camera(raw_data_msg):
 def monitor_motor_in_background(gazebo_actuator, feagi_settings):
     previous_state = {
         'servo': {},
-        'motor': {}
+        'motor': {},
+        'motion_control': {}
     }
 
     while True:
         changes_to_send = {
             'servo': [],
-            'motor': []
+            'motor': [],
+            'motion_control': []
         }
         # Check each actuator type (servo and motor)
-        for actuator_type in ['servo', 'motor']:
+        for actuator_type in ['servo', 'motor', 'motion_control']:
             current_values = gazebo_actuator[actuator_type]
             prev_values = previous_state[actuator_type]
 
@@ -136,9 +138,14 @@ def monitor_motor_in_background(gazebo_actuator, feagi_settings):
                 topic = f'/M{channel}'
                 send(topic, 'gz.msgs.Double', gazebo_actuator['motor'][channel])
 
+            for channel in changes_to_send['motion_control']:
+                topic = f'/{channel}'
+                send(topic, 'gz.msgs.Twist', gazebo_actuator['motion_control'][channel])
+
         previous_state = {
             'servo': gazebo_actuator['servo'].copy(),
-            'motor': gazebo_actuator['motor'].copy()
+            'motor': gazebo_actuator['motor'].copy(),
+            'motion_control': gazebo_actuator['motion_control'].copy(),
         }
         time.sleep(feagi_settings['feagi_burst_speed'])
 
@@ -160,6 +167,7 @@ def action(obtained_data, gazebo_actuator):
     recieve_motor_data = actuators.get_motor_data(obtained_data)
     recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
+    recieve_motion_data = actuators.get_motion_control_data(obtained_data)
 
     if recieve_servo_position_data:
         for servo_id in recieve_servo_position_data:
@@ -244,27 +252,31 @@ if __name__ == '__main__':
                 if 'pixelFormatType' in raw_data_msg[sensor_data]:
                     camera_data['vision'][str(camera_index)] = read_camera(raw_data_msg[sensor_data])
                     camera_index += 1
-            for data in camera_data['vision']:
-                if camera_data['vision']:
-                    raw_frame = copy.deepcopy(camera_data['vision'])
-                    # Post image into vision
-                    previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
-                        raw_frame,
-                        default_capabilities,
-                        previous_frame_data,
-                        rgb, capabilities)
+            for index in camera_data['vision']:
+                if len(camera_data['vision'][index]) > 0:
+                    for data in camera_data['vision']:
+                        if camera_data['vision']:
+                            raw_frame = copy.deepcopy(camera_data['vision'])
+                            # Post image into vision
+                            previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
+                                raw_frame,
+                                default_capabilities,
+                                previous_frame_data,
+                                rgb, capabilities)
+                    break # jump out
             # INSERT SENSORS INTO the FEAGI DATA SECTION BEGIN
             message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
 
             # # Add gyro data into feagi data
-            data_from_gyro = raw_data_msg['gyro']
-            if data_from_gyro:
-                gyro = {'0': [data_from_gyro['orientation']['x'],
-                              data_from_gyro['orientation']['y'],
-                              data_from_gyro['orientation']['z']]}
-                if gyro:
-                    message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
-                                                                     symmetric=True, measure_enable=True)
+            if 'gyro' in raw_data_msg:
+                data_from_gyro = raw_data_msg['gyro']
+                if data_from_gyro:
+                    gyro = {'0': [data_from_gyro['orientation']['x'],
+                                  data_from_gyro['orientation']['y'],
+                                  data_from_gyro['orientation']['z']]}
+                    if gyro:
+                        message_to_feagi = sensors.create_data_for_feagi('gyro', capabilities, message_to_feagi, gyro,
+                                                                         symmetric=True, measure_enable=True)
             # data_from_ultrasonic = raw_data_msg['ultrasonic']
             # if data_from_ultrasonic:
             #     if data_from_ultrasonic['ranges'][0] == '-Infinity':  # temp workaround
