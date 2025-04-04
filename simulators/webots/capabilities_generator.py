@@ -64,7 +64,7 @@ def make_capabilities(sensors, actuators, robot):
                         "min_value": [0, 0, 0]
                     }
 
-            elif device_type == "servo_position":
+            elif device_type == "position_sensor":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["input"][device_type][str(num)] = {
                         "custom_name": device.getName(),
@@ -73,12 +73,9 @@ def make_capabilities(sensors, actuators, robot):
                         "max_value": 0,
                         "min_value": 0
                     }
-                    name = device.getName()
-                    if "_sensor" in name:
-                        name = name.replace("_sensor", "")
-                    actuator_device = robot.getDevice(name)
-                    max = actuator_device.getMaxPosition()
-                    min = actuator_device.getMinPosition()
+                    parent_motor = device.getMotor()
+                    max = parent_motor.getMaxPosition()
+                    min = parent_motor.getMinPosition()
                     if max != 0.0 and min != 0.0:
                         data["capabilities"]["input"][device_type][str(num)].update({
                             "max_power": calculate_increment(min,max),
