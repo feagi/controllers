@@ -33,8 +33,8 @@ def make_capabilities(sensors, actuators, robot):
                         "custom_name": device.getName(),
                         "disabled": False,
                         "feagi_index": num,
-                        "max_value": [0, 0, 0],
-                        "min_value": [0, 0, 0]
+                        "max_value": [150, 150, 150], #technically inf
+                        "min_value": [-150, -150, -150]
                     }
             elif device_type == "compass":
                 for num, device in enumerate(device_list):
@@ -51,8 +51,8 @@ def make_capabilities(sensors, actuators, robot):
                         "custom_name": device.getName(),
                         "disabled": False,
                         "feagi_index": num,
-                        "max_value": [0, 0, 0],
-                        "min_value": [0, 0, 0]
+                        "max_value": [6, 6, 6], #technically inf
+                        "min_value": [-6, -6, -6]
                     }
             elif device_type == "pressure":
                 for num, device in enumerate(device_list):
