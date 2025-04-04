@@ -10,7 +10,7 @@
 		"battery_name": "battery"
     },
 	"plugin_output": {
-		"gz::sim::systems::DiffDrive": "motor"
+		"gz::sim::systems::DiffDrive": "motion_control"
 	},
 	"plugin_input": {
 

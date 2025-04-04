@@ -200,7 +200,8 @@ def rename_elements(found_elements, json_list, topic_definitions):
 # Output on success : Final nested JSON file
 # Output on fail : None
 def create_json(found_elements, json_list):
-    index_number = 0
+    index_mapping = {}
+
     # Loop through each found element from the SDF
     for elements in found_elements:
 
@@ -259,7 +260,7 @@ def create_json(found_elements, json_list):
             if feagi_dev_type is not None:
                 # retrieve all properties necessary for sensor / actuator
                 props = find_properties(feagi_dev_type, type)
-                props["feagi_index"] = index_number
+
                 # insert data into parameters/properties
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
@@ -286,6 +287,7 @@ def create_json(found_elements, json_list):
                     props["max_power"] = increment
                     if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
                         feagi_dev_type = 'motor'
+                        props["rolling_window_len"] = 2
 
                 elif feagi_dev_type == 'gyro':
                     pass
@@ -303,13 +305,19 @@ def create_json(found_elements, json_list):
                         toadd["custom_name"] = camera_name.text
                 else:
                     pass
-                
+
+                if feagi_dev_type in index_mapping:
+                    index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
+                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
+                else:
+                    index_mapping[feagi_dev_type] = 0
+                    props["feagi_index"] = 0
+                    
                 # add in extra lines to dict
                 temp = list(toadd.items())
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
                 temp.insert(3, ('properties', props ))
                 toadd = dict(temp)
-                index_number += 1
 
             # add to json list that will be sent to file
             json_list.append(toadd)
