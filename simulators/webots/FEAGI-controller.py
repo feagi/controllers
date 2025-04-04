@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 """
+import copy
 
 import cv2
 import json
@@ -36,6 +37,9 @@ from feagi_connector import feagi_interface as feagi
 # Global variable section
 camera_data = {"vision": []}  # This will be heavily relies for vision
 
+previous_frame_data = {}
+rgb = {'camera': {}}
+
 # create the Robot instance.
 robot = Robot()
 
@@ -48,7 +52,8 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
                        "Receiver", "TouchSensor"]
 
 # All data inputs read from the webot robot
-robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": [], "lidar": []}
+robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": [],
+                 "lidar": []}
 
 testing_sensors = {"compass": []}
 
@@ -75,17 +80,17 @@ def action(obtained_data):
     recieve_servo_data = actuators.get_servo_data(obtained_data)
     recieve_servo_position_data = actuators.get_servo_position_data(obtained_data)
 
-    #Will fully move the servo to the recieved position
+    # Will fully move the servo to the recieved position
     if recieve_servo_position_data:
         for device_num in recieve_servo_position_data:
             robot_actuators["servo"][device_num].setPosition(recieve_servo_position_data[device_num])
 
-    #Will increment the servo by recieved amount
+    # Will increment the servo by recieved amount
     if recieve_servo_data:
         for device_num in recieve_servo_data:  # example output: {0: 100, 2: 100}
             robot_actuators["servo"][device_num].setPosition(recieve_servo_data[device_num])
 
-    #Will set motor velocity by recieved amount
+    # Will set motor velocity by recieved amount
     if recieve_motor_data:
         for device_num in recieve_motor_data:
             robot_actuators["motor"][device_num].setVelocity(recieve_motor_data[device_num])
@@ -95,7 +100,7 @@ def action(obtained_data):
 def get_sensor_data(sensor):
     if type(sensor).__name__ == "TouchSensor":
         if sensor.getType() in (0, 1):  # bumper and force touch sensors
-            return [sensor.getValue(), 0, 0] # getValue only returns info about the x direction
+            return [sensor.getValue(), 0, 0]  # getValue only returns info about the x direction
         else:  # force-3d touch sensor
             return sensor.getValues()
 
@@ -106,35 +111,13 @@ def get_sensor_data(sensor):
         return sensor.getValues()
 
     elif type(sensor).__name__ == "Camera":
-        # print(f"height ---- {sensor.getWidth()}")
-        # print(f"width ---- {sensor.getHeight()}")
-        # print(f"LENGTH ---- {len(sensor.getImage().tolist())}")
-    #           for (i = width / 3; i < 2 * width / 3; i++) {
-    #     for (j = height / 2; j < 3 * height / 4; j++) {
-    #       red += wb_camera_image_get_red(image, width, i, j);
-    #       blue += wb_camera_image_get_blue(image, width, i, j);
-    #       green += wb_camera_image_get_green(image, width, i, j);
-    #     }
-    #   }
-
-
         image_string = sensor.getImage()
         image_width = sensor.getWidth()
         image_height = sensor.getHeight()
-        # for x in sensor.getWidth():
-        #     for y in sensor.getHeight():
-        #         print(Camera.imageGetRed(image, image_width,))
-
-
-        # print(sensor.getImage())
         uint8_array = np.frombuffer(image_string, dtype=np.uint8)
-        #put it in 4 channels but then delete alpha channel.
+        # put it in 4 channels but then delete alpha channel.
         rgb_image = uint8_array.reshape((image_height, image_width, 4))[:, :, :3]
-        cv2.imshow("RGB Image", rgb_image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        return uint8_array
+        return rgb_image
 
     elif type(sensor).__name__ == "InertialUnit":
         return sensor.getRollPitchYaw()
@@ -156,6 +139,7 @@ def get_sensor_data(sensor):
         if sensor.getQueueLength() != 0:
             return sensor.getBytes()
 
+
 # Reads all devices on webots robot and sorts into its type list
 
 def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_data):
@@ -163,7 +147,7 @@ def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_da
     total_array = []
     counter = 0
     length_based_off_cortical = int(len(full_lidar_data) / cortical_size)
-    for x in range(len(full_lidar_data)): # grab
+    for x in range(len(full_lidar_data)):  # grab
         if full_lidar_data[x] == float('inf'):
             full_lidar_data[x] = max_data
         if full_lidar_data[x] == float('-inf'):
@@ -178,6 +162,7 @@ def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_da
             except:
                 traceback.print_exc()
     return result
+
 
 def sort_devices():
     devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
@@ -248,7 +233,7 @@ def sort_devices():
             if device_type == "Motor":
                 if (dev.getMinPosition() == 0 and dev.getMaxPosition() == 0):
 
-                    #put into velocity mode
+                    # put into velocity mode
                     dev.setPosition(float("inf"))
 
                     robot_actuators["motor"].append(dev)
@@ -269,7 +254,6 @@ def sort_devices():
 
             # elif device_name == "Track":
             #     robot_actuators["track"].append(dev)
-
 
     # Sorts lists by alphabetical order of its specific name
     for device_type, device_list in robot_sensors.items():
@@ -329,8 +313,6 @@ if __name__ == "__main__":
             # print("obtained_signals", obtained_signals)
             action(obtained_signals)  # THis is for actuator#
 
-
-
         test_data = {}
         for device_type, device_list in testing_sensors.items():
             if testing_sensors[device_type]:
@@ -338,15 +320,6 @@ if __name__ == "__main__":
                     test_data[device_type] = {}
                 for num, dev in enumerate(device_list):
                     test_data[device_type][str(num)] = get_sensor_data(dev)
-        
-        #print(f"compass - {test_data}")
-
-
-
-
-
-
-
 
         # send sensor data to feagi
         data = {}
@@ -357,25 +330,36 @@ if __name__ == "__main__":
                 for num, dev in enumerate(device_list):
                     data[device_type][str(num)] = get_sensor_data(dev)
 
+        # raw_frame = {'vision': {}}
+        camera_data['vision'] = copy.deepcopy(data['camera'])
+        raw_frame = copy.deepcopy(camera_data['vision'])
+        previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
+            raw_frame,
+            default_capabilities,
+            previous_frame_data,
+            rgb, capabilities)
+        if rgb:
+            message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
+
 
         for sensor_name in data:
             if sensor_name == "lidar":
                 for index in data[sensor_name]:
                     max_range = robot_sensors[sensor_name][int(index)].getMaxRange()
                     min_range = robot_sensors[sensor_name][int(index)].getMinRange()
-                    new_data = convert_lidar_to_feagi_data(data[sensor_name][index][0], len(data[sensor_name][index][0]), max_range, min_range)
+                    new_data = convert_lidar_to_feagi_data(data[sensor_name][index][0],
+                                                           len(data[sensor_name][index][0]), max_range, min_range)
                     message_to_feagi = sensors.add_generic_input_to_feagi_data(
                         new_data,
                         message_to_feagi)
             else:
                 message_to_feagi = sensors.create_data_for_feagi(
-                                        sensor_name,
-                                        capabilities,
-                                        message_to_feagi,
-                                        current_data=data[sensor_name],
-                                        symmetric=True,
-                                        measure_enable=True)
-
+                    sensor_name,
+                    capabilities,
+                    message_to_feagi,
+                    current_data=data[sensor_name],
+                    symmetric=True,
+                    measure_enable=True)
 
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         message_to_feagi.clear()
@@ -383,3 +367,7 @@ if __name__ == "__main__":
         # cool down everytime
         sleep(feagi_settings['feagi_burst_speed'])
         robot.step(timestep)
+        if rgb:
+            for i in rgb['camera']:
+                rgb['camera'][i].clear()
+
