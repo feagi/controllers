@@ -339,7 +339,7 @@ if __name__ == "__main__":
                 for num, dev in enumerate(device_list):
                     test_data[device_type][str(num)] = get_sensor_data(dev)
         
-        print(f"compass - {test_data}")
+        #print(f"compass - {test_data}")
 
 
 
