@@ -20,6 +20,7 @@ limitations under the License.
 import cv2
 import json
 import math
+import traceback
 import threading
 import numpy as np
 from time import sleep
@@ -47,7 +48,7 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
                        "Receiver", "TouchSensor"]
 
 # All data inputs read from the webot robot
-robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": []}
+robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": [], "lidar": []}
 
 testing_sensors = {"compass": []}
 
@@ -142,7 +143,11 @@ def get_sensor_data(sensor):
         return sensor.getRangeImageArray()
 
     elif type(sensor).__name__ == "Radar":
-        return sensor.getTargets()
+        data = sensor.getTargets()
+        if data:
+            return data[0].distance
+        else:
+            return data
 
     elif type(sensor).__name__ == "RangeFinder":
         return sensor.getRangeImageArray()
@@ -152,6 +157,28 @@ def get_sensor_data(sensor):
             return sensor.getBytes()
 
 # Reads all devices on webots robot and sorts into its type list
+
+def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_data):
+    result = {'ilidar': {}}
+    total_array = []
+    counter = 0
+    length_based_off_cortical = int(len(full_lidar_data) / cortical_size)
+    for x in range(len(full_lidar_data)): # grab
+        if full_lidar_data[x] == float('inf'):
+            full_lidar_data[x] = max_data
+        if full_lidar_data[x] == float('-inf'):
+            full_lidar_data[x] = min_data
+        total_array.append(1 / full_lidar_data[x])
+        if len(total_array) == length_based_off_cortical:
+            name = (counter, 0, 0)
+            counter += 1
+            try:
+                result['ilidar'][name] = sum(total_array) // len(total_array)
+                total_array.clear()
+            except:
+                traceback.print_exc()
+    return result
+
 def sort_devices():
     devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
 
@@ -167,7 +194,9 @@ def sort_devices():
                 robot_sensors["camera"].append(dev)
 
             elif device_type == "Compass":
-                testing_sensors["compass"].append(dev)
+                if "compass" not in robot_sensors:
+                    robot_sensors['compass'] = []
+                robot_sensors["compass"].append(dev)
 
             elif device_type == "DistanceSensor":
                 robot_sensors["proximity"].append(dev)
@@ -179,13 +208,7 @@ def sort_devices():
                 robot_sensors["gyro"].append(dev)
 
             elif device_type == "Lidar":
-                dev.disable() #testiing
-                dev.enable(1000)
-                #robot_sensors["lidar"].append(dev)
-
-            elif device_type == "RangeFinder":
-                dev.disable() #testiing
-                dev.enable(1000)
+                robot_sensors["lidar"].append(dev)
 
             # elif device_type == "LightSensor":
             #     robot_sensors["light_sensor"].append(dev)
@@ -193,8 +216,8 @@ def sort_devices():
             elif device_type == "PositionSensor":
                 robot_sensors["servo_position"].append(dev)
 
-            # elif device_type == "Radar":
-            #     robot_sensors["radar"].append(dev)
+            elif device_type == "Radar":
+                robot_sensors["proximity"].append(dev)
 
             # elif device_type == "RangeFinder":
             #     robot_sensors["range_finder"].append(dev)
@@ -256,77 +279,6 @@ def sort_devices():
         device_list.sort(key=lambda device: device.getName())
 
 
-# move the motors to make the robot spin
-def pioneer2_wheel_movements():
-    # gets the motors
-    left_wheel = robot.getDevice("left wheel motor")
-    right_wheel = robot.getDevice("right wheel motor")
-
-    print("Pre-move sensors")
-    # print_all_ds()
-    print()
-
-    # sets velocities opposite eachother, moves and then stops
-    left_wheel.setVelocity(-3)
-    right_wheel.setVelocity(3)
-    robot.step(10 * timestep)
-    left_wheel.setVelocity(0)
-    right_wheel.setVelocity(0)
-
-    print("Post-move sensors")
-    # print_all_ds()
-    print("\n")
-
-    # 3 seconds
-    robot.step(3000)
-
-
-def pr2_move_arm(arm, positions):
-    """
-    Move the PR2 arm to a specified position.
-    :param arm: "left" or "right"
-    :param positions: Dict with joint angles {joint_name: angle}
-    """
-    """
-    Here is an example of how to call this function:
-    move_arm("right", {
-        "shoulder_pan": 0.0,
-        "shoulder_lift": 0.5,
-        "upper_arm_roll": 0.0,
-        "elbow_lift": -0.5,
-        "wrist_roll": 0.0
-    })
-    """
-    # Get PR2 motors for the right arm
-    right_arm_motors = {
-        "shoulder_pan": robot.getDevice("r_shoulder_pan_joint"),
-        "shoulder_lift": robot.getDevice("r_shoulder_lift_joint"),
-        "upper_arm_roll": robot.getDevice("r_upper_arm_roll_joint"),
-        "elbow_lift": robot.getDevice("r_elbow_flex_joint"),
-        "wrist_roll": robot.getDevice("r_wrist_roll_joint")
-    }
-    # Get PR2 motors for the left arm
-    left_arm_motors = {
-        "shoulder_pan": robot.getDevice("l_shoulder_pan_joint"),
-        "shoulder_lift": robot.getDevice("l_shoulder_lift_joint"),
-        "upper_arm_roll": robot.getDevice("l_upper_arm_roll_joint"),
-        "elbow_lift": robot.getDevice("l_elbow_flex_joint"),
-        "wrist_roll": robot.getDevice("l_wrist_roll_joint")
-    }
-    if arm == "right":
-        motors = right_arm_motors
-    elif arm == "left":
-        motors = left_arm_motors
-    else:
-        print("Invalid arm name. Use 'left' or 'right'.")
-        return
-    for joint, angle in positions.items():
-        if joint in motors:
-            motors[joint].setPosition(angle)
-        else:
-            print(f"Invalid joint name: {joint}")
-
-
 if __name__ == "__main__":
 
     # Generate runtime dictionary
@@ -365,7 +317,7 @@ if __name__ == "__main__":
     sort_devices()
     robot.step(timestep)  # ensures that all sensors have had time to make a measurement, avoids null pointers
     # make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
-    make_capabilities(robot_sensors, robot_actuators)
+    make_capabilities(robot_sensors, robot_actuators, robot)
 
     # Main Loop
     while True:
@@ -407,13 +359,23 @@ if __name__ == "__main__":
 
 
         for sensor_name in data:
-            message_to_feagi = sensors.create_data_for_feagi(
-                                    sensor_name,
-                                    capabilities,
-                                    message_to_feagi,
-                                    current_data=data[sensor_name], 
-                                    symmetric=True, 
-                                    measure_enable=True)
+            if sensor_name == "lidar":
+                for index in data[sensor_name]:
+                    max_range = robot_sensors[sensor_name][int(index)].getMaxRange()
+                    min_range = robot_sensors[sensor_name][int(index)].getMinRange()
+                    new_data = convert_lidar_to_feagi_data(data[sensor_name][index][0], len(data[sensor_name][index][0]), max_range, min_range)
+                    message_to_feagi = sensors.add_generic_input_to_feagi_data(
+                        new_data,
+                        message_to_feagi)
+            else:
+                message_to_feagi = sensors.create_data_for_feagi(
+                                        sensor_name,
+                                        capabilities,
+                                        message_to_feagi,
+                                        current_data=data[sensor_name],
+                                        symmetric=True,
+                                        measure_enable=True)
+
 
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel, agent_settings, feagi_settings)
         message_to_feagi.clear()

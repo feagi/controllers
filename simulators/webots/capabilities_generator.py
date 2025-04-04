@@ -15,7 +15,7 @@ def calculate_increment(min_value, max_value):
     return increment
 
 
-def make_capabilities(sensors, actuators):
+def make_capabilities(sensors, actuators, robot):
     data = {
         "capabilities": {
             "input": {},
@@ -36,20 +36,15 @@ def make_capabilities(sensors, actuators):
                         "max_value": [150, 150, 150], #technically inf
                         "min_value": [-150, -150, -150]
                     }
-
-
-            # elif device_type == "compass":
-            #     for num, device in enumerate(device_list):
-            #         data["capabilities"]["input"][device_type][str(num)] = {
-            #             "custom_name": device.getName(),
-            #             "disabled": False,
-            #             "feagi_index": num,
-            #             "max_value": [1, 1, 1],
-            #             "min_value": [-1, -1, -1]
-            #         }
-
-
-
+            elif device_type == "compass":
+                for num, device in enumerate(device_list):
+                    data["capabilities"]["input"][device_type][str(num)] = {
+                        "custom_name": device.getName(),
+                        "disabled": False,
+                        "feagi_index": num,
+                        "max_value": [1, 1, 1],
+                        "min_value": [-1, -1, -1]
+                    }
             elif device_type == "gyro":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["input"][device_type][str(num)] = {
@@ -59,7 +54,6 @@ def make_capabilities(sensors, actuators):
                         "max_value": [6, 6, 6], #technically inf
                         "min_value": [-6, -6, -6]
                     }
-
             elif device_type == "pressure":
                 for num, device in enumerate(device_list):
                     data["capabilities"]["input"][device_type][str(num)] = {
@@ -79,6 +73,18 @@ def make_capabilities(sensors, actuators):
                         "max_value": 0,
                         "min_value": 0
                     }
+                    name = device.getName()
+                    if "_sensor" in name:
+                        name = name.replace("_sensor", "")
+                    actuator_device = robot.getDevice(name)
+                    max = actuator_device.getMaxPosition()
+                    min = actuator_device.getMinPosition()
+                    if max != 0.0 and min != 0.0:
+                        data["capabilities"]["input"][device_type][str(num)].update({
+                            "max_power": calculate_increment(min,max),
+                            "max_value": max,
+                            "min_value": min,
+                        })
 
             elif device_type == "proximity":
                 for num, device in enumerate(device_list):
@@ -86,6 +92,15 @@ def make_capabilities(sensors, actuators):
                         "custom_name": device.getName(),
                         "disabled": False,
                         "feagi_index": num,
+                        "max_value": 0,
+                        "min_value": 0
+                    }
+            elif device_type == "lidar":
+                for num, device in enumerate(device_list):
+                    data["capabilities"]["input"][device_type][str(num)] = {
+                        "custom_name": device.getName(),
+                        "disabled": False,
+                        "feagi_index": 0,
                         "max_value": 0,
                         "min_value": 0
                     }
