@@ -15,7 +15,11 @@ def calculate_increment(min_value, max_value):
     return increment
 
 
-def make_capabilities(sensors, actuators, robot):
+def make_capabilities(sensors, actuators):
+
+    with open("capabilities.json", "w") as json_file:
+        json.dump({}, json_file, indent=4)
+
     data = {
         "capabilities": {
             "input": {},
