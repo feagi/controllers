@@ -18,6 +18,9 @@
 	"plugin_input": {
 
 	},
+	"plugin_rename": {
+		"gz::sim::systems::DiffDrive": "cmd_vel"
+	},
 	"ignore_list": [
         "disabled",
         "type",
@@ -31,6 +34,7 @@
 		"link",
 		"joint",
 		"sensor",
-		"plugin"
+		"plugin",
+		"model"
     ]
 }
