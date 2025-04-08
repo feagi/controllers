@@ -256,6 +256,7 @@ def create_json(found_elements, json_list):
                         'description': "",
                         'children': []}
             
+            print(elements.get("name"))
             # handle device type and parameters/properties if sensor or actuator
             if feagi_dev_type is not None:
                 # retrieve all properties necessary for sensor / actuator
@@ -271,29 +272,40 @@ def create_json(found_elements, json_list):
                     if max is not None:
                         props["max_value"] = float(max.text)
                     # calculate max power
-                    range_value = abs(float(max.text) - float(min.text))
-                    target_steps = 30  # Aim for about 30 steps
-                    magnitude = math.log10(range_value)
-                    increment = pow(10, magnitude) / 10
-                    if range_value / increment > target_steps * 2:
-                        increment *= 5
-                    elif range_value / increment > target_steps:
-                        increment *= 2
-                    elif range_value / increment < target_steps / 2:
-                        increment /= 2
+                    if min and max is not None:
+                        range_value = abs(float(max.text) - float(min.text))
+                        target_steps = 30  # Aim for about 30 steps
+                        magnitude = math.log10(range_value)
+                        increment = pow(10, magnitude) / 10
+                        if range_value / increment > target_steps * 2:
+                            increment *= 5
+                        elif range_value / increment > target_steps:
+                            increment *= 2
+                        elif range_value / increment < target_steps / 2:
+                            increment /= 2
 
-                    if increment > 999999999:
-                        increment = 999999999
-                    props["max_power"] = increment
-                    if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
-                        feagi_dev_type = 'motor'
-                        props["rolling_window_len"] = 2
+                        if increment > 999999999:
+                            increment = 999999999
+                        props["max_power"] = increment
+                        if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
+                            feagi_dev_type = 'motor'
+                            props["rolling_window_len"] = 2
 
                 elif feagi_dev_type == 'gyro':
                     pass
                 elif feagi_dev_type == 'lidar':
                     min = find_element_by_tag(elements, 'min')
                     max = find_element_by_tag(elements, 'max')
+                    width = find_element_by_tag(elements, 'horizontal')
+                    height = find_element_by_tag(elements, 'vertical')
+                    if width is not None:
+                        width_value = find_element_by_tag(width, 'samples')
+                        if width_value is not None:
+                            props["width"] = float(width_value.text)
+                    if height is not None:
+                        height_value = find_element_by_tag(height, 'samples')
+                        if height_value is not None:
+                            props["height"] = float(height_value.text)
                     if min is not None:
                         props["min_value"] = float(min.text)
                     if max is not None:
