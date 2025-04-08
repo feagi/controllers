@@ -301,7 +301,7 @@ if __name__ == "__main__":
     sort_devices()
     robot.step(timestep)  # ensures that all sensors have had time to make a measurement, avoids null pointers
     # make_capabilities(all_FEAGI_inputs, all_FEAGI_outputs)
-    make_capabilities(robot_sensors, robot_actuators, robot)
+    make_capabilities(robot_sensors, robot_actuators)
 
     # Main Loop
     while True:
