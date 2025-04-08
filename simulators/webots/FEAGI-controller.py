@@ -16,10 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 """
-import copy
+
 
 import cv2
 import json
+import copy
 import math
 import traceback
 import threading
@@ -331,15 +332,16 @@ if __name__ == "__main__":
                     data[device_type][str(num)] = get_sensor_data(dev)
 
         # raw_frame = {'vision': {}}
-        camera_data['vision'] = copy.deepcopy(data['camera'])
-        raw_frame = copy.deepcopy(camera_data['vision'])
-        previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
-            raw_frame,
-            default_capabilities,
-            previous_frame_data,
-            rgb, capabilities)
-        if rgb:
-            message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
+        if "camera" in data:
+            camera_data['vision'] = copy.deepcopy(data['camera'])
+            raw_frame = copy.deepcopy(camera_data['vision'])
+            previous_frame_data, rgb, default_capabilities = retina.process_visual_stimuli(
+                raw_frame,
+                default_capabilities,
+                previous_frame_data,
+                rgb, capabilities)
+            if rgb:
+                message_to_feagi = pns.generate_feagi_data(rgb, message_to_feagi)
 
 
         for sensor_name in data:
@@ -370,4 +372,3 @@ if __name__ == "__main__":
         if rgb:
             for i in rgb['camera']:
                 rgb['camera'][i].clear()
-
