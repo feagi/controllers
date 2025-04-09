@@ -54,9 +54,7 @@ webots_sensor_types = ["Accelerometer", "Camera", "Compass", "DistanceSensor", "
 
 # All data inputs read from the webot robot
 robot_sensors = {"gyro": [], "pressure": [], "servo_position": [], "proximity": [], "accelerometer": [], "camera": [],
-                 "lidar": []}
-
-testing_sensors = {"compass": []}
+                 "lidar": [], "compass": []}
 
 # All outputs read from webot robot
 robot_actuators = {"motor": [], "servo": [], "LED": []}
@@ -164,7 +162,7 @@ def convert_lidar_to_feagi_data(full_lidar_data, cortical_size, max_data, min_da
                 traceback.print_exc()
     return result
 
-
+# Puts Webots sensors/actuators into its FEAGI equivalent
 def sort_devices():
     devices = [robot.getDeviceByIndex(i) for i in range(robot.getNumberOfDevices())]
 
