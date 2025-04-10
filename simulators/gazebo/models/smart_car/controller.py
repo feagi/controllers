@@ -81,6 +81,9 @@ def send(topic, message_type, data):
     command = f'gz topic -t {topic} -m {message_type} -p "data: {data}" &'
     subprocess.run(command, shell=True)
 
+def motion_send(topic, message_type, data):
+    command = f'gz topic -t {topic} -m {message_type} -p "linear: {{x: {data["x"]}}}, angular: {{z: {data["z"]}}}" &'
+    subprocess.run(command, shell=True)
 
 def get_data_json(instance, sensor_name, initalize_data):
     raw_data_msg[sensor_name] = initalize_data
@@ -107,7 +110,7 @@ def read_camera(raw_data_msg):
         return []
 
 
-def monitor_motor_in_background(gazebo_actuator, feagi_settings):
+def monitor_motor_in_background(gazebo_actuator, feagi_settings, capabilities):
     previous_state = {
         'servo': {},
         'motor': {},
@@ -120,8 +123,8 @@ def monitor_motor_in_background(gazebo_actuator, feagi_settings):
             'motor': [],
             'motion_control': []
         }
-        # Check each actuator type (servo and motor)
-        for actuator_type in ['servo', 'motor', 'motion_control']:
+
+        for actuator_type in ['servo', 'motor']:
             current_values = gazebo_actuator[actuator_type]
             prev_values = previous_state[actuator_type]
 
@@ -129,7 +132,20 @@ def monitor_motor_in_background(gazebo_actuator, feagi_settings):
                 if channel not in prev_values or value != prev_values[channel]:
                     changes_to_send[actuator_type].append(channel)
 
-        if changes_to_send['servo'] or changes_to_send['motor']:
+        current_motion = gazebo_actuator['motion_control']
+        prev_motion = previous_state['motion_control']
+
+        for index, commands in current_motion.items():
+            if index not in prev_motion:
+                changes_to_send['motion_control'].append(index)
+            else:
+                for cmd, value in commands.items():
+                    if cmd not in prev_motion[index] or value != prev_motion[index][cmd]:
+                        if index not in changes_to_send['motion_control']:
+                            changes_to_send['motion_control'].append(index)
+                        break
+
+        if changes_to_send['servo'] or changes_to_send['motor'] or changes_to_send['motion_control']:
             for channel in changes_to_send['servo']:
                 topic = f'/S{channel}'
                 send(topic, 'gz.msgs.Double', gazebo_actuator['servo'][channel])
@@ -138,15 +154,43 @@ def monitor_motor_in_background(gazebo_actuator, feagi_settings):
                 topic = f'/M{channel}'
                 send(topic, 'gz.msgs.Double', gazebo_actuator['motor'][channel])
 
-            for channel in changes_to_send['motion_control']:
-                topic = f'/{channel}'
-                send(topic, 'gz.msgs.Twist', gazebo_actuator['motion_control'][channel])
+            if changes_to_send['motion_control']:
+                for channel in changes_to_send['motion_control']:
 
+                    control_values = gazebo_actuator['motion_control'][channel]
+
+                    linear_x = 0.0
+                    angular_z = 0.0
+
+                    if 'move_forward' in control_values:
+                        linear_x += control_values['move_forward']
+                    if 'move_backward' in control_values:
+                        linear_x -= control_values['move_backward']
+
+                    if 'yaw_left' in control_values:
+                        angular_z += control_values['yaw_left']
+                    if 'yaw_right' in control_values:
+                        angular_z -= control_values['yaw_right']
+
+                    twist_msg = dict()
+                    twist_msg["x"] = linear_x
+                    twist_msg["z"] = angular_z
+
+                    topic = "/" + capabilities['output']['motion_control'][str(channel)]['custom_name']
+                    motion_send(topic, 'gz.msgs.Twist', twist_msg)
         previous_state = {
             'servo': gazebo_actuator['servo'].copy(),
             'motor': gazebo_actuator['motor'].copy(),
             'motion_control': gazebo_actuator['motion_control'].copy(),
         }
+
+        # TODO: fix this logic so it can reset the motion every time.
+        # if 'motion_control' in changes_to_send:
+        #     for index in gazebo_actuator['motion_control']:
+        #         for data in gazebo_actuator['motion_control'][index]:
+        #             if gazebo_actuator['motion_control'][index][data] != 0.0:
+        #                 gazebo_actuator['motion_control'][index][data] = 0.0
+
         time.sleep(feagi_settings['feagi_burst_speed'])
 
 
@@ -186,6 +230,12 @@ def action(obtained_data, gazebo_actuator):
             if motor_id not in gazebo_actuator['motor']:
                 gazebo_actuator['motor'][motor_id] = recieve_motor_data[motor_id]
             gazebo_actuator['motor'][motor_id] += recieve_motor_data[motor_id]
+
+    if recieve_motion_data:
+        for motion_id in recieve_motion_data['motion_control']:
+            if motion_id not in gazebo_actuator['motion_control']:
+                gazebo_actuator['motion_control'][motion_id] = dict()
+            gazebo_actuator['motion_control'][motion_id] = recieve_motion_data['motion_control'][motion_id]
     return gazebo_actuator
 
 
@@ -235,7 +285,7 @@ if __name__ == '__main__':
         # print("instance: ", instance, " and custom name: ", capabilities['input'][instance])
         # threading.Thread(target=get_ultrasonic_json, args=(ultrasonic_instance,), daemon=True).start()
     threading.Thread(target=data_opu, args=(action, gazebo_actuator), daemon=True).start()
-    threading.Thread(target=monitor_motor_in_background, args=(gazebo_actuator, feagi_settings), daemon=True).start()
+    threading.Thread(target=monitor_motor_in_background, args=(gazebo_actuator, feagi_settings, capabilities), daemon=True).start()
     # server_command = f"gz sim -v 4 {world} -s -r"
     # gui_command = "gz sim -v 4 -g"
     # server_process = subprocess.Popen(server_command, shell=True)
