@@ -10,10 +10,16 @@
 		"battery_name": "battery"
     },
 	"plugin_output": {
-		"gz::sim::systems::DiffDrive": "motion_control"
+		"gz::sim::systems::DiffDrive": "motion_control",
+		"gz::sim::systems::JointPositionController": "servo",
+		"gz::sim::systems::AdvancedLiftDrag": "motion_control",
+		"gz::sim::systems::MulticopterMotorModel": "motion_control"
 	},
 	"plugin_input": {
 
+	},
+	"plugin_rename": {
+		"gz::sim::systems::DiffDrive": "cmd_vel"
 	},
 	"ignore_list": [
         "disabled",
@@ -28,6 +34,7 @@
 		"link",
 		"joint",
 		"sensor",
-		"plugin"
+		"plugin",
+		"model"
     ]
 }

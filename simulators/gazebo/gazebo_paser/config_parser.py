@@ -139,11 +139,12 @@ def nest(found_elements, json_list):
 
         if parent is not None:
             json_child = find_json_element(json_list, xml_elements.get('name'))
-            if json_child:
+            if json_child is not None:
                 json_parent = find_json_element(json_list, parent.text)
-                if json_parent:
+                if json_parent is not None:
                     json_parent['children'].append(json_child)
-                    json_list.remove(json_child)    
+                    if json_child in json_list:
+                        json_list.remove(json_child)    
 
 # Description : Locates any topic definitions in the sdf file
 # INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings
@@ -200,14 +201,16 @@ def rename_elements(found_elements, json_list, topic_definitions):
 # Output on success : Final nested JSON file
 # Output on fail : None
 def create_json(found_elements, json_list):
+    used_names = []
     index_mapping = {}
 
     # Loop through each found element from the SDF
     for elements in found_elements:
-
         # Check to see if element is plugin, and if plugin is in gazebo mapping list
         if elements.tag == 'plugin' and elements.get('name') not in g_config['plugin_output']:
             found_elements.remove
+        elif elements.tag == 'model':
+                model_name = elements.get('name')
         else:
         # Create Vars for Sensor element
             if elements.get('type') in g_config['sensor']: # sensor
@@ -238,8 +241,14 @@ def create_json(found_elements, json_list):
             # setting up general structure
             # Check to see if current element is plugin
             if elements.tag == 'plugin':
-                parsed_name = elements.get('name').replace("gz::sim::systems::", "")
+                parsed_name = elements.get('name')
                 topic_name = find_element_by_tag(elements, 'topic')
+
+                if parsed_name in g_config['plugin_rename']:
+                    rename = '/model/' + model_name + '/' + g_config['plugin_rename'][elements.get('name')]
+                    parsed_name = rename
+                    print("Conflicting names defaulting to : ", rename)
+                
                 if topic_name is not None:
                     toadd = {'custom_name': topic_name.text,
                             'type': type,
@@ -271,29 +280,40 @@ def create_json(found_elements, json_list):
                     if max is not None:
                         props["max_value"] = float(max.text)
                     # calculate max power
-                    range_value = abs(float(max.text) - float(min.text))
-                    target_steps = 30  # Aim for about 30 steps
-                    magnitude = math.log10(range_value)
-                    increment = pow(10, magnitude) / 10
-                    if range_value / increment > target_steps * 2:
-                        increment *= 5
-                    elif range_value / increment > target_steps:
-                        increment *= 2
-                    elif range_value / increment < target_steps / 2:
-                        increment /= 2
+                    if min is not None and max is not None:
+                        range_value = abs(float(max.text) - float(min.text))
+                        target_steps = 30  # Aim for about 30 steps
+                        magnitude = math.log10(range_value)
+                        increment = pow(10, magnitude) / 10
+                        if range_value / increment > target_steps * 2:
+                            increment *= 5
+                        elif range_value / increment > target_steps:
+                            increment *= 2
+                        elif range_value / increment < target_steps / 2:
+                            increment /= 2
 
-                    if increment > 999999999:
-                        increment = 999999999
-                    props["max_power"] = increment
-                    if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
-                        feagi_dev_type = 'motor'
-                        props["rolling_window_len"] = 2
+                        if increment > 999999999:
+                            increment = 999999999
+                        props["max_power"] = increment
+                        if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
+                            feagi_dev_type = 'motor'
+                            props["rolling_window_len"] = 2
 
                 elif feagi_dev_type == 'gyro':
                     pass
                 elif feagi_dev_type == 'lidar':
                     min = find_element_by_tag(elements, 'min')
                     max = find_element_by_tag(elements, 'max')
+                    width = find_element_by_tag(elements, 'horizontal')
+                    height = find_element_by_tag(elements, 'vertical')
+                    if width is not None:
+                        width_value = find_element_by_tag(width, 'samples')
+                        if width_value is not None:
+                            props["width"] = float(width_value.text)
+                    if height is not None:
+                        height_value = find_element_by_tag(height, 'samples')
+                        if height_value is not None:
+                            props["height"] = float(height_value.text)
                     if min is not None:
                         props["min_value"] = float(min.text)
                     if max is not None:
@@ -312,7 +332,7 @@ def create_json(found_elements, json_list):
                 else:
                     index_mapping[feagi_dev_type] = 0
                     props["feagi_index"] = 0
-                    
+
                 # add in extra lines to dict
                 temp = list(toadd.items())
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
@@ -373,8 +393,6 @@ def main():
 
     # Finds all topic definitions, necessary for correct naming
     find_topics(sys.argv[1], topic_definitions)
-    print("Definitions found : ", topic_definitions)
-
 
     # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
