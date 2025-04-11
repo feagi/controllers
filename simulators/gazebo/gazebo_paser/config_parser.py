@@ -151,7 +151,7 @@ def nest(found_elements, json_list):
 # Output on success : updates "topic_definitions" to contain mappings from
 #                             "joint_name" : "topic_name"
 # Output on fail : "topic_definitions" is left empty
-def find_topics(fp, topic_definitions):
+def find_topics(fp, topic_definitions, found_elements):
     try:
         with open(fp, 'r') as f:
             sdf_content = f.read()
@@ -179,6 +179,15 @@ def find_topics(fp, topic_definitions):
                 else:
                     topic_definitions[plugin.get('name')] = topic_element.text
 
+        # Search elements for topics
+        for element in found_elements:
+
+            topic_element = element.find("topic")
+
+            if topic_element is not None and topic_element.text:
+                if element is not None and element.get('name'):
+                    topic_definitions[element.get('name')] = topic_element.text.strip()
+
     except Exception as e:
         print(f"Error: {e}")
         return []
@@ -201,7 +210,6 @@ def rename_elements(found_elements, json_list, topic_definitions):
 # Output on success : Final nested JSON file
 # Output on fail : None
 def create_json(found_elements, json_list):
-    used_names = []
     index_mapping = {}
 
     # Loop through each found element from the SDF
@@ -244,8 +252,8 @@ def create_json(found_elements, json_list):
                 parsed_name = elements.get('name')
                 topic_name = find_element_by_tag(elements, 'topic')
 
-                if parsed_name in g_config['plugin_rename']:
-                    rename = '/model/' + model_name + '/' + g_config['plugin_rename'][elements.get('name')]
+                if parsed_name in g_config['topic_rename']:
+                    rename = '/model/' + model_name + '/' + g_config['topic_rename'][elements.get('name')]
                     parsed_name = rename
                     print("Conflicting names defaulting to : ", rename)
                 
@@ -392,7 +400,7 @@ def main():
     file = open("model_config_tree.json", "w")
 
     # Finds all topic definitions, necessary for correct naming
-    find_topics(sys.argv[1], topic_definitions)
+    find_topics(sys.argv[1], topic_definitions, found_elements)
 
     # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
