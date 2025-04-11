@@ -18,8 +18,9 @@
 	"plugin_input": {
 
 	},
-	"plugin_rename": {
-		"gz::sim::systems::DiffDrive": "cmd_vel"
+	"topic_rename": {
+		"gz::sim::systems::DiffDrive": "cmd_vel",
+		"gpu_lidar": "lidar"
 	},
 	"ignore_list": [
         "disabled",
