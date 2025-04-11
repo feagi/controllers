@@ -274,7 +274,7 @@ def create_json(found_elements, json_list):
                 topic_name = find_element_by_tag(elements, 'topic')
 
                 if parsed_name in g_config['topic_rename']:
-                    rename = '/model/' + model_name + '/' + g_config['topic_rename'][elements.get('name')]
+                    rename = 'model/' + model_name + '/' + g_config['topic_rename'][elements.get('name')]
                     parsed_name = rename
                     print("Conflicting names defaulting to : ", rename)
                 
