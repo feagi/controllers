@@ -147,11 +147,12 @@ def nest(found_elements, json_list):
                         json_list.remove(json_child)    
 
 # Description : Locates any topic definitions in the sdf file
-# INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings
-# Output on success : updates "topic_definitions" to contain mappings from
-#                             "joint_name" : "topic_name"
+# INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings, 
+# found_elements ~ list of found elements from gazebo config, sub_topic_definitions ~ dictionary to contain mappings
+# Output on success : updates "topic_definitions" and "sub_topic_definitions" to contain mappings from
+#                             "element" : "topic_name"
 # Output on fail : "topic_definitions" is left empty
-def find_topics(fp, topic_definitions, found_elements):
+def find_topics(fp, topic_definitions, found_elements, sub_topic_definitions):
     try:
         with open(fp, 'r') as f:
             sdf_content = f.read()
@@ -179,6 +180,11 @@ def find_topics(fp, topic_definitions, found_elements):
                 else:
                     topic_definitions[plugin.get('name')] = topic_element.text
 
+            sub_topic_element = plugin.find("sub_topic")
+            
+            if sub_topic_element is not None and sub_topic_element.text:
+                sub_topic_definitions[sub_topic_element.text] = plugin.get('name')
+
         # Search elements for topics
         for element in found_elements:
 
@@ -204,6 +210,21 @@ def rename_elements(found_elements, json_list, topic_definitions):
             if element_to_rename['custom_name'] in topic_definitions:
                 element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
     return
+
+# Description : Removes elements that contain a sub_topic to another element from the json list
+# INPUT : List of elements, current json list, sub topic mappings
+# Output on success : Updates the json list to no longer contain the removed element
+# Output on fail : None
+def remove_element(sub_topic_definitions, found_elements, json_list):
+     for element in found_elements:
+        element_index = 0
+        if element.get('name') in sub_topic_definitions:
+            element_to_remove = find_json_element(json_list, sub_topic_definitions[element.get('name')])
+
+            if element_to_remove is not None:
+                while json_list[element_index]['custom_name'] is not element_to_remove['custom_name']:
+                    element_index += 1
+                del json_list[element_index]
 
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
@@ -382,6 +403,7 @@ def main():
 
     # Stores mappings from joint names -> topics
     topic_definitions = {}
+    sub_topic_definitions = {}
 
     num_args = len(sys.argv) - 1
 
@@ -400,7 +422,7 @@ def main():
     file = open("model_config_tree.json", "w")
 
     # Finds all topic definitions, necessary for correct naming
-    find_topics(sys.argv[1], topic_definitions, found_elements)
+    find_topics(sys.argv[1], topic_definitions, found_elements, sub_topic_definitions)
 
     # Creates un-nested json structure with all data from file
     create_json(found_elements, json_list)
@@ -409,6 +431,8 @@ def main():
     nest(found_elements, json_list)
 
     rename_elements(found_elements, json_list, topic_definitions)
+
+    remove_element(sub_topic_definitions, found_elements, json_list)
 
     json.dump(json_list, file, indent=4)
     file.close()
