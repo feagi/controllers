@@ -209,6 +209,14 @@ def rename_elements(found_elements, json_list, topic_definitions):
         if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
                 element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+            
+            # Any sensor/actuator not included in topics is converted to 'body'
+
+            else:
+                if element_to_rename['type'] != "body":
+                    element_to_rename['type'] = "body"
+                    del element_to_rename['properties']
+                    del element_to_rename['feagi device type']
     return
 
 # Description : Removes elements that contain a sub_topic to another element from the json list
