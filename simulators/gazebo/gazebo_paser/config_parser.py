@@ -202,13 +202,21 @@ def find_topics(fp, topic_definitions, found_elements, sub_topic_definitions):
 # INPUT : List of elements, current json list, list of topic names
 # Output on success : Updates the custom name of the json list elements to be the topic name
 # Output on fail : None
-def rename_elements(found_elements, json_list, topic_definitions):
+def rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions):
     for elements in found_elements:
         element_to_rename = find_json_element(json_list, elements.get('name'))
 
         if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
                 element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+            
+            # Any sensor/actuator not included in topics is converted to 'body'
+
+            elif element_to_rename['custom_name'] not in topic_definitions and element_to_rename['custom_name'] not in sub_topic_definitions:
+                if element_to_rename['type'] != "body":
+                    element_to_rename['type'] = "body"
+                    del element_to_rename['properties']
+                    del element_to_rename['feagi device type']
     return
 
 # Description : Removes elements that contain a sub_topic to another element from the json list
@@ -430,7 +438,7 @@ def main():
     # Nests the children found in created Json structure
     nest(found_elements, json_list)
 
-    rename_elements(found_elements, json_list, topic_definitions)
+    rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions)
 
     remove_element(sub_topic_definitions, found_elements, json_list)
 
