@@ -147,11 +147,11 @@ def monitor_motor_in_background(gazebo_actuator, feagi_settings, capabilities):
 
         if changes_to_send['servo'] or changes_to_send['motor'] or changes_to_send['motion_control']:
             for channel in changes_to_send['servo']:
-                topic = f'/S{channel}'
+                topic = "/" + capabilities['output']['servo'][str(channel)]['custom_name']
                 send(topic, 'gz.msgs.Double', gazebo_actuator['servo'][channel])
 
             for channel in changes_to_send['motor']:
-                topic = f'/M{channel}'
+                topic = "/" + capabilities['output']['motor'][str(channel)]['custom_name']
                 send(topic, 'gz.msgs.Double', gazebo_actuator['motor'][channel])
 
             if changes_to_send['motion_control']:
