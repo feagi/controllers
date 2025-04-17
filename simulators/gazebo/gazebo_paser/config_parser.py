@@ -208,7 +208,15 @@ def rename_elements(found_elements, json_list, topic_definitions, sub_topic_defi
 
         if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
-                element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                existing_element = find_json_element(json_list, topic_definitions[elements.get('name')])
+                if existing_element is None:
+                    element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                else:
+                    if element_to_rename['custom_name'] != topic_definitions[elements.get('name')]:
+                        if element_to_rename['type'] != "body":
+                            element_to_rename['type'] = "body"
+                            del element_to_rename['properties']
+                            del element_to_rename['feagi device type']
             
             # Any sensor/actuator not included in topics is converted to 'body'
 
@@ -238,13 +246,15 @@ def remove_element(sub_topic_definitions, found_elements, json_list):
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
 # Output on fail : None
-def create_json(found_elements, json_list):
+def create_json(found_elements, json_list, topic_definitions):
     index_mapping = {}
 
     # Loop through each found element from the SDF
     for elements in found_elements:
         # Check to see if element is plugin, and if plugin is in gazebo mapping list
         if elements.tag == 'plugin' and elements.get('name') not in g_config['plugin_output']:
+            if elements.get('name') in topic_definitions:
+                del topic_definitions[elements.get('name')]
             found_elements.remove
         elif elements.tag == 'model':
                 model_name = elements.get('name')
@@ -311,11 +321,21 @@ def create_json(found_elements, json_list):
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
                     min = find_element_by_tag(elements, 'lower')
+                    i_min = find_element_by_tag(elements, 'i_min')
                     max = find_element_by_tag(elements, 'upper')
+                    i_max = find_element_by_tag(elements, 'i_max')
                     if min is not None:
                         props["min_value"] = float(min.text)
+                    elif i_min is not None:
+                        min = i_min
+                        props["min_value"] = float(min.text)
+
                     if max is not None:
                         props["max_value"] = float(max.text)
+                    elif i_max is not None:
+                        max = i_max
+                        props["max_value"] = float(max.text)
+
                     # calculate max power
                     if min is not None and max is not None:
                         range_value = abs(float(max.text) - float(min.text))
@@ -433,7 +453,7 @@ def main():
     find_topics(sys.argv[1], topic_definitions, found_elements, sub_topic_definitions)
 
     # Creates un-nested json structure with all data from file
-    create_json(found_elements, json_list)
+    create_json(found_elements, json_list, topic_definitions)
 
     # Nests the children found in created Json structure
     nest(found_elements, json_list)
