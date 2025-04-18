@@ -268,21 +268,21 @@ def remove_element(sub_topic_definitions, found_elements, json_list):
 def index_elements(found_elements, json_list, topic_definitions):
     index_mapping = {}
     for element in found_elements:
-        element_to_index = find_json_element(json_list, element.get('name'))
-        if element_to_index is not None:
-            if element_to_index['custom_name'] in topic_definitions:
-                renamed_element = find_json_element(json_list, topic_definitions[element.get('name')])
-                element_to_index = renamed_element
+        if element.tag != 'model':
+            element_to_index = find_json_element(json_list, element.get('name'))
+            if element_to_index is not None:
+                if element_to_index['custom_name'] in topic_definitions:
+                    renamed_element = find_json_element(json_list, topic_definitions[element.get('name')])
+                    element_to_index = renamed_element
 
-        if element_to_index is not None:
-            print(element_to_index['custom_name'])
-            if element_to_index['type'] != 'body':
-                if element_to_index['feagi device type'] in index_mapping:
-                    index_mapping[element_to_index['feagi device type']] = int(index_mapping[element_to_index['feagi device type']]) + 1
-                    element_to_index['properties']["feagi_index"] = int(index_mapping[element_to_index['feagi device type']])
-                else:
-                    index_mapping[element_to_index['feagi device type']] = 0
-                    element_to_index['properties']["feagi_index"] = 0
+            if element_to_index is not None:
+                if element_to_index['type'] != 'body':
+                    if element_to_index['feagi device type'] in index_mapping:
+                        index_mapping[element_to_index['feagi device type']] = int(index_mapping[element_to_index['feagi device type']]) + 1
+                        element_to_index['properties']["feagi_index"] = int(index_mapping[element_to_index['feagi device type']])
+                    else:
+                        index_mapping[element_to_index['feagi device type']] = 0
+                        element_to_index['properties']["feagi_index"] = 0  
     
     
 
