@@ -113,6 +113,16 @@ def find_json_element(json_list, json_name):
             return result
     return None
 
+def find_json_element_type(json_list, json_name, json_type):
+    for json_elements in json_list:
+        if json_elements['custom_name'] == json_name and json_elements['type'] == json_type:
+            return json_elements
+        # Recursively check children
+        result = find_json_element_type(json_elements['children'], json_name, json_type)
+        if result is not None:
+            return result
+    return None
+
 # Description : Changes existing JSON structure to account for parent child nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
@@ -207,8 +217,25 @@ def rename_elements(found_elements, json_list, topic_definitions, sub_topic_defi
         element_to_rename = find_json_element(json_list, elements.get('name'))
 
         if element_to_rename is not None:
+            if element_to_rename['type'] == 'body':
+                output_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'output')
+                input_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'input')
+                if output_element_to_rename is None and input_element_to_rename is not None:
+                    element_to_rename = input_element_to_rename
+                elif output_element_to_rename is not None and input_element_to_rename is None:
+                    element_to_rename = output_element_to_rename
+        
+        if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
-                element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                existing_element = find_json_element(json_list, topic_definitions[elements.get('name')])
+                if existing_element is None:
+                    element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                else:
+                    if element_to_rename['custom_name'] != topic_definitions[elements.get('name')]:
+                        if element_to_rename['type'] != "body":
+                            element_to_rename['type'] = "body"
+                            del element_to_rename['properties']
+                            del element_to_rename['feagi device type']
             
             # Any sensor/actuator not included in topics is converted to 'body'
 
@@ -234,17 +261,37 @@ def remove_element(sub_topic_definitions, found_elements, json_list):
                     element_index += 1
                 del json_list[element_index]
 
+# Description : Updates the feagi index values based on the newly changed json elements
+# INPUT : list of found elements, existing json list
+# Output on success : Updated feagi index values
+# Output on fail : None
+def index_elements(found_elements, json_list):
+    index_mapping = {}
+    for element in found_elements:
+        element_to_index = find_json_element(json_list, element.get('name'))
+
+        if element_to_index is not None:
+            if element_to_index['type'] != 'body':
+                if element_to_index['feagi device type'] in index_mapping:
+                    index_mapping[element_to_index['feagi device type']] = int(index_mapping[element_to_index['feagi device type']]) + 1
+                    element_to_index['properties']["feagi_index"] = int(index_mapping[element_to_index['feagi device type']])
+                else:
+                    index_mapping[element_to_index['feagi device type']] = 0
+                    element_to_index['properties']["feagi_index"] = 0
+
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
 # Output on fail : None
-def create_json(found_elements, json_list):
+def create_json(found_elements, json_list, topic_definitions):
     index_mapping = {}
 
     # Loop through each found element from the SDF
     for elements in found_elements:
         # Check to see if element is plugin, and if plugin is in gazebo mapping list
         if elements.tag == 'plugin' and elements.get('name') not in g_config['plugin_output']:
+            if elements.get('name') in topic_definitions:
+                del topic_definitions[elements.get('name')]
             found_elements.remove
         elif elements.tag == 'model':
                 model_name = elements.get('name')
@@ -311,11 +358,21 @@ def create_json(found_elements, json_list):
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
                     min = find_element_by_tag(elements, 'lower')
+                    i_min = find_element_by_tag(elements, 'i_min')
                     max = find_element_by_tag(elements, 'upper')
+                    i_max = find_element_by_tag(elements, 'i_max')
                     if min is not None:
                         props["min_value"] = float(min.text)
+                    elif i_min is not None:
+                        min = i_min
+                        props["min_value"] = float(min.text)
+
                     if max is not None:
                         props["max_value"] = float(max.text)
+                    elif i_max is not None:
+                        max = i_max
+                        props["max_value"] = float(max.text)
+
                     # calculate max power
                     if min is not None and max is not None:
                         range_value = abs(float(max.text) - float(min.text))
@@ -433,7 +490,7 @@ def main():
     find_topics(sys.argv[1], topic_definitions, found_elements, sub_topic_definitions)
 
     # Creates un-nested json structure with all data from file
-    create_json(found_elements, json_list)
+    create_json(found_elements, json_list, topic_definitions)
 
     # Nests the children found in created Json structure
     nest(found_elements, json_list)
@@ -441,6 +498,8 @@ def main():
     rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions)
 
     remove_element(sub_topic_definitions, found_elements, json_list)
+
+    index_elements(found_elements, json_list)
 
     json.dump(json_list, file, indent=4)
     file.close()
