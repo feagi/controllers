@@ -1,6 +1,8 @@
 import json
 import sys
 from lxml import etree as ET
+import feagi_connector_gazebo
+current_path = feagi_connector_gazebo.parser.__path__
 
 
 # CMD LINE USAGE :
@@ -262,7 +264,9 @@ def save_xml_string_to_file(xml_string, file_path="output.sdf"):
 
 def xml_file_to_config(xml_file):
     found_elements = []
-    open_files('gazebo_config_template.json', 'feagi_config_template.json', xml_file, found_elements)
+    gazebo_template = str(current_path[0]) + '/gazebo_config_template.json'
+    feagi_template = str(current_path[0]) + '/feagi_config_template.json'
+    open_files(gazebo_template, feagi_template , xml_file, found_elements)
     json_list = []
 
     file = open("model_config_tree.json", "w")
@@ -275,12 +279,13 @@ def xml_file_to_config(xml_file):
 
     json.dump(json_list, file, indent=4)
     file.close()
+    return json_list
 
 
 def raw_xml_string_to_config(string_xml_file):
     save_xml_string_to_file(string_xml_file)
-    xml_file_to_config('output.sdf')
-
+    final_tree_model_config = xml_file_to_config('output.sdf')
+    return final_tree_model_config
 
 def main():
     # Will store all found elements
