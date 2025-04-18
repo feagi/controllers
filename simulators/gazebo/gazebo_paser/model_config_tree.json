@@ -1,102 +1,41 @@
 [
     {
-        "custom_name": "base_link",
+        "custom_name": "world_fixed",
         "type": "body",
         "description": "",
         "children": [
             {
-                "custom_name": "Center Pivot",
+                "custom_name": "base_link",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "custom_name": "Rear_Rocker_Link",
+                        "custom_name": "j1",
                         "type": "body",
                         "description": "",
                         "children": [
                             {
-                                "custom_name": "left_rear_wheel",
+                                "custom_name": "rotor",
                                 "type": "body",
                                 "description": "",
-                                "children": [
-                                    {
-                                        "custom_name": "left_rear_wheel_link",
-                                        "type": "body",
-                                        "description": "",
-                                        "children": []
-                                    }
-                                ]
-                            },
-                            {
-                                "custom_name": "right_rear_wheel",
-                                "type": "body",
-                                "description": "",
-                                "children": [
-                                    {
-                                        "custom_name": "right_rear_wheel_link",
-                                        "type": "body",
-                                        "description": "",
-                                        "children": []
-                                    }
-                                ]
+                                "children": []
                             }
                         ]
-                    }
-                ]
-            },
-            {
-                "custom_name": "left_front_wheel",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "left_front_wheel_link",
-                        "type": "body",
-                        "description": "",
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "custom_name": "right_front_wheel",
-                "type": "body",
-                "description": "",
-                "children": [
-                    {
-                        "custom_name": "right_front_wheel_link",
-                        "type": "body",
-                        "description": "",
-                        "children": []
                     }
                 ]
             }
         ]
     },
     {
-        "custom_name": "camera",
-        "type": "input",
-        "feagi device type": "camera",
-        "properties": {
-            "index": "00",
-            "eccentricity_control": {
-                "X offset percentage": 1,
-                "Y offset percentage": 1
-            },
-            "modulation_control": {
-                "X offset percentage": 99,
-                "Y offset percentage": 99
-            },
-            "feagi_index": 0
-        },
-        "description": "",
-        "children": []
-    },
-    {
-        "custom_name": "cmd_vel",
+        "custom_name": "rotor_cmd",
         "type": "output",
-        "feagi device type": "motion_control",
+        "feagi device type": "servo",
         "properties": {
-            "feagi_index": 0
+            "max_value": 1.0,
+            "min_value": -1.0,
+            "max_power": 0.1,
+            "feagi_index": 0,
+            "default_value": 0
         },
         "description": "",
         "children": []
