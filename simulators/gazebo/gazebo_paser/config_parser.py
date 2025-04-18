@@ -113,6 +113,16 @@ def find_json_element(json_list, json_name):
             return result
     return None
 
+def find_json_element_type(json_list, json_name, json_type):
+    for json_elements in json_list:
+        if json_elements['custom_name'] == json_name and json_elements['type'] == json_type:
+            return json_elements
+        # Recursively check children
+        result = find_json_element_type(json_elements['children'], json_name, json_type)
+        if result is not None:
+            return result
+    return None
+
 # Description : Changes existing JSON structure to account for parent child nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
@@ -207,6 +217,15 @@ def rename_elements(found_elements, json_list, topic_definitions, sub_topic_defi
         element_to_rename = find_json_element(json_list, elements.get('name'))
 
         if element_to_rename is not None:
+            if element_to_rename['type'] == 'body':
+                output_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'output')
+                input_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'input')
+                if output_element_to_rename is None and input_element_to_rename is not None:
+                    element_to_rename = input_element_to_rename
+                elif output_element_to_rename is not None and input_element_to_rename is None:
+                    element_to_rename = output_element_to_rename
+        
+        if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
                 existing_element = find_json_element(json_list, topic_definitions[elements.get('name')])
                 if existing_element is None:
@@ -241,6 +260,24 @@ def remove_element(sub_topic_definitions, found_elements, json_list):
                 while json_list[element_index]['custom_name'] is not element_to_remove['custom_name']:
                     element_index += 1
                 del json_list[element_index]
+
+# Description : Updates the feagi index values based on the newly changed json elements
+# INPUT : list of found elements, existing json list
+# Output on success : Updated feagi index values
+# Output on fail : None
+def index_elements(found_elements, json_list):
+    index_mapping = {}
+    for element in found_elements:
+        element_to_index = find_json_element(json_list, element.get('name'))
+
+        if element_to_index is not None:
+            if element_to_index['type'] != 'body':
+                if element_to_index['feagi device type'] in index_mapping:
+                    index_mapping[element_to_index['feagi device type']] = int(index_mapping[element_to_index['feagi device type']]) + 1
+                    element_to_index['properties']["feagi_index"] = int(index_mapping[element_to_index['feagi device type']])
+                else:
+                    index_mapping[element_to_index['feagi device type']] = 0
+                    element_to_index['properties']["feagi_index"] = 0
 
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
@@ -461,6 +498,8 @@ def main():
     rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions)
 
     remove_element(sub_topic_definitions, found_elements, json_list)
+
+    index_elements(found_elements, json_list)
 
     json.dump(json_list, file, indent=4)
     file.close()
