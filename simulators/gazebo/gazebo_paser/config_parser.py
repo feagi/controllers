@@ -268,7 +268,7 @@ def remove_element(sub_topic_definitions, found_elements, json_list):
 def index_elements(found_elements, json_list, topic_definitions):
     index_mapping = {}
     for element in found_elements:
-        if element.tag != 'model':
+        if element.tag != 'model' and element.tag != 'link':
             element_to_index = find_json_element(json_list, element.get('name'))
             if element_to_index is not None:
                 if element_to_index['custom_name'] in topic_definitions:
