@@ -20,7 +20,7 @@ LINE_WIDTH = 1
 
 robot = {'accelerator': {'0': []}, "proximity": [], "gyro": {'0': []}, 'servo_head': [], "battery": [],
          'lift_height': []}
-camera_data = {"vision": []}
+camera_data = {"vision": {'0': []}}
 
 
 
@@ -131,7 +131,7 @@ def on_camera_image(cli, image):
     new_rgb = retina.RGB_list_to_ndarray(image.getdata(), size)
     # update astype to work well with retina and cv2
     raw_frame = retina.update_astype(new_rgb)
-    camera_data['vision'] = raw_frame
+    camera_data['vision']['0'] = raw_frame
     time.sleep(0.01)
 
 def vision_initalization(cli):

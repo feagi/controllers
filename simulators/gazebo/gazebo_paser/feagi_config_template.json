@@ -444,6 +444,18 @@
 					"default": 0
 				},
 				{
+					"label": "width",
+					"description": "A width to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "height",
+					"description": "A height to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
 					"label": "feagi_index",
 					"description": "An index to place",
 					"type": "integer",

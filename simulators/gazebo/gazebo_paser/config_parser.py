@@ -113,6 +113,16 @@ def find_json_element(json_list, json_name):
             return result
     return None
 
+def find_json_element_type(json_list, json_name, json_type):
+    for json_elements in json_list:
+        if json_elements['custom_name'] == json_name and json_elements['type'] == json_type:
+            return json_elements
+        # Recursively check children
+        result = find_json_element_type(json_elements['children'], json_name, json_type)
+        if result is not None:
+            return result
+    return None
+
 # Description : Changes existing JSON structure to account for parent child nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
@@ -139,18 +149,20 @@ def nest(found_elements, json_list):
 
         if parent is not None:
             json_child = find_json_element(json_list, xml_elements.get('name'))
-            if json_child:
+            if json_child is not None:
                 json_parent = find_json_element(json_list, parent.text)
-                if json_parent:
+                if json_parent is not None:
                     json_parent['children'].append(json_child)
-                    json_list.remove(json_child)    
+                    if json_child in json_list:
+                        json_list.remove(json_child)    
 
 # Description : Locates any topic definitions in the sdf file
-# INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings
-# Output on success : updates "topic_definitions" to contain mappings from
-#                             "joint_name" : "topic_name"
+# INPUT : fp ~ file path to sdf file, topic_definitions ~ dictionary to contain mappings, 
+# found_elements ~ list of found elements from gazebo config, sub_topic_definitions ~ dictionary to contain mappings
+# Output on success : updates "topic_definitions" and "sub_topic_definitions" to contain mappings from
+#                             "element" : "topic_name"
 # Output on fail : "topic_definitions" is left empty
-def find_topics(fp, topic_definitions):
+def find_topics(fp, topic_definitions, found_elements, sub_topic_definitions):
     try:
         with open(fp, 'r') as f:
             sdf_content = f.read()
@@ -178,6 +190,20 @@ def find_topics(fp, topic_definitions):
                 else:
                     topic_definitions[plugin.get('name')] = topic_element.text
 
+            sub_topic_element = plugin.find("sub_topic")
+            
+            if sub_topic_element is not None and sub_topic_element.text:
+                sub_topic_definitions[sub_topic_element.text] = plugin.get('name')
+
+        # Search elements for topics
+        for element in found_elements:
+
+            topic_element = element.find("topic")
+
+            if topic_element is not None and topic_element.text:
+                if element is not None and element.get('name'):
+                    topic_definitions[element.get('name')] = topic_element.text.strip()
+
     except Exception as e:
         print(f"Error: {e}")
         return []
@@ -186,27 +212,96 @@ def find_topics(fp, topic_definitions):
 # INPUT : List of elements, current json list, list of topic names
 # Output on success : Updates the custom name of the json list elements to be the topic name
 # Output on fail : None
-def rename_elements(found_elements, json_list, topic_definitions):
+def rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions):
     for elements in found_elements:
         element_to_rename = find_json_element(json_list, elements.get('name'))
 
         if element_to_rename is not None:
+            if element_to_rename['type'] == 'body':
+                output_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'output')
+                input_element_to_rename = find_json_element_type(json_list, elements.get('name'), 'input')
+                if output_element_to_rename is None and input_element_to_rename is not None:
+                    element_to_rename = input_element_to_rename
+                elif output_element_to_rename is not None and input_element_to_rename is None:
+                    element_to_rename = output_element_to_rename
+        
+        if element_to_rename is not None:
             if element_to_rename['custom_name'] in topic_definitions:
-                element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                existing_element = find_json_element(json_list, topic_definitions[elements.get('name')])
+                if existing_element is None:
+                    element_to_rename['custom_name'] = topic_definitions[elements.get('name')]
+                else:
+                    if element_to_rename['custom_name'] != topic_definitions[elements.get('name')]:
+                        if element_to_rename['type'] != "body":
+                            element_to_rename['type'] = "body"
+                            del element_to_rename['properties']
+                            del element_to_rename['feagi device type']
+            
+            # Any sensor/actuator not included in topics is converted to 'body'
+
+            elif element_to_rename['custom_name'] not in topic_definitions and element_to_rename['custom_name'] not in sub_topic_definitions:
+                if element_to_rename['type'] != "body":
+                    element_to_rename['type'] = "body"
+                    del element_to_rename['properties']
+                    del element_to_rename['feagi device type']
     return
+
+# Description : Removes elements that contain a sub_topic to another element from the json list
+# INPUT : List of elements, current json list, sub topic mappings
+# Output on success : Updates the json list to no longer contain the removed element
+# Output on fail : None
+def remove_element(sub_topic_definitions, found_elements, json_list):
+     for element in found_elements:
+        element_index = 0
+        if element.get('name') in sub_topic_definitions:
+            element_to_remove = find_json_element(json_list, sub_topic_definitions[element.get('name')])
+
+            if element_to_remove is not None:
+                while json_list[element_index]['custom_name'] is not element_to_remove['custom_name']:
+                    element_index += 1
+                del json_list[element_index]
+
+# Description : Updates the feagi index values based on the newly changed json elements
+# INPUT : list of found elements, existing json list
+# Output on success : Updated feagi index values
+# Output on fail : None
+def index_elements(found_elements, json_list, topic_definitions):
+    index_mapping = {}
+    for element in found_elements:
+        if element.tag != 'model' and element.tag != 'link':
+            element_to_index = find_json_element(json_list, element.get('name'))
+            if element_to_index is not None:
+                if element_to_index['custom_name'] in topic_definitions:
+                    renamed_element = find_json_element(json_list, topic_definitions[element.get('name')])
+                    element_to_index = renamed_element
+
+            if element_to_index is not None:
+                if element_to_index['type'] != 'body':
+                    if element_to_index['feagi device type'] in index_mapping:
+                        index_mapping[element_to_index['feagi device type']] = int(index_mapping[element_to_index['feagi device type']]) + 1
+                        element_to_index['properties']["feagi_index"] = int(index_mapping[element_to_index['feagi device type']])
+                    else:
+                        index_mapping[element_to_index['feagi device type']] = 0
+                        element_to_index['properties']["feagi_index"] = 0  
+    
+    
 
 # Description : Creates json items and adds to list without nesting
 # INPUT : list of found elements, existing json list
 # Output on success : Final nested JSON file
 # Output on fail : None
-def create_json(found_elements, json_list):
-    index_number = 0
+def create_json(found_elements, json_list, topic_definitions):
+    index_mapping = {}
+
     # Loop through each found element from the SDF
     for elements in found_elements:
-
         # Check to see if element is plugin, and if plugin is in gazebo mapping list
         if elements.tag == 'plugin' and elements.get('name') not in g_config['plugin_output']:
+            if elements.get('name') in topic_definitions:
+                del topic_definitions[elements.get('name')]
             found_elements.remove
+        elif elements.tag == 'model':
+                model_name = elements.get('name')
         else:
         # Create Vars for Sensor element
             if elements.get('type') in g_config['sensor']: # sensor
@@ -237,8 +332,14 @@ def create_json(found_elements, json_list):
             # setting up general structure
             # Check to see if current element is plugin
             if elements.tag == 'plugin':
-                parsed_name = elements.get('name').replace("gz::sim::systems::", "")
+                parsed_name = elements.get('name')
                 topic_name = find_element_by_tag(elements, 'topic')
+
+                if parsed_name in g_config['topic_rename']:
+                    rename = 'model/' + model_name + '/' + g_config['topic_rename'][elements.get('name')]
+                    parsed_name = rename
+                    print("Conflicting names defaulting to : ", rename)
+                
                 if topic_name is not None:
                     toadd = {'custom_name': topic_name.text,
                             'type': type,
@@ -259,39 +360,61 @@ def create_json(found_elements, json_list):
             if feagi_dev_type is not None:
                 # retrieve all properties necessary for sensor / actuator
                 props = find_properties(feagi_dev_type, type)
-                props["feagi_index"] = index_number
+
                 # insert data into parameters/properties
                 # TYPES ARE: gyro, servo, proximity, camera
                 if feagi_dev_type == 'servo':
                     min = find_element_by_tag(elements, 'lower')
+                    i_min = find_element_by_tag(elements, 'i_min')
                     max = find_element_by_tag(elements, 'upper')
+                    i_max = find_element_by_tag(elements, 'i_max')
                     if min is not None:
                         props["min_value"] = float(min.text)
+                    elif i_min is not None:
+                        min = i_min
+                        props["min_value"] = float(min.text)
+
                     if max is not None:
                         props["max_value"] = float(max.text)
-                    # calculate max power
-                    range_value = abs(float(max.text) - float(min.text))
-                    target_steps = 30  # Aim for about 30 steps
-                    magnitude = math.log10(range_value)
-                    increment = pow(10, magnitude) / 10
-                    if range_value / increment > target_steps * 2:
-                        increment *= 5
-                    elif range_value / increment > target_steps:
-                        increment *= 2
-                    elif range_value / increment < target_steps / 2:
-                        increment /= 2
+                    elif i_max is not None:
+                        max = i_max
+                        props["max_value"] = float(max.text)
 
-                    if increment > 999999999:
-                        increment = 999999999
-                    props["max_power"] = increment
-                    if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
-                        feagi_dev_type = 'motor'
+                    # calculate max power
+                    if min is not None and max is not None:
+                        range_value = abs(float(max.text) - float(min.text))
+                        target_steps = 30  # Aim for about 30 steps
+                        magnitude = math.log10(range_value)
+                        increment = pow(10, magnitude) / 10
+                        if range_value / increment > target_steps * 2:
+                            increment *= 5
+                        elif range_value / increment > target_steps:
+                            increment *= 2
+                        elif range_value / increment < target_steps / 2:
+                            increment /= 2
+
+                        if increment > 999999999:
+                            increment = 999999999
+                        props["max_power"] = increment
+                        if abs(float(min.text)) > 200 or abs(float(max.text)) > 200:
+                            feagi_dev_type = 'motor'
+                            props["rolling_window_len"] = 2
 
                 elif feagi_dev_type == 'gyro':
                     pass
                 elif feagi_dev_type == 'lidar':
                     min = find_element_by_tag(elements, 'min')
                     max = find_element_by_tag(elements, 'max')
+                    width = find_element_by_tag(elements, 'horizontal')
+                    height = find_element_by_tag(elements, 'vertical')
+                    if width is not None:
+                        width_value = find_element_by_tag(width, 'samples')
+                        if width_value is not None:
+                            props["width"] = float(width_value.text)
+                    if height is not None:
+                        height_value = find_element_by_tag(height, 'samples')
+                        if height_value is not None:
+                            props["height"] = float(height_value.text)
                     if min is not None:
                         props["min_value"] = float(min.text)
                     if max is not None:
@@ -303,13 +426,19 @@ def create_json(found_elements, json_list):
                         toadd["custom_name"] = camera_name.text
                 else:
                     pass
-                
+
+                if feagi_dev_type in index_mapping:
+                    index_mapping[feagi_dev_type] = int(index_mapping[feagi_dev_type]) + 1
+                    props["feagi_index"] = int(index_mapping[feagi_dev_type])
+                else:
+                    index_mapping[feagi_dev_type] = 0
+                    props["feagi_index"] = 0
+
                 # add in extra lines to dict
                 temp = list(toadd.items())
                 temp.insert(2, ('feagi device type', feagi_dev_type ))
                 temp.insert(3, ('properties', props ))
                 toadd = dict(temp)
-                index_number += 1
 
             # add to json list that will be sent to file
             json_list.append(toadd)
@@ -346,6 +475,7 @@ def main():
 
     # Stores mappings from joint names -> topics
     topic_definitions = {}
+    sub_topic_definitions = {}
 
     num_args = len(sys.argv) - 1
 
@@ -364,17 +494,19 @@ def main():
     file = open("model_config_tree.json", "w")
 
     # Finds all topic definitions, necessary for correct naming
-    find_topics(sys.argv[1], topic_definitions)
-    print("Definitions found : ", topic_definitions)
-
+    find_topics(sys.argv[1], topic_definitions, found_elements, sub_topic_definitions)
 
     # Creates un-nested json structure with all data from file
-    create_json(found_elements, json_list)
+    create_json(found_elements, json_list, topic_definitions)
 
     # Nests the children found in created Json structure
     nest(found_elements, json_list)
 
-    rename_elements(found_elements, json_list, topic_definitions)
+    rename_elements(found_elements, json_list, topic_definitions, sub_topic_definitions)
+
+    remove_element(sub_topic_definitions, found_elements, json_list)
+
+    index_elements(found_elements, json_list, topic_definitions)
 
     json.dump(json_list, file, indent=4)
     file.close()
