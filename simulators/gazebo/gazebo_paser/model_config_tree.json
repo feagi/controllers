@@ -1,42 +1,177 @@
 [
     {
-        "custom_name": "world_fixed",
+        "custom_name": "link",
+        "type": "body",
+        "description": "",
+        "children": []
+    },
+    {
+        "custom_name": "base_link",
         "type": "body",
         "description": "",
         "children": [
             {
-                "custom_name": "base_link",
+                "custom_name": "rotor_puller_joint",
                 "type": "body",
                 "description": "",
                 "children": [
                     {
-                        "custom_name": "j1",
+                        "custom_name": "rotor_puller",
                         "type": "body",
                         "description": "",
-                        "children": [
-                            {
-                                "custom_name": "rotor",
-                                "type": "body",
-                                "description": "",
-                                "children": []
-                            }
-                        ]
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_0",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 0,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "left_elevon",
+                        "type": "body",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_1",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 1,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "right_elevon",
+                        "type": "body",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_4",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 2,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "left_flap",
+                        "type": "body",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_5",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 3,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "right_flap",
+                        "type": "body",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_2",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 4,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "elevator",
+                        "type": "body",
+                        "description": "",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "custom_name": "servo_3",
+                "type": "output",
+                "feagi device type": "servo",
+                "properties": {
+                    "max_value": 0.53,
+                    "min_value": -0.53,
+                    "max_power": 0.053000000000000005,
+                    "feagi_index": 5,
+                    "default_value": 0
+                },
+                "description": "",
+                "children": [
+                    {
+                        "custom_name": "rudder",
+                        "type": "body",
+                        "description": "",
+                        "children": []
                     }
                 ]
             }
         ]
     },
     {
-        "custom_name": "rotor_cmd",
-        "type": "output",
-        "feagi device type": "servo",
-        "properties": {
-            "max_value": 1.0,
-            "min_value": -1.0,
-            "max_power": 0.1,
-            "feagi_index": 0,
-            "default_value": 0
-        },
+        "custom_name": "imu_sensor",
+        "type": "body",
+        "description": "",
+        "children": []
+    },
+    {
+        "custom_name": "air_pressure_sensor",
+        "type": "body",
+        "description": "",
+        "children": []
+    },
+    {
+        "custom_name": "gz::sim::systems::AdvancedLiftDrag",
+        "type": "body",
+        "description": "",
+        "children": []
+    },
+    {
+        "custom_name": "gz::sim::systems::MulticopterMotorModel",
+        "type": "body",
         "description": "",
         "children": []
     }
