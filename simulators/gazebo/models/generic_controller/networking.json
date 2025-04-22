@@ -1,5 +1,5 @@
 {
-    "description": "gazebo",
+    "description": "generic gazebo",
     "version": "v0.0.1",
     "feagi_settings": {
       "feagi_url": "http://127.0.0.1",
@@ -7,7 +7,7 @@
    },
     "agent_settings": {
        "agent_data_port": 10015,
-       "agent_id": "smart_car_simulation",
+       "agent_id": "generic_gazebo_simulation",
        "agent_type": "embodiment",
        "compression": true
     }
