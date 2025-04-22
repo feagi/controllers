@@ -27,7 +27,7 @@
 					"label": "rolling_window_len",
 					"description": "How many windows are needed to slow the motor to a stop.",
 					"type": "integer",
-					"default": 0
+					"default": 2
 				},
 				{
 					"label": "feagi_index",
@@ -405,6 +405,53 @@
 				{
 					"label": "min_value",
 					"description": "A minimum number to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "feagi_index",
+					"description": "An index to place",
+					"type": "integer",
+					"default": 0
+				}
+			]
+		},
+		"lidar": {
+			"label": "Lidar sensor",
+			"description": "",
+			"parameters": [
+				{
+					"label": "custom_name",
+					"description": "User defined name for the device.",
+					"type": "string"
+				},
+				{
+					"label": "disabled",
+					"description": "Disables the device when true.",
+					"type": "boolean",
+					"default": false
+				},
+				{
+					"label": "max_value",
+					"description": "A maximum number to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "min_value",
+					"description": "A minimum number to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "width",
+					"description": "A width to read the value",
+					"type": "float",
+					"default": 0
+				},
+				{
+					"label": "height",
+					"description": "A height to read the value",
 					"type": "float",
 					"default": 0
 				},
