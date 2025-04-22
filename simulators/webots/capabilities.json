@@ -1,0 +1,282 @@
+{
+    "capabilities": {
+        "input": {
+            "camera": {
+                "0": {
+                    "custom_name": "Astra rgb",
+                    "disabled": false,
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "feagi_index": 0,
+                    "index": "00",
+                    "mirror": false,
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    },
+                    "threshold_default": 50
+                },
+                "1": {
+                    "custom_name": "Hokuyo URG-04LX-UG01",
+                    "disabled": false,
+                    "eccentricity_control": {
+                        "X offset percentage": 1,
+                        "Y offset percentage": 1
+                    },
+                    "feagi_index": 1,
+                    "index": "00",
+                    "mirror": false,
+                    "modulation_control": {
+                        "X offset percentage": 99,
+                        "Y offset percentage": 99
+                    },
+                    "threshold_default": 50
+                }
+            },
+            "gyro": {
+                "0": {
+                    "custom_name": "gyro",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "min_value": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "proximity": {
+                "0": {
+                    "custom_name": "base_sonar_01_link",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "1": {
+                    "custom_name": "base_sonar_02_link",
+                    "disabled": false,
+                    "feagi_index": 1,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "2": {
+                    "custom_name": "base_sonar_03_link",
+                    "disabled": false,
+                    "feagi_index": 2,
+                    "max_value": 0,
+                    "min_value": 0
+                }
+            },
+            "servo_position": {
+                "0": {
+                    "custom_name": "arm_1_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "1": {
+                    "custom_name": "arm_2_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 1,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "2": {
+                    "custom_name": "arm_3_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 2,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "3": {
+                    "custom_name": "arm_4_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 3,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "4": {
+                    "custom_name": "arm_5_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 4,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "5": {
+                    "custom_name": "arm_6_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 5,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "6": {
+                    "custom_name": "arm_7_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 6,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "7": {
+                    "custom_name": "gripper_left_sensor_finger_joint",
+                    "disabled": false,
+                    "feagi_index": 7,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "8": {
+                    "custom_name": "gripper_right_sensor_finger_joint",
+                    "disabled": false,
+                    "feagi_index": 8,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "9": {
+                    "custom_name": "head_1_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 9,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "10": {
+                    "custom_name": "head_2_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 10,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "11": {
+                    "custom_name": "torso_lift_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 11,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "12": {
+                    "custom_name": "wheel_left_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 12,
+                    "max_value": 0,
+                    "min_value": 0
+                },
+                "13": {
+                    "custom_name": "wheel_right_joint_sensor",
+                    "disabled": false,
+                    "feagi_index": 13,
+                    "max_value": 0,
+                    "min_value": 0
+                }
+            }
+        },
+        "output": {
+            "motor": {
+                "0": {
+                    "custom_name": "arm_1_joint",
+                    "disabled": false,
+                    "feagi_index": 0,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "1": {
+                    "custom_name": "arm_2_joint",
+                    "disabled": false,
+                    "feagi_index": 1,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "2": {
+                    "custom_name": "arm_3_joint",
+                    "disabled": false,
+                    "feagi_index": 2,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "3": {
+                    "custom_name": "arm_4_joint",
+                    "disabled": false,
+                    "feagi_index": 3,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "4": {
+                    "custom_name": "arm_5_joint",
+                    "disabled": false,
+                    "feagi_index": 4,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "5": {
+                    "custom_name": "arm_6_joint",
+                    "disabled": false,
+                    "feagi_index": 5,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "6": {
+                    "custom_name": "arm_7_joint",
+                    "disabled": false,
+                    "feagi_index": 6,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "7": {
+                    "custom_name": "gripper_left_finger_joint",
+                    "disabled": false,
+                    "feagi_index": 7,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "8": {
+                    "custom_name": "gripper_right_finger_joint",
+                    "disabled": false,
+                    "feagi_index": 8,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "9": {
+                    "custom_name": "head_1_joint",
+                    "disabled": false,
+                    "feagi_index": 9,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "10": {
+                    "custom_name": "head_2_joint",
+                    "disabled": false,
+                    "feagi_index": 10,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "11": {
+                    "custom_name": "torso_lift_joint",
+                    "disabled": false,
+                    "feagi_index": 11,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "12": {
+                    "custom_name": "wheel_left_joint",
+                    "disabled": false,
+                    "feagi_index": 12,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                },
+                "13": {
+                    "custom_name": "wheel_right_joint",
+                    "disabled": false,
+                    "feagi_index": 13,
+                    "max_power": 0,
+                    "rolling_window_len": 0
+                }
+            }
+        }
+    }
+}
