@@ -2,15 +2,15 @@
     "description": "gazebo",
     "version": "v0.0.1",
     "feagi_settings": {
-      "feagi_url": "http://127.0.0.1",
-      "feagi_api_port": 8000,
-      "magic_link": "null"
-   },
+        "feagi_url": "http://127.0.0.1",
+        "feagi_api_port": "8000",
+        "magic_link": "null",
+        "feagi_host": "127.0.0.1"
+    },
     "agent_settings": {
-       "agent_data_port": 10015,
-       "agent_id": "smart_car_simulation",
-       "agent_type": "embodiment",
-       "compression": true
+        "agent_data_port": 10015,
+        "agent_id": "smart_car_simulation",
+        "agent_type": "embodiment",
+        "compression": true
     }
- }
-
+}
