@@ -40,7 +40,7 @@ if __name__ == "__main__":
                 (randrange(0, 30), randrange(0, 30), 0): 100
             },
             "o__mot": {
-                (0, 0, 0): 100
+                (0, 0, 0): 100, (2, 0, 0): 20, (4, 0, 0): 60
             }
         }}}}
         pns.signals_to_feagi(message_to_feagi, feagi_ipu_channel,
