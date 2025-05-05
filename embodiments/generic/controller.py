@@ -4,19 +4,10 @@ from feagi_connector import pns_gateway as pns
 from feagi_connector.version import __version__
 from random import randrange
 
-
 feagi.validate_requirements('requirements.txt')  # you should get it from the boilerplate generator
 runtime_data = {}
 
 if __name__ == "__main__":
-    # thread_read = threading.Thread(target=read_from_port, args=(ser,)) # We need this for sensor soon
-    # thread_write = threading.Thread(target=write_to_port, args=(ser,))
-
-    # thread_read.start() # Needs to uncomment this for sensor
-    # thread_write.start()
-
-    # thread_read.join()
-    # thread_write.join()
     print("Ready...")
     config = feagi.build_up_from_configuration()
     feagi_settings = config['feagi_settings'].copy()
@@ -25,19 +16,12 @@ if __name__ == "__main__":
     message_to_feagi = config['message_to_feagi'].copy()
     capabilities = config['capabilities'].copy()
 
-    # # # FEAGI registration # # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # - - - - - - - - - - - - - - - - - - #
+    # # # FEAGI registration # # #
     feagi_settings, runtime_data, api_address, feagi_ipu_channel, feagi_opu_channel = \
         feagi.connect_to_feagi(feagi_settings, runtime_data, agent_settings,
                                capabilities,
                                __version__)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    print(feagi_settings)
-    print(runtime_data)
-    print(api_address)
-    print(feagi_ipu_channel)
-    print(feagi_opu_channel)
 
     while True:
         message_from_feagi = pns.message_from_feagi
