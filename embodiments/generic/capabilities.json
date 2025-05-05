@@ -1,0 +1,46 @@
+{
+	"capabilities": {
+		"input": {
+			"camera": {
+				"0": {
+					"custom_name": "camera_0",
+					"disabled": false,
+					"eccentricity_control": {
+						"X offset percentage": 1,
+						"Y offset percentage": 1
+					},
+					"feagi_index": 0,
+					"index": "00",
+					"mirror": true,
+					"modulation_control": {
+						"X offset percentage": 99,
+						"Y offset percentage": 99
+					},
+					"threshold_default": 50
+				}
+			}
+		},
+		"output": {
+			"servo": {
+				"0": {
+					"custom_name": "thumb",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 0,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				},
+				"1": {
+					"custom_name": "index",
+					"default_value": 40,
+					"disabled": false,
+					"feagi_index": 1,
+					"max_power": 10,
+					"max_value": 100,
+					"min_value": 0
+				}
+			}
+		}
+	}
+}

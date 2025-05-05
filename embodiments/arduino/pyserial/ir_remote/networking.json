@@ -11,6 +11,7 @@
         "agent_data_port": 10014,
         "agent_id": "ir_remote",
         "agent_type": "embodiment",
-        "compression": true
+        "compression": true,
+        "usb_port": "/dev/cu.usbserial-210"
     }
 }
